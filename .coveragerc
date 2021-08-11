@@ -1,0 +1,10 @@
+# .coveragerc to control coverage.py
+[run]
+omit=
+  *tables_io/_version.py
+  *tables_io/version.py
+
+
+[html]
+directory = cover
+
