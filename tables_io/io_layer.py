@@ -355,6 +355,6 @@ def readPqToDataframes(basepath, keys=None, **kwargs):
         try:
             pqtab = pq.read_table("%s%s.pq" % (basepath, key), **kwargs)
             dataframes[key] = pqtab.to_pandas()
-        except Exception:
+        except Exception:  #pragma: no cover
             pass
     return dataframes
