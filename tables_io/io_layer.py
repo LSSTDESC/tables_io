@@ -1,4 +1,4 @@
-"""IO Functions for qp"""
+"""IO Functions for tables_io"""
 
 from collections import OrderedDict
 
