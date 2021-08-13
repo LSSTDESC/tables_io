@@ -50,10 +50,8 @@ class IoLayerTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-at
     def tearDown(self):
         """ Clean up any mock data files created by the tests. """
         for ff in self._files:
-            try:
+            if os.path.exists(ff):
                 os.unlink(ff)
-            except:
-                pass
 
     def testFitsLoopback(self):
         """ Test writing / reading to FITS """

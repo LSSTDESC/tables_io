@@ -1,5 +1,6 @@
 """IO Functions for tables_io"""
 
+import os
 from collections import OrderedDict
 
 import numpy as np
@@ -9,24 +10,28 @@ try:
     from astropy.io import fits
     HAS_ASTROPY = True
 except ImportError:  #pragma: no cover
+    print("Warning: astropy.table is not available.  tables_io will still work with other formats.")
     HAS_ASTROPY = False
 
 try:
     import h5py
     HAS_HDF5 = True
 except ImportError:  #pragma: no cover
+    print("Warning: h5py is not available.  tables_io will still work with other formats.")
     HAS_HDF5 = False
 
 try:
     import pandas as pd
     HAS_PANDAS = True
 except ImportError:  #pragma: no cover
+    print("Warning: pandas is not available.  tables_io will still work with other formats.")
     HAS_PANDAS = False
 
 try:
     import pyarrow.parquet as pq
     HAS_PQ = True
 except ImportError:  #pragma: no cover
+    print("Warning: parquet is not available.  tables_io will still work with other formats.")
     HAS_PQ = False
 
 
@@ -86,6 +91,46 @@ def tableToDataframe(tab):
     for k, v in tab.meta.items():
         df.attrs[k] = v  #pragma: no cover
     return df
+
+
+def dataframeToArrayDict(df):
+    """
+    Convert a `pandas.DataFrame` to an `OrderedDict` of `str` : `numpy.array`
+
+    Parameters
+    ----------
+    df :  `pandas.DataFrame`
+        The dataframe
+
+    Returnes
+    --------
+    data : `OrderedDict`,  (`str` : `numpy.array`)
+        The tabledata
+    """
+    data = OrderedDict()
+    for key in df.keys():
+        data[key] = np.array(df[key])
+    return data
+
+
+def hdf5GroupToArrayDict(hg):
+    """
+    Convert a `hdf5` object to an `OrderedDict` of `str` : `numpy.array`
+
+    Parameters
+    ----------
+    hg :  FIXME
+        The hdf5 object
+
+    Returnes
+    --------
+    data : `OrderedDict`,  (`str` : `numpy.array`)
+        The tabledata
+    """
+    data = OrderedDict()
+    for key in hg.keys():
+        data[key] = np.array(hg[key])
+    return data
 
 
 def arraysToDataframe(array_dict, meta=None):  #pragma: no cover
@@ -274,6 +319,47 @@ def readHdf5ToTables(filepath):
     return tables
 
 
+def readHdf5ToDataframe(filepath):
+    """
+    Reads `pandas.DataFrame` objects from an hdf5 file.
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    Returns
+    -------
+    df : `pandas.DataFrame`
+        The dataframe
+    """
+    if not HAS_HDF5:  #pragma: no cover
+        raise ImportError("h5py is not available, can't read hdf5")
+    if not HAS_PANDAS:  #pragma: no cover
+        raise ImportError("pandas is not available, can't read hdf5 to dataframe")
+    return pd.read_hdf(filepath)
+
+
+def readHdf5Group(infile, groupname=None):
+    """ Get the size of data in a particular group in an hdf5 file
+
+    Parameters
+    ----------
+    infile : `str`
+        File in question
+    groupname : `str` or `None`
+        For hdf5 files, the groupname for the data
+
+    Returns
+    -------
+    FIXME
+    """
+    infp = h5py.File(infile, "r")
+    if groupname != 'None':  #pragma: no cover
+        return infp[groupname], infp
+    return infp, infp
+
+
 def writeArraysToHdf5(arrays, filepath, **kwargs):
     """
     Writes a dictionary of `numpy.array` to a single hdf5 file
@@ -330,6 +416,23 @@ def writeDataframesToPq(dataFrames, filepath, **kwargs):
         _ = v.to_parquet("%s%s.pq" % (filepath, k), **kwargs)
 
 
+def readPqToDataframe(infile):
+    """
+    Reads a `pandas.DataFrame` object from an parquet file.
+
+    Parameters
+    ----------
+    infile: `str`
+        Path to input file
+
+    Returns
+    -------
+    df : `pandas.DataFrame`
+        The data frame
+    """
+    return pd.read_parquet(infile, engine='pyarrow')
+
+
 def readPqToDataframes(basepath, keys=None, **kwargs):
     """
     Reads `pandas.DataFrame` objects from an parquet file.
@@ -358,3 +461,187 @@ def readPqToDataframes(basepath, keys=None, **kwargs):
         except Exception:  #pragma: no cover
             pass
     return dataframes
+
+
+def readPqToArrayDict(infile):
+    """ Open a parquet file and return a dictionary of `numpy.array`
+    """
+    df = readPqToDataframe(infile)
+    return dataframeToArrayDict(df)
+
+
+def readH5ToArrayDict(infile):
+    """ Open an h5 file and and return a dictionary of `numpy.array`
+    """
+    df = readHdf5ToDataframe(infile)
+    return dataframeToArrayDict(df)
+
+
+def readHdf5ToArrayDict(infile, groupname='None'):
+    """ Read in h5py hdf5 data, return a dictionary of all of the keys
+    """
+    hg, infp = readHdf5Group(infile, groupname)
+    data = hdf5GroupToArrayDict(hg)
+    infp.close()
+    return data
+
+
+def readFileToArrayDict(filename, fmt=None, groupname='None'):
+    """ Load training data
+
+    Parameters
+    ----------
+    filename : `str`
+        File to load
+    fmt : `str`
+        File format
+    groupname : `str` or `None`
+        For hdf5 files, the groupname for the data
+
+    Returns
+    -------
+    data : `dict` ( `str` -> `numpy.array` )
+        The data
+    """
+    if fmt is None:
+        _, ext = os.path.splitext(filename)
+        fmt = ext[1:]
+
+    fmtlist = ['hdf5', 'parquet', 'h5']
+    if fmt not in fmtlist:
+        raise NotImplementedError(f"File format {fmt} not implemented")
+    if fmt == 'hdf5':
+        data = readHdf5ToArrayDict(filename, groupname)
+    if fmt == 'parquet':
+        data = readPqToArrayDict(filename)
+    if fmt == 'h5':
+        data = readH5ToArrayDict(filename)
+    return data
+
+
+def getGroupInputDataSize(hg):
+    """ Return the size of a HDF5 group """
+    firstkey = list(hg.keys())[0]
+    nrows = len(hg[firstkey])
+    return nrows
+
+
+def getInputDataSizeHdf5(infile, groupname='None'):
+    """ Open an HDF5 file and return  the size of a group """
+    hg, infp = readHdf5Group(infile, groupname)
+    nrow = getGroupInputDataSize(hg)
+    infp.close()
+    return nrow
+
+
+def initializeHdf5Writeout(outfile, **kwds):
+    """ Prepares an hdf5 files for parallel output
+
+    Parameters
+    ----------
+    outfile : `str`
+        The output file name
+
+    Notes
+    -----
+    The keywords should be used to create_datasets within the hdf5 file.
+
+    Each keyword should provide a tuple of ( (shape), (dtype) )
+
+    shape : `tuple` ( `int` )
+        The shape of the data for this dataset
+    dtype : `str`
+        The data type for this dataset
+
+    For exmaple
+    `initialize_writeout('test.hdf5', scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))`
+
+    Would initialize an hdf5 file with two datasets, which shapes and data types as given
+    """
+    outdir = os.path.dirname(outfile)
+    if not os.path.exists(outdir):  #pragma: no cover
+        os.makedirs(outdir, exist_ok=True)
+    outf = h5py.File(outfile, "w")
+    for k, v in kwds.items():
+        outf.create_dataset(k, v[0], v[1])
+    return outf
+
+
+def writeoutHdf5Chunk(outf, data_dict, start, end, **kwds):
+    """ Writes a data chunk to an hdf5 file
+
+    Parameters
+    ----------
+    outf : `h5py.File`
+        The file
+
+    data_dict : `dict`
+        The data being written
+
+    start : `int`
+        Starting row number to place the data
+
+    end : `int`
+        Ending row number to place the data
+
+    Notes
+    -----
+    The kwds can be used to control the output locations
+
+    For each item in data_dict, the output location is set as
+
+    `k_out = kwds.get(key, key)`
+    """
+    for key, val in data_dict.items():
+        k_out = kwds.get(key, key)
+        outf[k_out][start:end] = val
+
+
+def finalizeHdf5Writeout(outf, **kwds):
+    """ Write any last data and closes an hdf5 file
+
+    Parameters
+    ----------
+    outf : `h5py.File`
+        The file
+
+    Notes
+    -----
+    The keywords can be used to write additional data
+    """
+    for k, v in kwds.items():
+        outf[k] = v
+    outf.close()
+
+
+def iterChunkHdf5Data(infile, chunk_size=100_000, groupname='None'):
+    """
+    iterator for sending chunks of data in hdf5.
+
+    Parameters
+    ----------
+      infile: input file name (str)
+      chunk_size: size of chunk to iterate over (int)
+
+    Returns
+    -------
+    output:
+        iterator chunk
+
+    Currently only implemented for hdf5, returns `tuple`
+        start: start index (int)
+        end: ending index (int)
+        data: dictionary of all data from start:end (dict)
+    """
+    f, infp = readHdf5Group(infile, groupname)
+    num_rows = getGroupInputDataSize(f)
+    data = OrderedDict()
+    for i in range(0, num_rows, chunk_size):
+        start = i
+        end = i+chunk_size
+        if end > num_rows:
+            end = num_rows
+        for key in f.keys():
+            data[key] = np.array(f[key][start:end])
+        yield start, end, data
+    infp.close()
