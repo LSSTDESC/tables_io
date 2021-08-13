@@ -20,11 +20,11 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         ],
-    install_requires=["matplotlib",
-                      "numpy>=1.21.0",
+    install_requires=["numpy>=1.21.0",
                       "astropy",
                       "h5py",
                       "pandas",
                       "pyarrow",
+                      "tables",
                       "setuptools_scm"]
 )
