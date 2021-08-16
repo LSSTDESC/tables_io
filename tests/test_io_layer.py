@@ -73,9 +73,19 @@ class IoLayerTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-at
         io_layer.writeDataframesToPq(dataframe_in, "test_out_")
         self._files.append('test_out_data.pq')
         self._files.append('test_out_md.pq')
-        dataframes_in = io_layer.readPqToDataframes("test_out_", keys=['data', 'md'])
-        tables_r_pq = io_layer.dataframesToTables(dataframes_in)
+        dataframes_r = io_layer.readPqToDataframes("test_out_", keys=['data', 'md'])
+        tables_r_pq = io_layer.dataframesToTables(dataframes_r)
         assert compare_table_dicts(self._tables, tables_r_pq)
+
+    def testH5Loopback(self):
+        """ Test writing / reading to HDF5 """
+        dataframe_in = io_layer.tablesToDataframes(self._tables)
+        io_layer.writeDataframesToH5(dataframe_in, "test_out.h5")
+        self._files.append('test_out.h5')
+        dataframes_r = io_layer.readH5ToDataFrames("test_out.h5")
+        tables_r_h5 = io_layer.dataframesToTables(dataframes_r)
+        assert compare_table_dicts(self._tables, tables_r_h5)
+
 
 
 if __name__ == '__main__':
