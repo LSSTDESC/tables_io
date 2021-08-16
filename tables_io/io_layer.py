@@ -436,7 +436,7 @@ def readPqToDataframe(infile):
     return pd.read_parquet(infile, engine='pyarrow')
 
 
-def readPqToDataframes(basepath, keys=None, **kwargs):
+def readPqToDataframes(basepath, keys=None):
     """
     Reads `pandas.DataFrame` objects from an parquet file.
 
@@ -459,8 +459,7 @@ def readPqToDataframes(basepath, keys=None, **kwargs):
     dataframes = OrderedDict()
     for key in keys:
         try:
-            pqtab = pq.read_table("%s%s.pq" % (basepath, key), **kwargs)
-            dataframes[key] = pqtab.to_pandas()
+            dataframes[key] = readPqToDataframe("%s%s.pq" % (basepath, key))
         except Exception:  #pragma: no cover
             pass
     return dataframes
