@@ -21,7 +21,7 @@ def lazyImport(modulename):
         return sys.modules[modulename]
     except KeyError:
         spec = importlib.util.find_spec(modulename)
-        if spec is None:
+        if spec is None:   #pragma: no cover
             print("Can't find module %s" % modulename)
             return None
         module = importlib.util.module_from_spec(spec)
