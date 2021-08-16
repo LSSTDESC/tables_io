@@ -482,10 +482,8 @@ def readPqToArrayDict(infile, columns=None):
     tab : `OrderedDict` (`str` : `numpy.array`)
        The data
     """
-    #df = readPqToDataframe(infile)
-    #return dataframeToArrayDict(df)
     tab = pq.read_table(infile, columns=columns)
-    return OrderedDict([(col.name, col.to_numpy()) for col in tab.itercolumns()])
+    return OrderedDict([(c_name, col.to_numpy()) for c_name, col in zip(tab.column_names, tab.itercolumns())])
 
 
 def readH5ToArrayDict(infile):
