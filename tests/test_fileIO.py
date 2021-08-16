@@ -21,12 +21,12 @@ def test_pandas_readin():
 
 def test_no_groupname():
     """ Test the load_training_data function for a file with no groupname """
-    _ = io_layer.readFileToArrayDict(no_group_file, groupname='None')
+    _ = io_layer.readFileToArrayDict(no_group_file, groupname=None)
 
-def test_get_input_data_size_hdf5():
+def test_get_input_data_length_hdf5():
     """ Test the get_input_data_size_hdf5 function """
-    assert io_layer.getInputDataSizeHdf5(no_group_file) == 10
-    assert io_layer.getInputDataSizeHdf5(h5_data_file, 'df') == 14
+    assert io_layer.getInputDataLengthHdf5(no_group_file) == 10
+    assert io_layer.getInputDataLengthHdf5(h5_data_file, 'df') == 14
 
 def test_missing_file_ext():
     """ Test that we refuse to read csv files """
