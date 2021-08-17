@@ -5,3 +5,5 @@ from ._version import version
 from .lazy_modules import *
 
 from . import io_layer
+
+from . tableDict import TableDict
