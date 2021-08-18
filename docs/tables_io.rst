@@ -10,10 +10,10 @@ Stuff
 Infrastructure and Core functionality
 =====================================
 
-`tables_io.io_layer`
---------------------
+`tables_io.io`
+--------------
 
-.. automodule:: tables_io.io_layer
+.. automodule:: tables_io.io
     :members:
     :undoc-members:
 
