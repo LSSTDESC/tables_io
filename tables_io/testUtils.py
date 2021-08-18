@@ -81,4 +81,3 @@ def make_test_data():
     small_table.meta['small'] = True
     tables = dict(data=table, md=small_table)
     return tables
-    

@@ -35,13 +35,13 @@ class TableDict(OrderedDict):
         return write(self, basepath, fmt)
 
     def convert(self, tType):
-        """ Build a new TableDict by converting all the table in the object to a different type 
+        """ Build a new TableDict by converting all the table in the object to a different type
 
         Parameters
         ----------
         tType : `int`
             The type to convert to
-        
+
         Returns
         -------
         td : `TableDict`

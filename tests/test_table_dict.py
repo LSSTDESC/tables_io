@@ -4,11 +4,7 @@ Unit tests for io_layer module
 
 import os
 
-import numpy as np
 import unittest
-
-from astropy.table import Table as apTable
-from astropy.utils.diff import report_diff_values
 
 from tables_io import types, forceTo, TableDict
 from tables_io.testUtils import compare_table_dicts, make_test_data
@@ -41,7 +37,7 @@ class TableDictTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-
             for key in keys:
                 self._files.append("%s%s.%s" % (basepath, key, fmt))
         td_r = TableDict.read(filepath, tType=tType, fmt=fmt, keys=keys)
-        tables_r = forceTo(td_r, types.AP_TABLE)
+        tables_r = td_r.convert(types.AP_TABLE)
         assert compare_table_dicts(self._tables, tables_r)
         if keys is not None:
             return
@@ -49,7 +45,7 @@ class TableDictTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-
         filepath2 = td_c.write(basepath2)
         self._files.append(filepath2)
         td_r2 = TableDict.read(filepath2, tType=tType)
-        tables_r2 = forceTo(td_r2, types.AP_TABLE)
+        tables_r2 = td_r2.convert(types.AP_TABLE)
         assert compare_table_dicts(self._tables, tables_r2)
 
     def testFitsLoopback(self):
