@@ -4,6 +4,24 @@ from ._version import version
 
 from .lazy_modules import *
 
-from . import io_layer
+from . import types
 
-from . tableDict import TableDict
+from . import arrayUtils
+
+from . import convUtils as conv
+
+from . import ioUtils as io
+
+from .tableDict import TableDict
+
+forceObjTo = conv.forceObjTo
+
+forceTo = conv.forceTo
+
+writeNative = io.writeNative
+
+write = io.write
+
+readNative = io.readNative
+
+read = io.read
