@@ -1,0 +1,133 @@
+"""Type defintions for tables_io"""
+
+import os
+
+from collections import OrderedDict
+from collections.abc import Mapping, Iterable
+
+from .lazy_modules import apTable, pd
+from .arrayUtils import arrayLength
+
+# Tabular data formats
+AP_TABLE = 0
+NUMPY_DICT = 1
+PD_DATAFRAME = 2
+
+TABULAR_FORMAT_NAMES = OrderedDict([
+    ('astropyTable', AP_TABLE),
+    ('numpyDict', NUMPY_DICT),
+    ('pandasDataFrame', PD_DATAFRAME)])
+
+TABULAR_FORMATS = OrderedDict([(val, key) for key, val in TABULAR_FORMAT_NAMES.items()])
+
+
+# File Formats
+ASTROPY_FITS = 0
+ASTROPY_HDF5 = 1
+NUMPY_HDF5 = 2
+PANDAS_HDF5 = 3
+PANDAS_PARQUET = 4
+
+FILE_FORMAT_NAMES = OrderedDict([
+    ('astropyFits', ASTROPY_FITS),
+    ('astropyHdf5', ASTROPY_HDF5),
+    ('numpyHdf5', NUMPY_HDF5),
+    ('pandasHdf5', PANDAS_HDF5),
+    ('pandaParquet', PANDAS_PARQUET)])
+
+# Default suffixes for various file formats
+FILE_FORMAT_SUFFIXS = OrderedDict([
+    ('fits', ASTROPY_FITS),
+    ('hf5', ASTROPY_HDF5),
+    ('hdf5', NUMPY_HDF5),
+    ('h5', PANDAS_HDF5),
+    ('pq', PANDAS_PARQUET)])
+
+FILE_FORMATS = OrderedDict([(val, key) for key, val in FILE_FORMAT_NAMES.items()])
+
+FILE_FORMAT_SUFFIX_MAP = OrderedDict([(val, key) for key, val in FILE_FORMAT_SUFFIXS.items()])
+
+# Default format to write various table types
+NATIVE_FORMAT = OrderedDict([
+    (AP_TABLE, ASTROPY_HDF5),
+    (NUMPY_DICT, NUMPY_HDF5),
+    (PD_DATAFRAME, PANDAS_PARQUET)])
+
+NATIVE_TABLE_TYPE = OrderedDict([(val, key) for key, val in NATIVE_FORMAT.items()])
+
+# Allowed formats to write various table types
+ALLOWED_FORMATS = OrderedDict([
+    (AP_TABLE, [ASTROPY_HDF5, ASTROPY_HDF5]),
+    (NUMPY_DICT, NUMPY_HDF5),
+    (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5])])
+
+
+
+
+def tableType(obj):
+    """ Identify the type of table we have
+
+    Parameters
+    ----------
+    obj : `object`
+        The input object
+
+    Returns
+    -------
+    otype : `int`
+        The object type, one of `TABULAR_FORMATS.keys()`
+
+    Raises
+    ------
+    TypeError : The object is not a supported type
+
+    IndexError : One of the columns in a Mapping is the wrong length
+    """
+    if isinstance(obj, apTable.Table):
+        return AP_TABLE
+    if isinstance(obj, pd.DataFrame):
+        return PD_DATAFRAME
+    if not isinstance(obj, Mapping):
+        raise TypeError("Object of type %s is not one of the supported types %s" %
+                        (type(obj), list(TABULAR_FORMAT_NAMES.keys())))
+
+    nRow = None
+    for key, val in obj.items():
+        if not isinstance(val, Iterable):  #pragma: no cover
+            raise TypeError("Column %s of type %s is not iterable" %
+                            (key, type(val)))
+        if nRow is None:
+            nRow = arrayLength(val)
+        else:
+            if arrayLength(val) != nRow:  #pragma: no cover
+                raise IndexError("Column %s length %i != %i" % (key, arrayLength(val), nRow)) #pylint: disable=bad-string-format-type
+    return NUMPY_DICT
+
+
+def fileType(filepath, fmt=None):
+    """ Identify the type of file we have
+
+    Parameters
+    ----------
+    filepath : `str`
+        The path to the file
+
+    fmt : `str` or `None`
+        Overrides the file extension
+
+    Returns
+    -------
+    otype : `int`
+        The object type, one of `FILE_FORMATS.keys()`
+
+    Raises
+    ------
+    KeyError : The file format is not a support value
+    """
+    if fmt is None:
+        fmt = os.path.splitext(filepath)[1][1:]
+    try:
+        return FILE_FORMAT_SUFFIXS[fmt]
+    except KeyError as msg:  #pragma: no cover
+        raise KeyError("Unknown file format %s, supported types are %s" %
+                       (fmt, list(FILE_FORMAT_SUFFIXS.keys()))) from msg
