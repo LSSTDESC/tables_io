@@ -2,13 +2,10 @@
 Unit tests for io_layer module
 """
 
-import numpy as np
 import unittest
 from tables_io import types, forceTo, forceObjTo
 from tables_io.testUtils import compare_table_dicts, make_test_data
 
-from astropy.table import Table as apTable
-from astropy.utils.diff import report_diff_values
 
 class ConvTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attributes
     """ Test the utility functions """

@@ -91,7 +91,7 @@ def initializeHdf5Write(filepath, groupname=None, **kwds):
     Returns
     -------
     group : `h5py.File` or `h5py.Group`
-        The group to write to 
+        The group to write to
     fout : `h5py.File`
         The output file
 
@@ -111,11 +111,11 @@ def initializeHdf5Write(filepath, groupname=None, **kwds):
     if not os.path.exists(outdir):  #pragma: no cover
         os.makedirs(outdir, exist_ok=True)
     outf = h5py.File(filepath, "w")
-    if groupname is None:
+    if groupname is None:  #pragma: no cover
         group = outf
     else:
         group = outf.create_group(groupname)
-        
+
     for k, v in kwds.items():
         group.create_dataset(k, v[0], v[1])
     return group, outf
@@ -169,7 +169,7 @@ def finalizeHdf5Write(fout, groupname=None, **kwds):
     -----
     The keywords can be used to write additional data
     """
-    if groupname is None:
+    if groupname is None:  #pragma: no cover
         group = fout
     else:
         group = fout.create_group(groupname)

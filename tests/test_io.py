@@ -4,13 +4,9 @@ Unit tests for io_layer module
 
 import os
 
-import numpy as np
 import unittest
 from tables_io import types, forceTo, read, write
 from tables_io.testUtils import compare_table_dicts, make_test_data
-
-from astropy.table import Table as apTable
-from astropy.utils.diff import report_diff_values
 
 
 class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attributes
@@ -20,7 +16,7 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
         """
         Make any objects that are used in multiple tests.
         """
-        self._tables = make_test_data()        
+        self._tables = make_test_data()
         self._files = []
 
     def tearDown(self):

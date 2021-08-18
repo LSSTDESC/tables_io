@@ -48,8 +48,8 @@ def test_write_output_file():
 
     data_dict = dict(zmode=zmode, pz_pdf=pz_pdf)
 
-    outf = io.initializeHdf5Write(test_outfile, photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4'))
-    io.writeDictToHdf5Chunk(outf, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
-    io.finalizeHdf5Write(outf, zgrid=zgrid)
+    group, outf = io.initializeHdf5Write(test_outfile, 'data', photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4'))
+    io.writeDictToHdf5Chunk(group, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
+    io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
 
     os.unlink(test_outfile)
