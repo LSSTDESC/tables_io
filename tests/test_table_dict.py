@@ -39,7 +39,7 @@ class TableDictTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-
         td_r = TableDict.read(filepath, tType=tType, fmt=fmt, keys=keys)
         tables_r = td_r.convert(types.AP_TABLE)
         assert compare_table_dicts(self._tables, tables_r)
-        if keys is not None:
+        if fmt in ['pq', 'h5']:
             return
         basepath2 = "%s_v2" % basepath
         filepath2 = td_c.write(basepath2)
