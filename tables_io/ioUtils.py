@@ -99,12 +99,15 @@ def initializeHdf5Write(filepath, groupname=None, **kwds):
     -----
     The keywords should be used to create_datasets within the hdf5 file.
     Each keyword should provide a tuple of ( (shape), (dtype) )
+
     shape : `tuple` ( `int` )
         The shape of the data for this dataset
     dtype : `str`
         The data type for this dataset
+
     For exmaple
     `initialize_writeout('test.hdf5', scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))`
+
     Would initialize an hdf5 file with two datasets, with shapes and data types as given
     """
     outdir = os.path.dirname(os.path.abspath(filepath))
