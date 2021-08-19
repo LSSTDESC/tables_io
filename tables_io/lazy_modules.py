@@ -4,6 +4,23 @@ import sys
 import importlib.util
 
 
+class DeferredModuleError:
+    """ Class to throw an error if you try to use a modules that wasn't loaded """
+
+    def __init__(self, moduleName):
+        self._moduleName = moduleName
+
+    @property
+    def moduleName(self):
+        """ Return the name of the module this is associated to """
+        return self._moduleName
+
+    def __getattr__(self, item):
+        raise ImportError("Module %s was not loaded, so call to %s.%s fails" %
+                          (self.moduleName, self.moduleName, item))
+
+
+
 def lazyImport(modulename):
     """ This will allow us to lazy import various modules
 
@@ -21,9 +38,9 @@ def lazyImport(modulename):
         return sys.modules[modulename]
     except KeyError:
         spec = importlib.util.find_spec(modulename)
-        if spec is None:   #pragma: no cover
+        if spec is None:
             print("Can't find module %s" % modulename)
-            return None
+            return DeferredModuleError(modulename)
         module = importlib.util.module_from_spec(spec)
         loader = importlib.util.LazyLoader(spec.loader)
         # Make module with proper locking and get it inserted into sys.modules.
