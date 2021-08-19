@@ -44,17 +44,19 @@ def forceToPandables(arr, check_nrow=None):
         Something that pandas can handle
     """
     ndim = np.ndim(arr)
+    if ndim == 0:
+        return arr
     shape = np.shape(arr)
     nrow = shape[0]
-    if check_nrow is not None and check_nrow != nrow:  # pragma: no cover
+    if check_nrow is not None and check_nrow != nrow:
         raise ValueError("Number of rows does not match: %i != %i" % (nrow, check_nrow))
     if ndim == 1:
         return arr
     if ndim == 2:
         return list(arr)
-    shape = np.shape(arr)  #pragma: no cover
-    ncol = np.product(shape[1:])  #pragma: no cover
-    return list(arr.reshape(nrow, ncol))  #pragma: no cover
+    shape = np.shape(arr)
+    ncol = np.product(shape[1:])
+    return list(arr.reshape(nrow, ncol))
 
 
 def getGroupInputDataLength(hg):

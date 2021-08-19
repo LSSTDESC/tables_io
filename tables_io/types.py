@@ -43,6 +43,13 @@ FILE_FORMAT_SUFFIXS = OrderedDict([
     ('h5', PANDAS_HDF5),
     ('pq', PANDAS_PARQUET)])
 
+DEFAULT_TABLE_KEY = OrderedDict([
+    ('fits', ''),
+    ('hf5', None),
+    ('hdf5', None),
+    ('h5', 'data'),
+    ('pq', '')])
+
 FILE_FORMATS = OrderedDict([(val, key) for key, val in FILE_FORMAT_NAMES.items()])
 
 FILE_FORMAT_SUFFIX_MAP = OrderedDict([(val, key) for key, val in FILE_FORMAT_SUFFIXS.items()])
@@ -60,8 +67,6 @@ ALLOWED_FORMATS = OrderedDict([
     (AP_TABLE, [ASTROPY_HDF5, ASTROPY_HDF5]),
     (NUMPY_DICT, NUMPY_HDF5),
     (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5])])
-
-
 
 
 def tableType(obj):
@@ -93,15 +98,59 @@ def tableType(obj):
 
     nRow = None
     for key, val in obj.items():
+        if isinstance(val, (Mapping, apTable.Table, pd.DataFrame)):
+            raise TypeError("Column %s of type a Mapping %s" %
+                            (key, type(val)))
         if not isinstance(val, Iterable):  #pragma: no cover
             raise TypeError("Column %s of type %s is not iterable" %
                             (key, type(val)))
         if nRow is None:
             nRow = arrayLength(val)
         else:
-            if arrayLength(val) != nRow:  #pragma: no cover
+            if arrayLength(val) != nRow:
                 raise IndexError("Column %s length %i != %i" % (key, arrayLength(val), nRow)) #pylint: disable=bad-string-format-type
     return NUMPY_DICT
+
+
+def istablelike(obj):
+    """ Test to see if an object is one of the supported table types
+
+    Parameters
+    ----------
+    obj : `object`
+        The input object
+
+    Returns
+    -------
+    tablelike : `bool`
+        True is the object is `Tablelike`, False otherwise
+    """
+    try:
+        _ = tableType(obj)
+    except (TypeError, IndexError):
+        return False
+    return True
+
+
+def istabledictlike(obj):
+    """ Test to see if an object is a `Mapping`, (`str`, `Tablelike`)
+
+    Parameters
+    ----------
+    obj : `object`
+        The input object
+
+    Returns
+    -------
+    tabledict : `bool`
+        True is the object is a `Mapping`, (`str`, `Tablelike`), False otherwise
+    """
+    if not isinstance(obj, Mapping):
+        return False
+    for val in obj.values():
+        if not istablelike(val):
+            return False
+    return True
 
 
 def fileType(filepath, fmt=None):
@@ -128,6 +177,6 @@ def fileType(filepath, fmt=None):
         fmt = os.path.splitext(filepath)[1][1:]
     try:
         return FILE_FORMAT_SUFFIXS[fmt]
-    except KeyError as msg:  #pragma: no cover
+    except KeyError as msg:
         raise KeyError("Unknown file format %s, supported types are %s" %
                        (fmt, list(FILE_FORMAT_SUFFIXS.keys()))) from msg

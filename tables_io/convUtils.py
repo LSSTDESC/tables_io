@@ -9,7 +9,7 @@ from .lazy_modules import HAS_ASTROPY, HAS_PANDAS
 
 from .arrayUtils import forceToPandables
 
-from .types import AP_TABLE, NUMPY_DICT, PD_DATAFRAME, tableType
+from .types import AP_TABLE, NUMPY_DICT, PD_DATAFRAME, tableType, istablelike
 
 
 ### I. Single `Tablelike` conversions
@@ -208,9 +208,6 @@ def dictToDataFrame(odict, meta=None):
     df :  `pandas.DataFrame`
         The dataframe
     """
-    if not HAS_PANDAS:  #pragma: no cover
-        raise ImportError("pandas is not available, can't make DataFrame")
-
     outdict = OrderedDict()
     for k, v in odict.items():
         outdict[k] = forceToPandables(v)
@@ -326,23 +323,26 @@ def forceToDataFrames(odict):
     return OrderedDict([(k, forceToDataFrame(v)) for k, v in odict.items()])
 
 
-def forceTo(odict, tType):
+def forceTo(obj, tType):
     """
     Convert several `objects` to a specific type
 
     Parameters
     ----------
-    odict :  `Mapping`, (`str`, `Tablelike`)
-        The input objects
+    obj :  'Tablelike` or `TableDictlike`
+        The input object
 
     tType : `int`
         One of `TABULAR_FORMAT_NAMES.keys()`
 
     Returns
     -------
-    out :  `OrderedDict`, (`str`, `Tablelike`)
+    out :  `Tablelike` or `TableDictlike`
         The converted data
     """
+    if istablelike(obj):
+        return forceObjTo(obj, tType)
+
     funcMap = {AP_TABLE:forceToTables,
                NUMPY_DICT:forceToDicts,
                PD_DATAFRAME:forceToDataFrames}
@@ -350,4 +350,4 @@ def forceTo(odict, tType):
         theFunc = funcMap[tType]
     except KeyError as msg:  #pragma: no cover
         raise KeyError("Unsupported type %i" % tType) from msg
-    return theFunc(odict)
+    return theFunc(obj)

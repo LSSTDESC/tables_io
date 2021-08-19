@@ -6,13 +6,14 @@ from collections import OrderedDict
 import numpy as np
 
 from .lazy_modules import pd, pq, h5py, apTable, fits
-from .lazy_modules import HAS_TABLES, HAS_ASTROPY, HAS_HDF5, HAS_PANDAS
+from .lazy_modules import HAS_TABLES, HAS_HDF5
 
 from .arrayUtils import getGroupInputDataLength
 
 from .types import ASTROPY_FITS, ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PANDAS_PARQUET,\
-     NATIVE_FORMAT, FILE_FORMAT_SUFFIXS, FILE_FORMAT_SUFFIX_MAP, NATIVE_TABLE_TYPE, AP_TABLE, PD_DATAFRAME,\
-     fileType, tableType
+     NATIVE_FORMAT, FILE_FORMAT_SUFFIXS, FILE_FORMAT_SUFFIX_MAP, DEFAULT_TABLE_KEY,\
+     NATIVE_TABLE_TYPE, AP_TABLE, PD_DATAFRAME,\
+     fileType, tableType, istablelike, istabledictlike
 
 from .convUtils import dataFrameToDict, hdf5GroupToDict, forceTo
 
@@ -233,8 +234,6 @@ def writeTablesToFits(tables, filepath, **kwargs):
 
     kwargs are passed to `astropy.io.fits.writeto` call.
     """
-    if not HAS_ASTROPY:  #pragma: no cover
-        raise ImportError("Astropy is not available, can't save to FITS")
     out_list = [fits.PrimaryHDU()]
     for k, v in tables.items():
         hdu = fits.table_to_hdu(v)
@@ -258,8 +257,6 @@ def readFitsToTables(filepath):
     tables : `OrderedDict` of `astropy.table.Table`
         Keys will be HDU names, values will be tables
     """
-    if not HAS_ASTROPY:  #pragma: no cover
-        raise ImportError("Astropy is not available, can't read FITS")
     fin = fits.open(filepath)
     tables = OrderedDict()
     for hdu in fin[1:]:
@@ -304,8 +301,6 @@ def readHdf5ToTables(filepath):
     tables : `OrderedDict` of `astropy.table.Table`
         Keys will be 'paths', values will be tables
     """
-    if not HAS_HDF5:  #pragma: no cover
-        raise ImportError("h5py is not available, can't read hdf5")
     fin = h5py.File(filepath)
     tables = OrderedDict()
     for k in fin.keys():
@@ -332,9 +327,6 @@ def readHdf5Group(filepath, groupname=None):
     infp : `h5py.File`
         The input file (returned so that the used can explicitly close the file)
     """
-    if not HAS_HDF5:  #pragma: no cover
-        raise ImportError("h5py is not available, can't read hdf5")
-
     infp = h5py.File(filepath, "r")
     if groupname is None:  #pragma: no cover
         return infp, infp
@@ -356,6 +348,8 @@ def readHdf5GroupToDict(hg, start=None, end=None):
         Keys will be 'paths', values will be tables
     """
     # pylint: disable=unused-argument
+    if isinstance(hg, h5py.Dataset):
+        return readHdf5DatasetToArray(hg, start, end)
     return OrderedDict([(key, readHdf5DatasetToArray(val, start, end)) for key, val in hg.items()])
 
 
@@ -375,8 +369,6 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
         The groupname for the data
     """
     # pylint: disable=unused-argument
-    if not HAS_HDF5:  #pragma: no cover
-        raise ImportError("h5py is not available, can't save to hdf5")
     fout = h5py.File(filepath, 'a')
     if groupname is None:  #pragma: no cover
         group = fout
@@ -449,8 +441,6 @@ def readHdf5ToDataFrame(filepath, key=None):
     """
     if not HAS_HDF5:  #pragma: no cover
         raise ImportError("h5py is not available, can't read hdf5")
-    if not HAS_PANDAS:  #pragma: no cover
-        raise ImportError("pandas is not available, can't read hdf5 to dataframe")
     if not HAS_TABLES:  #pragma: no cover
         raise ImportError("tables is not available, can't read hdf5 to dataframe")
 
@@ -475,10 +465,6 @@ def readH5ToDataFrames(filepath):
     We are using the file suffix 'h5' to specify 'hdf5' files written from DataFrames using `pandas`
     They have a different structure than 'hdf5' files written with `h5py` or `astropy.table`
     """
-    if not HAS_HDF5:  #pragma: no cover
-        raise ImportError("h5py is not available, can't read hdf5")
-    if not HAS_PANDAS:  #pragma: no cover
-        raise ImportError("pandas is not available, can't read hdf5 to dataframe")
     if not HAS_TABLES:  #pragma: no cover
         raise ImportError("tables is not available, can't read hdf5 to dataframe")
     fin = h5py.File(filepath)
@@ -504,6 +490,7 @@ def writeDataFramesToH5(dataFrames, filepath):
 
     for key, val in dataFrames.items():
         val.to_hdf(filepath, key)
+
 
 
 
@@ -696,6 +683,10 @@ def read(filepath, tType=None, fmt=None, keys=None):
 
     """
     odict = readNative(filepath, fmt, keys)
+    if len(odict) == 1:
+        for defName in ['', None, '__astropy_table__', 'data']:
+            if defName in odict:
+                odict = odict[defName]
     if tType is None:  #pragma: no cover
         return odict
     return forceTo(odict, tType)
@@ -711,15 +702,26 @@ def writeNative(odict, basename):
     basename : `str`
         Basename for the file to write.  The suffix will be applied based on the object type.
     """
-    if not odict:  #pragma: no cover
+    istable = False
+    if istablelike(odict):
+        istable = True
+        tType = tableType(odict)
+    elif istabledictlike(odict):
+        tType = tableType(list(odict.values())[0])
+    elif not odict:  #pragma: no cover
         return None
+    else:  #pragma: no cover
+        raise TypeError("Can not write object of type %s" % type(odict))
 
-    tType = tableType(list(odict.values())[0])
     try:
         fType = NATIVE_FORMAT[tType]
     except KeyError as msg:  #pragma: no cover
         raise KeyError("No native format for table type %i" % tType) from msg
-    filepath = basename + '.' + FILE_FORMAT_SUFFIX_MAP[fType]
+    fmt = FILE_FORMAT_SUFFIX_MAP[fType]
+    filepath = basename + '.' + fmt
+
+    if istable:
+        odict = OrderedDict([(DEFAULT_TABLE_KEY[fmt], odict)])
 
     try:
         os.unlink(filepath)
@@ -738,26 +740,33 @@ def writeNative(odict, basename):
     raise TypeError("Unsupported Native file type %i" % fType)  #pragma: no cover
 
 
-def write(odict, basename, fmt=None):
+def write(obj, basename, fmt=None):
     """ Write a file or files with tables
 
     Parameters
     ----------
-    odict : `OrderedDict`, (`str`, `Tablelike`)
+    obj : `Tablelike` or `TableDictLike`
         The data to write
     basename : `str`
         Basename for the file to write.  The suffix will be applied based on the object type.
     fmt : `str` or `None`
         The output file format, If `None` this will use `writeNative`
     """
-    if not odict:  #pragma: no cover
-        return None
     if fmt is None:
-        return writeNative(odict, basename)
+        return writeNative(obj, basename)
     try:
         fType = FILE_FORMAT_SUFFIXS[fmt]
     except KeyError as msg:  #pragma: no cover
         raise KeyError("Unknown file format %s, options are %s" % (fmt, list(FILE_FORMAT_SUFFIXS.keys()))) from msg
+
+    if istablelike(obj):
+        odict = OrderedDict([(DEFAULT_TABLE_KEY[fmt], obj)])
+    elif istabledictlike(obj):
+        odict = obj
+    elif not obj:
+        return None
+    else:
+        raise TypeError("Can not write object of type %s" % type(obj))
 
     if fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_PARQUET]:
         try:
