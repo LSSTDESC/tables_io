@@ -78,7 +78,13 @@ def getGroupInputDataLength(hg):
     and not the total size of the array.
 
     Normally that is what you want to be iterating over.
+
+    The group is meant to represent a table, hence all child datasets
+    should be the same length
     """
     firstkey = list(hg.keys())[0]
     nrows = len(hg[firstkey])
+    for value in hg.values():
+        if len(value) != nrows:
+            raise ValueError("Group does not represent a table; row lengths differ")
     return nrows
