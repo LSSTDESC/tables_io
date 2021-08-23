@@ -25,7 +25,13 @@ def test_no_groupname():
 def test_get_input_data_length_hdf5():
     """ Test the get_input_data_size_hdf5 function """
     assert io.getInputDataLengthHdf5(no_group_file) == 10
-    assert io.getInputDataLengthHdf5(h5_data_file, 'df') == 14
+    try:
+        _ = io.getInputDataLengthHdf5(h5_data_file, 'df')
+    except ValueError:
+        pass
+    else:
+        raise ValueError("Failed to catch ValueError for mismatched column lengths")
+        
 
 def test_iter_chunk_hdf5_data():
     """ Test the hdf5 data chunk iterator """
