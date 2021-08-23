@@ -3,7 +3,7 @@ Unit tests for io_layer module
 """
 
 import unittest
-from tables_io import types, forceTo, forceObjTo
+from tables_io import types, convert, convertObj
 from tables_io.testUtils import compare_table_dicts, make_test_data
 
 
@@ -22,13 +22,13 @@ class ConvTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attri
 
     def _do_loopback(self, tType1, tType2):
         """ Utility function to do loopback tests """
-        odict_1 = forceTo(self._tables, tType1)
-        odict_2 = forceTo(odict_1, tType2)
-        tables_r = forceTo(odict_2, types.AP_TABLE)
+        odict_1 = convert(self._tables, tType1)
+        odict_2 = convert(odict_1, tType2)
+        tables_r = convert(odict_2, types.AP_TABLE)
         assert compare_table_dicts(self._tables, tables_r)
-        t1 = forceObjTo(self._table, tType1)
-        t2 = forceObjTo(t1, tType2)
-        _ = forceObjTo(t2, types.AP_TABLE)
+        t1 = convertObj(self._table, tType1)
+        t2 = convertObj(t1, tType2)
+        _ = convertObj(t2, types.AP_TABLE)
 
     def testAstropyLoopback(self):
         """ Test writing / reading astropy tables to HDF5 """

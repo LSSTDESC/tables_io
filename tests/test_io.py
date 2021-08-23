@@ -5,7 +5,7 @@ Unit tests for io_layer module
 import os
 
 import unittest
-from tables_io import types, forceTo, read, write
+from tables_io import types, convert, read, write
 from tables_io.testUtils import compare_table_dicts, compare_tables, make_test_data
 
 
@@ -28,7 +28,7 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
 
     def _do_loopback(self, tType, basepath, fmt, keys=None):
         """ Utility function to do loopback tests """
-        odict_c = forceTo(self._tables, tType)
+        odict_c = convert(self._tables, tType)
         filepath = write(odict_c, basepath, fmt)
         if keys is None:
             self._files.append(filepath)
@@ -36,12 +36,12 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
             for key in keys:
                 self._files.append("%s%s.%s" % (basepath, key, fmt))
         odict_r = read(filepath, tType=tType, fmt=fmt, keys=keys)
-        tables_r = forceTo(odict_r, types.AP_TABLE)
+        tables_r = convert(odict_r, types.AP_TABLE)
         assert compare_table_dicts(self._tables, tables_r)
 
     def _do_loopback_single(self, tType, basepath, fmt, keys=None):
         """ Utility function to do loopback tests """
-        obj_c = forceTo(self._table, tType)
+        obj_c = convert(self._table, tType)
         filepath = write(obj_c, basepath, fmt)
         if keys is None:
             self._files.append(filepath)
@@ -49,7 +49,7 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
             for key in keys:
                 self._files.append("%s%s.%s" % (basepath, key, fmt))
         obj_r = read(filepath, tType=tType, fmt=fmt, keys=keys)
-        table_r = forceTo(obj_r, types.AP_TABLE)
+        table_r = convert(obj_r, types.AP_TABLE)
         assert compare_tables(self._table, table_r)
         if types.FILE_FORMAT_SUFFIXS[fmt] not in types.NATIVE_TABLE_TYPE:
             return
@@ -60,7 +60,7 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
             filepath_native += ".pq"
         self._files.append(filepath_native)
         obj_r_native = read(filepath_native, tType=tType, keys=keys)
-        table_r_native = forceTo(obj_r_native, types.AP_TABLE)
+        table_r_native = convert(obj_r_native, types.AP_TABLE)
         assert compare_tables(self._table, table_r_native)
 
 

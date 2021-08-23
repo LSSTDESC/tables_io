@@ -15,7 +15,7 @@ from .types import ASTROPY_FITS, ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PANDAS_P
      NATIVE_TABLE_TYPE, AP_TABLE, PD_DATAFRAME,\
      fileType, tableType, istablelike, istabledictlike
 
-from .convUtils import dataFrameToDict, hdf5GroupToDict, forceTo
+from .convUtils import dataFrameToDict, hdf5GroupToDict, convert
 
 
 
@@ -216,7 +216,7 @@ def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None):
 
 
 
-### II.  Reading and Writing Files
+### II.   Reading and Writing Files
 
 ### II A.  Reading and Writing `astropy.table.Table` to/from FITS files
 
@@ -689,7 +689,7 @@ def read(filepath, tType=None, fmt=None, keys=None):
                 odict = odict[defName]
     if tType is None:  #pragma: no cover
         return odict
-    return forceTo(odict, tType)
+    return convert(odict, tType)
 
 
 def writeNative(odict, basename):
@@ -774,16 +774,16 @@ def write(obj, basename, fmt=None):
         except KeyError as msg:  #pragma: no cover
             raise KeyError("Native file type not known for %s" % (fmt)) from msg
 
-        forcedOdict = forceTo(odict, nativeTType)
+        forcedOdict = convert(odict, nativeTType)
         return writeNative(forcedOdict, basename)
 
     if fType == ASTROPY_FITS:
-        forcedOdict = forceTo(odict, AP_TABLE)
+        forcedOdict = convert(odict, AP_TABLE)
         filepath = "%s.fits" % basename
         writeTablesToFits(forcedOdict, filepath)
         return filepath
     if fType == PANDAS_HDF5:
-        forcedOdict = forceTo(odict, PD_DATAFRAME)
+        forcedOdict = convert(odict, PD_DATAFRAME)
         filepath = "%s.h5" % basename
         writeDataFramesToH5(forcedOdict, filepath)
         return filepath

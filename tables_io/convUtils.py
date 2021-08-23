@@ -46,7 +46,7 @@ def dataFrameToTable(df):
     return tab
 
 
-def forceToTable(obj):
+def convertTable(obj):
     """
     Convert an object to an `astropy.table.Table`
 
@@ -137,7 +137,7 @@ def hdf5GroupToDict(hg):
     return data
 
 
-def forceToDict(obj):
+def convertDict(obj):
     """
     Convert an object to an `OrderedDict`, (`str`, `numpy.array`)
 
@@ -218,7 +218,7 @@ def dictToDataFrame(odict, meta=None):
     return df
 
 
-def forceToDataFrame(obj):
+def convertDataFrame(obj):
     """
     Convert an object to a `pandas.DataFrame`
 
@@ -242,9 +242,9 @@ def forceToDataFrame(obj):
     raise TypeError("Unsupported tableType %i" % tType)  #pragma: no cover
 
 
-# I D. Generic `forceTo`
+# I D. Generic `convert`
 
-def forceObjTo(obj, tType):
+def convertObj(obj, tType):
     """
     Convert an object to a specific type of `Tablelike`
 
@@ -261,18 +261,18 @@ def forceObjTo(obj, tType):
         The converted object
     """
     if tType == AP_TABLE:
-        return forceToTable(obj)
+        return convertTable(obj)
     if tType == NUMPY_DICT:
-        return forceToDict(obj)
+        return convertDict(obj)
     if tType == PD_DATAFRAME:
-        return forceToDataFrame(obj)
+        return convertDataFrame(obj)
     raise TypeError("Unsupported tableType %i" % tType)  #pragma: no cover
 
 
 
 ### II.  Multi-table conversion utilities
 
-def forceToTables(odict):
+def convertTables(odict):
     """
     Convert several `objects` to `astropy.table.Table`
 
@@ -286,10 +286,10 @@ def forceToTables(odict):
     tabs : `OrderedDict` of `astropy.table.Table`
         The tables
     """
-    return OrderedDict([(k, forceToTable(v)) for k, v in odict.items()])
+    return OrderedDict([(k, convertTable(v)) for k, v in odict.items()])
 
 
-def forceToDicts(odict):
+def convertDicts(odict):
     """
     Convert several `objects` to `OrderedDict`, (`str`, `numpy.array`)
 
@@ -303,10 +303,10 @@ def forceToDicts(odict):
     tabs : `OrderedDict` of `OrderedDict`, (`str`, `numpy.array`)
         The tables
     """
-    return OrderedDict([(k, forceToDict(v)) for k, v in odict.items()])
+    return OrderedDict([(k, convertDict(v)) for k, v in odict.items()])
 
 
-def forceToDataFrames(odict):
+def convertDataFrames(odict):
     """
     Convert several `objects` to `pandas.DataFrame`
 
@@ -320,10 +320,10 @@ def forceToDataFrames(odict):
     df :  `OrderedDict` of `pandas.DataFrame`
         The dataframes
     """
-    return OrderedDict([(k, forceToDataFrame(v)) for k, v in odict.items()])
+    return OrderedDict([(k, convertDataFrame(v)) for k, v in odict.items()])
 
 
-def forceTo(obj, tType):
+def convert(obj, tType):
     """
     Convert several `objects` to a specific type
 
@@ -341,11 +341,11 @@ def forceTo(obj, tType):
         The converted data
     """
     if istablelike(obj):
-        return forceObjTo(obj, tType)
+        return convertObj(obj, tType)
 
-    funcMap = {AP_TABLE:forceToTables,
-               NUMPY_DICT:forceToDicts,
-               PD_DATAFRAME:forceToDataFrames}
+    funcMap = {AP_TABLE:convertTables,
+               NUMPY_DICT:convertDicts,
+               PD_DATAFRAME:convertDataFrames}
     try:
         theFunc = funcMap[tType]
     except KeyError as msg:  #pragma: no cover

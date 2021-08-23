@@ -2,7 +2,7 @@
 
 from collections import OrderedDict
 
-from .ioUtils import tableType, write, read, forceTo
+from .ioUtils import tableType, write, read, convert
 
 
 class TableDict(OrderedDict):
@@ -47,7 +47,7 @@ class TableDict(OrderedDict):
         td : `TableDict`
             The new TableDict
         """
-        return TableDict(forceTo(self, tType))
+        return TableDict(convert(self, tType))
 
 
     @classmethod

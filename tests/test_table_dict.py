@@ -6,7 +6,7 @@ import os
 
 import unittest
 
-from tables_io import types, forceTo, TableDict
+from tables_io import types, convert, TableDict
 from tables_io.testUtils import compare_table_dicts, make_test_data
 
 
@@ -28,7 +28,7 @@ class TableDictTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-
 
     def _do_loopback(self, tType, basepath, fmt, keys=None):
         """ Utility function to do loopback tests """
-        odict_c = forceTo(self._tables, tType)
+        odict_c = convert(self._tables, tType)
         td_c = TableDict(odict_c)
         filepath = td_c.write(basepath, fmt)
         if keys is None:

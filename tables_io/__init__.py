@@ -14,9 +14,9 @@ from . import ioUtils as io
 
 from .tableDict import TableDict
 
-forceObjTo = conv.forceObjTo
+convertObj = conv.convertObj
 
-forceTo = conv.forceTo
+convert = conv.convert
 
 writeNative = io.writeNative
 
@@ -25,3 +25,5 @@ write = io.write
 readNative = io.readNative
 
 read = io.read
+
+#iterate = io.iterate
