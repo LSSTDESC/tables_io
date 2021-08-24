@@ -90,7 +90,7 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
         """ Test writing / reading astropy tables to HDF5 """
         self._do_loopback(types.AP_TABLE, 'test_out', 'hf5')
         self._do_loopback_single(types.AP_TABLE, 'test_out_single', 'hf5')
-        self._do_iterator('test_out_single.hf5', types.AP_TABLE, True)
+        self._do_iterator('test_out_single.hf5', types.AP_TABLE, True, chunk_size=50)
 
     def testHdf5Loopback(self):
         """ Test writing / reading numpy arrays to HDF5 """
@@ -102,7 +102,7 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
         """ Test writing / reading pandas dataframes to HDF5 """
         self._do_loopback(types.PD_DATAFRAME, 'test_out', 'h5')
         self._do_loopback_single(types.PD_DATAFRAME, 'test_out_single', 'h5')
-        self._do_iterator('test_out_single.h5', types.PD_DATAFRAME, False, chunk_size=50)
+        self._do_iterator('test_out_single.h5', types.PD_DATAFRAME, True, chunk_size=50)
 
     def testPQLoopback(self):
         """ Test writing / reading pandas dataframes to parquet """

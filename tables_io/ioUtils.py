@@ -234,16 +234,19 @@ def iterH5ToDataFrame(filepath, chunk_size=100_000, groupname=None):
         end: ending index (int)
         data: pandas.DataFrame of all data from start:end (dict)
     """
-    f, infp = readHdf5Group(filepath, groupname)
-    num_rows = getGroupInputDataLength(f)
-    for i in range(0, num_rows, chunk_size):
-        start = i
-        end = i+chunk_size
-        if end > num_rows:
-            end = num_rows
-        data = pd.read_hdf(filepath, start=start, stop=end)
-        yield start, end, data
-    infp.close()
+    raise NotImplementedError("iterH5ToDataFrame")
+
+    # This does't work b/c of the difference in structure
+    #f, infp = readHdf5Group(filepath, groupname)
+    #num_rows = getGroupInputDataLength(f)
+    #for i in range(0, num_rows, chunk_size):
+    #    start = i
+    #    end = i+chunk_size
+    #    if end > num_rows:
+    #        end = num_rows
+    #    data = pd.read_hdf(filepath, start=start, stop=end)
+    #    yield start, end, data
+    #infp.close()
 
 
 def iterPqToDataFrame(filepath):
