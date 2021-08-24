@@ -118,7 +118,7 @@ Table Reading
 -------------
 
 The `tables_io.read` function provides a unified interface for
-writing files.
+reading files.
 
 .. code-block:: python
 
@@ -133,6 +133,26 @@ writing files.
     # If the file suffix doesn't match the expectation
     table = tables_io.read('data.hdf5', fmt='hd5')
 
+
+
+Iterating on Tables
+-------------------
+
+The `tables_io.iterate` function provides a unified interface for
+iterating on table-like objects in files.
+
+.. code-block:: python
+
+    # filepath is a file with tabular data
+
+    # To read it to it's native format e.g., numpy dicts for hdf5 files
+    for start, stop, data in tables_io.iterate(filepath):
+        ...
+
+    # To read it to a different format
+    for start, stop, data in tables_io.read(filepath, tables_io.types.PD_DATAFRAME):
+        ...
+	
 
 
 Multiple Tables

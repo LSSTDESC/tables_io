@@ -31,7 +31,7 @@ def test_get_input_data_length_hdf5():
         pass
     else:
         raise ValueError("Failed to catch ValueError for mismatched column lengths")
-        
+
 
 def test_iter_chunk_hdf5_data():
     """ Test the hdf5 data chunk iterator """

@@ -215,6 +215,57 @@ def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None):
     infp.close()
 
 
+def iterH5ToDataFrame(filepath, chunk_size=100_000, groupname=None):
+    """
+    iterator for sending chunks of data in hdf5.
+
+    Parameters
+    ----------
+      filepath: input file name (str)
+      chunk_size: size of chunk to iterate over (int)
+
+    Returns
+    -------
+    output:
+        iterator chunk
+
+    Currently only implemented for hdf5, returns `tuple`
+        start: start index (int)
+        end: ending index (int)
+        data: pandas.DataFrame of all data from start:end (dict)
+    """
+    f, infp = readHdf5Group(filepath, groupname)
+    num_rows = getGroupInputDataLength(f)
+    for i in range(0, num_rows, chunk_size):
+        start = i
+        end = i+chunk_size
+        if end > num_rows:
+            end = num_rows
+        data = pd.read_hdf(f, start=start, stop=end)
+        yield start, end, data
+    infp.close()
+
+
+def iterPqToDataFrame(filepath):
+    """
+    iterator for sending chunks of data in parquet
+
+    Parameters
+    ----------
+      filepath: input file name (str)
+
+    Returns
+    -------
+    output:
+        iterator chunk
+
+    Currently only implemented for hdf5, returns `tuple`
+        start: start index (int)
+        end: ending index (int)
+        data: `pandas.DataFrame` of all data from start:end (dict)
+    """
+    raise NotImplementedError("iterPqToDataFrame")
+
 
 ### II.   Reading and Writing Files
 
@@ -629,6 +680,8 @@ def readHdf5ToDict(filepath, groupname=None):
     return data
 
 
+### II G.  Top-level interface functions
+
 def readNative(filepath, fmt=None, keys=None):
     """ Read a file to the corresponding table type
 
@@ -690,6 +743,62 @@ def read(filepath, tType=None, fmt=None, keys=None):
     if tType is None:  #pragma: no cover
         return odict
     return convert(odict, tType)
+
+
+def iterateNative(filepath, fmt=None, **kwargs):
+    """ Read a file to the corresponding table type and iterate over the file
+
+    Parameters
+    ----------
+    filepath : `str`
+        File to load
+    fmt : `str` or `None`
+        File format, if `None` it will be taken from the file extension
+
+    Returns
+    -------
+    data : `TableLike`
+        The data
+
+    Notes
+    -----
+    The kwargs are used passed to the specific iterator type
+
+    """
+    fType = fileType(filepath, fmt)
+    funcDict = {NUMPY_HDF5:iterHdf5ToDict,
+                PANDAS_HDF5:iterH5ToDataFrame,
+                PANDAS_PARQUET:iterPqToDataFrame}
+
+    try:
+        theFunc = funcDict[fType]
+        return theFunc(filepath, **kwargs)
+    except KeyError as msg:
+        raise NotImplementedError("Unsupported FileType for iterateNative %i" % fType) from msg #pragma: no cover
+
+
+def iterate(filepath, tType=None, fmt=None, **kwargs):
+    """ Read a file to the corresponding table type iterate over the file
+
+    Parameters
+    ----------
+    filepath : `str`
+        File to load
+    tType : `int` or `None`
+        Table type, if `None` this will use `readNative`
+    fmt : `str` or `None`
+        File format, if `None` it will be taken from the file extension
+    groupname : `str` or `None`
+        For hdf5 files, the groupname for the data
+
+    Returns
+    -------
+    data : `OrderedDict` ( `str` -> `Tablelike` )
+        The data
+
+    """
+    for start, stop, data in iterateNative(filepath, fmt, **kwargs):
+        yield start, stop, convert(data, tType)
 
 
 def writeNative(odict, basename):
