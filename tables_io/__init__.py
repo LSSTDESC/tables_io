@@ -4,4 +4,28 @@ from ._version import version
 
 from .lazy_modules import *
 
-from . import io_layer
+from . import types
+
+from . import arrayUtils
+
+from . import convUtils as conv
+
+from . import ioUtils as io
+
+from .tableDict import TableDict
+
+convertObj = conv.convertObj
+
+convert = conv.convert
+
+writeNative = io.writeNative
+
+write = io.write
+
+readNative = io.readNative
+
+read = io.read
+
+iterateNative = io.iterate
+
+iterate = io.iterate
