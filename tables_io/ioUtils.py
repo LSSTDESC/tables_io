@@ -241,7 +241,7 @@ def iterH5ToDataFrame(filepath, chunk_size=100_000, groupname=None):
         end = i+chunk_size
         if end > num_rows:
             end = num_rows
-        data = pd.read_hdf(f, start=start, stop=end)
+        data = pd.read_hdf(filepath, start=start, stop=end)
         yield start, end, data
     infp.close()
 
