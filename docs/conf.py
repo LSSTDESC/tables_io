@@ -14,7 +14,10 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../tables_io'))
 
-import tables_io
+try:
+    import tables_io
+except:
+    print(sys.path)
 
 # -- Project information -----------------------------------------------------
 
