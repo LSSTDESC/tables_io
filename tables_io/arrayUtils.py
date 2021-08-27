@@ -1,5 +1,6 @@
 """Array-related utility functions for tables_io"""
 
+from collections import OrderedDict
 import numpy as np
 
 def arrayLength(arr):
@@ -89,3 +90,78 @@ def getGroupInputDataLength(hg):
         if len(value) != nrows:
             raise ValueError(f"Group does not represent a table. Length ({len(value)}) of column {value.name} not not match length ({nrows}) of first column {firstname}")
     return nrows
+
+
+def printDictShape(odict):
+    """Print the shape of arrays in a dictionary.
+    This is useful for debugging `astropy.Table` creation.
+
+    Parameters
+    ----------
+    in_dict : `dict`
+        The dictionary to print
+    """
+    for key, val in odict.items():
+        print(key, np.shape(val))
+
+
+def sliceDict(odict, subslice):
+    """Create a new `dict` by taking a slice of of every array in a `dict`
+
+    Parameters
+    ----------
+    in_dict : `dict`
+        The dictionary to conver
+    subslice : `int` or `slice`
+        Used to slice the arrays
+
+    Returns
+    -------
+    out_dict : `dict`
+        The converted dicionary
+    """
+
+    out_dict = OrderedDict()
+    for key, val in odict.items():
+        try:
+            out_dict[key] = val[subslice]
+        except (KeyError, TypeError):
+            out_dict[key] = val
+    return out_dict
+
+
+def checkKeys(odicts):
+    """Check that the keys in all the odicts match
+
+    Raises KeyError if one does not match.
+    """
+    if not odicts:  #pragma: no cover
+        return
+    master_keys = odicts[0].keys()
+    for in_dict in odicts[1:]:
+        if in_dict.keys() != master_keys:  #pragma: no cover
+            raise ValueError("Keys to not match: %s != %s" % (in_dict.keys(), master_keys))
+
+
+def concatenateDicts(odicts):
+    """Create a new `dict` by concatenate each array in `in_dicts`
+
+    Parameters
+    ----------
+    odicst : `list`, (`OrderedDict`, (`str`, `numpy.array`))
+        The dictionaries to stack
+
+    Returns
+    -------
+    out_dict : `dict`
+        The stacked dicionary
+    """
+    if not odicts:  #pragma: no cover
+        return OrderedDict()
+    checkKeys(odicts)
+    out_dict = OrderedDict([(key, None) for key in odicts[0].keys()])
+    for key in out_dict.keys():
+        out_dict[key] = np.concatenate([odict[key] for odict in odicts])
+    return out_dict
+
+
