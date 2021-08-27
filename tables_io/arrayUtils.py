@@ -92,7 +92,7 @@ def getGroupInputDataLength(hg):
     return nrows
 
 
-def printDictShape(odict):
+def printDictShape(in_dict):
     """Print the shape of arrays in a dictionary.
     This is useful for debugging `astropy.Table` creation.
 
@@ -101,17 +101,17 @@ def printDictShape(odict):
     in_dict : `dict`
         The dictionary to print
     """
-    for key, val in odict.items():
+    for key, val in in_dict.items():
         print(key, np.shape(val))
 
 
-def sliceDict(odict, subslice):
+def sliceDict(in_dict, subslice):
     """Create a new `dict` by taking a slice of of every array in a `dict`
 
     Parameters
     ----------
     in_dict : `dict`
-        The dictionary to conver
+        The dictionary to extract from
     subslice : `int` or `slice`
         Used to slice the arrays
 
@@ -122,7 +122,7 @@ def sliceDict(odict, subslice):
     """
 
     out_dict = OrderedDict()
-    for key, val in odict.items():
+    for key, val in in_dict.items():
         try:
             out_dict[key] = val[subslice]
         except (KeyError, TypeError):  #pragma: no cover
@@ -130,25 +130,30 @@ def sliceDict(odict, subslice):
     return out_dict
 
 
-def checkKeys(odicts):
-    """Check that the keys in all the odicts match
-
-    Raises KeyError if one does not match.
-    """
-    if not odicts:  #pragma: no cover
-        return
-    master_keys = odicts[0].keys()
-    for in_dict in odicts[1:]:
-        if in_dict.keys() != master_keys:  #pragma: no cover
-            raise ValueError("Keys to not match: %s != %s" % (in_dict.keys(), master_keys))
-
-
-def concatenateDicts(odicts):
-    """Create a new `dict` by concatenate each array in `in_dicts`
+def checkKeys(in_dicts):
+    """Check that the keys in all the in_dicts match
 
     Parameters
     ----------
-    odicst : `list`, (`OrderedDict`, (`str`, `numpy.array`))
+    in_dicts : `list`, (`OrderedDict`, (`str`, `numpy.array`))
+        The dictionaries for which compare keys
+
+    Raises KeyError if one does not match.
+    """
+    if not in_dicts:  #pragma: no cover
+        return
+    master_keys = in_dicts[0].keys()
+    for in_dict in in_dicts[1:]:
+        if in_dict.keys() != master_keys:  #pragma: no cover
+            raise ValueError("Keys do not match: %s != %s" % (in_dict.keys(), master_keys))
+
+
+def concatenateDicts(in_dicts):
+    """Create a new `dict` by concatenating each array in `in_dicts`
+
+    Parameters
+    ----------
+    in_dicts : `list`, (`OrderedDict`, (`str`, `numpy.array`))
         The dictionaries to stack
 
     Returns
@@ -156,12 +161,10 @@ def concatenateDicts(odicts):
     out_dict : `dict`
         The stacked dicionary
     """
-    if not odicts:  #pragma: no cover
+    if not in_dicts:  #pragma: no cover
         return OrderedDict()
-    checkKeys(odicts)
-    out_dict = OrderedDict([(key, None) for key in odicts[0].keys()])
+    checkKeys(in_dicts)
+    out_dict = OrderedDict([(key, None) for key in in_dicts[0].keys()])
     for key in out_dict.keys():
-        out_dict[key] = np.concatenate([odict[key] for odict in odicts])
+        out_dict[key] = np.concatenate([in_dict[key] for in_dict in in_dicts])
     return out_dict
-
-
