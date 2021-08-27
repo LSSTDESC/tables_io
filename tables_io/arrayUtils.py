@@ -125,7 +125,7 @@ def sliceDict(odict, subslice):
     for key, val in odict.items():
         try:
             out_dict[key] = val[subslice]
-        except (KeyError, TypeError):
+        except (KeyError, TypeError):  #pragma: no cover
             out_dict[key] = val
     return out_dict
 

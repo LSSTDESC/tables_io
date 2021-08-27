@@ -35,7 +35,7 @@ def test_force_to_pandasable():
 
 def test_slice_dict():
     """ Test the slice_dict method """
-    test_data = dict(scalar=np.random.uniform(size=10), 
+    test_data = dict(scalar=np.random.uniform(size=10),
                      vector=np.random.uniform(size=100).reshape(10, 10),
                      mat=np.random.uniform(size=1000).reshape(10, 10, 10))
     sliced = arrayUtils.sliceDict(test_data, 1)
@@ -51,10 +51,10 @@ def test_slice_dict():
     assert np.allclose(sliced['vector'], test_data['vector'][mask])
     assert np.allclose(sliced['mat'], test_data['mat'][mask])
 
-    
+
 def test_print_dict_shape():
     """ Test the print_dict_shape method """
-    test_data = dict(scalar=np.random.uniform(size=10), 
+    test_data = dict(scalar=np.random.uniform(size=10),
                      vector=np.random.uniform(size=100).reshape(10, 10),
                      mat=np.random.uniform(size=1000).reshape(10, 10, 10))
     arrayUtils.printDictShape(test_data)
@@ -62,7 +62,7 @@ def test_print_dict_shape():
 
 def test_concatenateDicts():
     """ Test the print_dict_shape method """
-    test_data = dict(scalar=np.random.uniform(size=10), 
+    test_data = dict(scalar=np.random.uniform(size=10),
                      vector=np.random.uniform(size=100).reshape(10, 10),
                      mat=np.random.uniform(size=1000).reshape(10, 10, 10))
     od = arrayUtils.concatenateDicts([test_data, test_data])
