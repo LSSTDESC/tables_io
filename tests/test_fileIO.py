@@ -5,6 +5,8 @@ import numpy as np
 
 from tables_io import io
 
+from tables_io.lazy_modules import apTable
+
 h5_data_file = 'tests/data/pandas_test_hdf5.h5'
 parquet_data_file = 'tests/data/parquet_test.parquet'
 no_group_file = 'tests/data/no_groupname_test.hdf5'

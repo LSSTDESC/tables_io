@@ -17,6 +17,7 @@ from .types import ASTROPY_FITS, ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PANDAS_P
 
 from .convUtils import dataFrameToDict, hdf5GroupToDict, convert
 
+from .mpUtils import getMPIActive
 
 
 ### I. Iteration functions
@@ -182,14 +183,18 @@ def finalizeHdf5Write(fout, groupname=None, **kwds):
     fout.close()
 
 
-def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None):
+def iterHdf5ToDict(filepath, mpiCom=None, chunk_size=100_000, groupname=None):
     """
     iterator for sending chunks of data in hdf5.
 
     Parameters
     ----------
-      filepath: input file name (str)
-      chunk_size: size of chunk to iterate over (int)
+    filepath: input file name (str)
+
+    mpiCom : MPI communicator
+            (default is None) An MPI comm object
+
+    chunk_size: size of chunk to iterate over (int)
 
     Returns
     -------
@@ -205,6 +210,8 @@ def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None):
     num_rows = getGroupInputDataLength(f)
     data = OrderedDict()
     for i in range(0, num_rows, chunk_size):
+        if not getMPIActive(i, mpiCom):
+            continue
         start = i
         end = i+chunk_size
         if end > num_rows:
@@ -215,14 +222,18 @@ def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None):
     infp.close()
 
 
-def iterH5ToDataFrame(filepath, chunk_size=100_000, groupname=None):
+def iterH5ToDataFrame(filepath, mpiCom=None, chunk_size=100_000, groupname=None):
     """
     iterator for sending chunks of data in hdf5.
 
     Parameters
     ----------
-      filepath: input file name (str)
-      chunk_size: size of chunk to iterate over (int)
+    filepath: input file name (str)
+
+    mpiCom : MPI communicator
+            (default is None) An MPI comm object
+
+    chunk_size: size of chunk to iterate over (int)
 
     Returns
     -------
@@ -249,13 +260,17 @@ def iterH5ToDataFrame(filepath, chunk_size=100_000, groupname=None):
     #infp.close()
 
 
-def iterPqToDataFrame(filepath):
+def iterPqToDataFrame(filepath, mpiCom=None):
     """
     iterator for sending chunks of data in parquet
 
     Parameters
     ----------
-      filepath: input file name (str)
+    filepath: input file name (str)
+
+    mpiCom : MPI communicator
+        (default is None) An MPI comm object
+
 
     Returns
     -------
@@ -748,13 +763,17 @@ def read(filepath, tType=None, fmt=None, keys=None):
     return convert(odict, tType)
 
 
-def iterateNative(filepath, fmt=None, **kwargs):
+def iterateNative(filepath, mpiCom=None, fmt=None, **kwargs):
     """ Read a file to the corresponding table type and iterate over the file
 
     Parameters
     ----------
     filepath : `str`
         File to load
+
+    mpiCom : MPI communicator
+        (default is None) An MPI comm object
+
     fmt : `str` or `None`
         File format, if `None` it will be taken from the file extension
 
@@ -775,12 +794,12 @@ def iterateNative(filepath, fmt=None, **kwargs):
 
     try:
         theFunc = funcDict[fType]
-        return theFunc(filepath, **kwargs)
+        return theFunc(filepath, mpiCom, **kwargs)
     except KeyError as msg:
         raise NotImplementedError("Unsupported FileType for iterateNative %i" % fType) from msg #pragma: no cover
 
 
-def iterate(filepath, tType=None, fmt=None, **kwargs):
+def iterate(filepath, mpiCom=None, tType=None, fmt=None, **kwargs):
     """ Read a file to the corresponding table type iterate over the file
 
     Parameters
@@ -800,7 +819,7 @@ def iterate(filepath, tType=None, fmt=None, **kwargs):
         The data
 
     """
-    for start, stop, data in iterateNative(filepath, fmt, **kwargs):
+    for start, stop, data in iterateNative(filepath, mpiCom, fmt, **kwargs):
         yield start, stop, convert(data, tType)
 
 

@@ -12,6 +12,8 @@ from . import convUtils as conv
 
 from . import ioUtils as io
 
+from . import mpUtils as mp
+
 from .tableDict import TableDict
 
 convertObj = conv.convertObj
