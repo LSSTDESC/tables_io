@@ -1,5 +1,6 @@
 """Array-related utility functions for tables_io"""
 
+from collections import OrderedDict
 import numpy as np
 
 def arrayLength(arr):
@@ -89,3 +90,81 @@ def getGroupInputDataLength(hg):
         if len(value) != nrows:
             raise ValueError(f"Group does not represent a table. Length ({len(value)}) of column {value.name} not not match length ({nrows}) of first column {firstname}")
     return nrows
+
+
+def printDictShape(in_dict):
+    """Print the shape of arrays in a dictionary.
+    This is useful for debugging `astropy.Table` creation.
+
+    Parameters
+    ----------
+    in_dict : `dict`
+        The dictionary to print
+    """
+    for key, val in in_dict.items():
+        print(key, np.shape(val))
+
+
+def sliceDict(in_dict, subslice):
+    """Create a new `dict` by taking a slice of of every array in a `dict`
+
+    Parameters
+    ----------
+    in_dict : `dict`
+        The dictionary to extract from
+    subslice : `int` or `slice`
+        Used to slice the arrays
+
+    Returns
+    -------
+    out_dict : `dict`
+        The converted dicionary
+    """
+
+    out_dict = OrderedDict()
+    for key, val in in_dict.items():
+        try:
+            out_dict[key] = val[subslice]
+        except (KeyError, TypeError):  #pragma: no cover
+            out_dict[key] = val
+    return out_dict
+
+
+def checkKeys(in_dicts):
+    """Check that the keys in all the in_dicts match
+
+    Parameters
+    ----------
+    in_dicts : `list`, (`OrderedDict`, (`str`, `numpy.array`))
+        The dictionaries for which compare keys
+
+    Raises KeyError if one does not match.
+    """
+    if not in_dicts:  #pragma: no cover
+        return
+    master_keys = in_dicts[0].keys()
+    for in_dict in in_dicts[1:]:
+        if in_dict.keys() != master_keys:  #pragma: no cover
+            raise ValueError("Keys do not match: %s != %s" % (in_dict.keys(), master_keys))
+
+
+def concatenateDicts(in_dicts):
+    """Create a new `dict` by concatenating each array in `in_dicts`
+
+    Parameters
+    ----------
+    in_dicts : `list`, (`OrderedDict`, (`str`, `numpy.array`))
+        The dictionaries to stack
+
+    Returns
+    -------
+    out_dict : `dict`
+        The stacked dicionary
+    """
+    if not in_dicts:  #pragma: no cover
+        return OrderedDict()
+    checkKeys(in_dicts)
+    out_dict = OrderedDict([(key, None) for key in in_dicts[0].keys()])
+    for key in out_dict.keys():
+        out_dict[key] = np.concatenate([in_dict[key] for in_dict in in_dicts])
+    return out_dict
