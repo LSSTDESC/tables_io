@@ -2,7 +2,7 @@
 
 try:
     from ._version import version
-except:
+except:  #pragma: no cover
     version = "unknown"
 
 from .lazy_modules import *
