@@ -24,7 +24,8 @@ def getMPICom(mpiCom=None):
         return None
     if isinstance(mpiCom, bool):
         if mpiCom:
-            return mpi4py.MPI.COMM_WORLD
+            from mpi4py import MPI
+            return MPI.COMM_WORLD
         return None
     return mpiCom
 
@@ -74,3 +75,25 @@ def getMPIActive(i, mpiCom=None):
         return True
     size, rank = getSizeAndRank(mpiCom)
     return i % size == rank
+
+
+def getH5FileMPIKwargs(mpiCom=None):
+    """ Return the keyword arguments to open a h5py.File under MPIO
+
+    Parameters
+    ----------
+    mpiCom : `mpi4py.Communicator` or `bool` or `None`
+
+    Returns
+    -------
+    kwds : `dict`
+        The keywords to pass to h5py.File()
+
+    Notes
+    -----
+    if mpiCom is 'False' or `None` this will return {}
+    """
+    theCom = getMPICom(mpiCom)
+    if theCom is None:
+        return {}
+    return dict(driver="mpio", comm=theCom)

@@ -80,7 +80,7 @@ def getInputDataLengthHdf5(filepath, groupname=None):
     return nrow
 
 
-def initializeHdf5Write(filepath, groupname=None, **kwds):
+def initializeHdf5Write(filepath, groupname=None,  mpiCom=None, **kwds):
     """ Prepares an hdf5 file for output
 
     Parameters
@@ -89,6 +89,8 @@ def initializeHdf5Write(filepath, groupname=None, **kwds):
         The output file name
     groupname : `str` or `None`
         The output group name
+    mpiCom : MPI communicator
+            (default is None) An MPI comm object
 
     Returns
     -------
@@ -112,15 +114,21 @@ def initializeHdf5Write(filepath, groupname=None, **kwds):
 
     Would initialize an hdf5 file with two datasets, with shapes and data types as given
     """
+    # If we are under MPI only do this for rank 0 node 
+    if not getMPIActive(0, mpiCom):
+        return None, None
+
+    fopenKwargs = getH5FileMPIKwargs(mpiCom)
     outdir = os.path.dirname(os.path.abspath(filepath))
     if not os.path.exists(outdir):  #pragma: no cover
         os.makedirs(outdir, exist_ok=True)
-    outf = h5py.File(filepath, "w")
+    outf = h5py.File(filepath, "w", **fopenKwargs)
     if groupname is None:  #pragma: no cover
         group = outf
     else:
         group = outf.create_group(groupname)
 
+    raise ValueError("kwds %s" % kwds)
     for k, v in kwds.items():
         group.create_dataset(k, v[0], v[1])
     return group, outf
@@ -162,18 +170,26 @@ def writeDictToHdf5Chunk(fout, odict, start, end, **kwds):
         fout[k_out][start:end] = val
 
 
-def finalizeHdf5Write(fout, groupname=None, **kwds):
+def finalizeHdf5Write(fout, groupname=None, mpiCom=None, **kwds):
     """ Write any last data and closes an hdf5 file
 
     Parameters
     ----------
     fout : `h5py.File`
         The file
+    groupname : `str` or `None`
+        The output group name
+    mpiCom : MPI communicator
+            (default is None) An MPI comm object
 
     Notes
     -----
     The keywords can be used to write additional data
     """
+    # If we are under MPI only do this for rank 0 node 
+    if not getMPIActive(0, mpiCom):
+        return
+
     if groupname is None:  #pragma: no cover
         group = fout
     else:
