@@ -225,7 +225,7 @@ def convertToRecarray(obj):
     if tType == NUMPY_RECARRAY:
         return obj
     if tType == PD_DATAFRAME:
-        return obj.to_records(index=False)
+        return tableToRecarray(dataFrameToTable(obj))
     raise TypeError("Unsupported TableType %i" % tType)  #pragma: no cover
 
 
