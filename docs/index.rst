@@ -13,7 +13,7 @@ be supported down the road if there is a strong desire to do so.
 Tabular data interfaces
 -----------------------
 
-The three most common tabular data interfaces used in the LSST DESC
+The four most common tabular data interfaces used in the LSST DESC
 are:
 
 1. 'astropy tables', specifically `astropy.table.Table`
@@ -21,7 +21,9 @@ are:
 2. 'dictionaries of arrays', specifically `Mapping`, (`str`,
    `numpy.array`)
 
-3. 'pandas dataframes', specifcially `pandas.DataFrame`
+3. 'numpy record arrays`, specifically `numpy.recarray`
+ 
+4. 'pandas dataframes', specifcially `pandas.DataFrame`
 
 
 
@@ -32,14 +34,26 @@ The three most common file formats for used to store tables in the
 LSST DESC are, 'FITS', 'HDF5' and 'parquet'.  However, because of the
 flexbility provided by 'HDF5', there are different 'HDF5' structures
 that are used for storing tables.   In all this leaves us with
-effectively 5 different file formats
+effectively 5 and a half different file formats
 
 1. 'FITS', used to store astropy tables, e.g., as produced by:
 
 .. code-block:: python
 
-    hdulist.writeto('out.fits')
+    out_list = [fits.PrimaryHDU()]
+    out_list.append(fits.table_to_hdu(table))
+    fits.HDUList(out_list).writeto('out.fits')
 
+
+    or as used to store numpy record arrays, e.g., as produced by:
+
+.. code-block:: python
+
+    out_list = [fits.PrimaryHDU()]
+    out_list.append(fits.BinTableHDU.from_columns(rec.columns))
+    fits.HDUList(out_list).writeto('out.fits')
+   
+    
 2. 'HDF5', as used to store astopy tables, e.g., as produced by:
 
 .. code-block:: python
