@@ -86,6 +86,12 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
         self._do_loopback_single(types.AP_TABLE, 'test_out_single', 'fits')
         self._do_iterator('test_out_single.fits', types.AP_TABLE, True)
 
+    def testRecarrayLoopback(self):
+        """ Test writing / reading to FITS """
+        self._do_loopback(types.NUMPY_RECARRAY, 'test_out', 'fit')
+        self._do_loopback_single(types.NUMPY_RECARRAY, 'test_out_single', 'fit')
+        self._do_iterator('test_out_single.fit', types.NUMPY_RECARRAY, True)
+
     def testHf5Loopback(self):
         """ Test writing / reading astropy tables to HDF5 """
         self._do_loopback(types.AP_TABLE, 'test_out', 'hf5')
