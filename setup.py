@@ -25,6 +25,6 @@ setup(
                       "h5py",
                       "pandas",
                       "pyarrow",
-                      "tables",
+                      #"tables",
                       "setuptools_scm"]
 )

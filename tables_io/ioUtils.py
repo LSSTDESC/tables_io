@@ -17,7 +17,7 @@ from .types import ASTROPY_FITS, ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PANDAS_P
 
 from .convUtils import dataFrameToDict, hdf5GroupToDict, convert
 
-from .mpUtils import getMPIActive
+from .mpUtils import getMPIActive, getH5FileMPIKwargs
 
 
 ### I. Iteration functions
