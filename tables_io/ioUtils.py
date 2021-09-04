@@ -274,7 +274,7 @@ def iterPqToDataFrame(filepath):
 
 ### II A.  Reading and Writing `astropy.table.Table` to/from FITS files
 
-def writeTablesToFits(tables, filepath, **kwargs):
+def writeApTablesToFits(tables, filepath, **kwargs):
     """
     Writes a dictionary of `astropy.table.Table` to a single FITS file
 
@@ -297,7 +297,7 @@ def writeTablesToFits(tables, filepath, **kwargs):
     hdu_list.writeto(filepath, **kwargs)
 
 
-def readFitsToTables(filepath):
+def readFitsToApTables(filepath):
     """
     Reads `astropy.table.Table` objects from a FITS file.
 
@@ -365,7 +365,7 @@ def readFitsToRecarrays(filepath):
 
 ### II B.  Reading and Writing `astropy.table.Table` to/from `hdf5`
 
-def writeTablesToHdf5(tables, filepath, **kwargs):
+def writeApTablesToHdf5(tables, filepath, **kwargs):
     """
     Writes a dictionary of `astropy.table.Table` to a single hdf5 file
 
@@ -386,7 +386,7 @@ def writeTablesToHdf5(tables, filepath, **kwargs):
         v.write(filepath, path=k, append=True, format='hdf5', **kwargs)
 
 
-def readHdf5ToTables(filepath):
+def readHdf5ToApTables(filepath):
     """
     Reads `astropy.table.Table` objects from an hdf5 file.
 
@@ -750,9 +750,9 @@ def readNative(filepath, fmt=None, keys=None):
     """
     fType = fileType(filepath, fmt)
     if fType == ASTROPY_FITS:
-        return readFitsToTables(filepath)
+        return readFitsToApTables(filepath)
     if fType == ASTROPY_HDF5:
-        return readHdf5ToTables(filepath)
+        return readHdf5ToApTables(filepath)
     if fType == NUMPY_HDF5:
         return readHdf5ToDicts(filepath)
     if fType == NUMPY_FITS:
@@ -888,7 +888,7 @@ def writeNative(odict, basename):
         pass
 
     if fType == ASTROPY_HDF5:
-        writeTablesToHdf5(odict, filepath)
+        writeApTablesToHdf5(odict, filepath)
         return filepath
     if fType == NUMPY_HDF5:
         writeDictsToHdf5(odict, filepath)
@@ -942,7 +942,7 @@ def write(obj, basename, fmt=None):
     if fType == ASTROPY_FITS:
         forcedOdict = convert(odict, AP_TABLE)
         filepath = "%s.fits" % basename
-        writeTablesToFits(forcedOdict, filepath)
+        writeApTablesToFits(forcedOdict, filepath)
         return filepath
     if fType == PANDAS_HDF5:
         forcedOdict = convert(odict, PD_DATAFRAME)
