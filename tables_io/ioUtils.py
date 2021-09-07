@@ -10,7 +10,7 @@ from .lazy_modules import HAS_TABLES, HAS_HDF5
 
 from .arrayUtils import getGroupInputDataLength
 
-from .types import ASTROPY_FITS, ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PANDAS_PARQUET,\
+from .types import ASTROPY_FITS, ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_HDF5, PANDAS_PARQUET,\
      NATIVE_FORMAT, FILE_FORMAT_SUFFIXS, FILE_FORMAT_SUFFIX_MAP, DEFAULT_TABLE_KEY,\
      NATIVE_TABLE_TYPE, AP_TABLE, PD_DATAFRAME,\
      fileType, tableType, istablelike, istabledictlike
@@ -274,7 +274,7 @@ def iterPqToDataFrame(filepath):
 
 ### II A.  Reading and Writing `astropy.table.Table` to/from FITS files
 
-def writeTablesToFits(tables, filepath, **kwargs):
+def writeApTablesToFits(tables, filepath, **kwargs):
     """
     Writes a dictionary of `astropy.table.Table` to a single FITS file
 
@@ -297,7 +297,7 @@ def writeTablesToFits(tables, filepath, **kwargs):
     hdu_list.writeto(filepath, **kwargs)
 
 
-def readFitsToTables(filepath):
+def readFitsToApTables(filepath):
     """
     Reads `astropy.table.Table` objects from a FITS file.
 
@@ -318,9 +318,54 @@ def readFitsToTables(filepath):
     return tables
 
 
+### II A'.  Reading and Writing `` to/from FITS files
+
+def writeRecarraysToFits(recarrays, filepath, **kwargs):
+    """
+    Writes a dictionary of `np.recarray` to a single FITS file
+
+    Parameters
+    ----------
+    recarrays  : `dict` of `np.recarray`
+        Keys will be HDU names, values will be tables
+
+    filepath: `str`
+        Path to output file
+
+    kwargs are passed to `astropy.io.fits.writeto` call.
+    """
+    out_list = [fits.PrimaryHDU()]
+    for k, v in recarrays.items():
+        hdu = fits.BinTableHDU.from_columns(v.columns)
+        hdu.name = k
+        out_list.append(hdu)
+    hdu_list = fits.HDUList(out_list)
+    hdu_list.writeto(filepath, **kwargs)
+
+
+def readFitsToRecarrays(filepath):
+    """
+    Reads `np.recarray` objects from a FITS file.
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    Returns
+    -------
+    tables : `OrderedDict` of `np.recarray`
+        Keys will be HDU names, values will be tables
+    """
+    fin = fits.open(filepath)
+    tables = OrderedDict()
+    for hdu in fin[1:]:
+        tables[hdu.name.lower()] = hdu.data
+    return tables
+
 ### II B.  Reading and Writing `astropy.table.Table` to/from `hdf5`
 
-def writeTablesToHdf5(tables, filepath, **kwargs):
+def writeApTablesToHdf5(tables, filepath, **kwargs):
     """
     Writes a dictionary of `astropy.table.Table` to a single hdf5 file
 
@@ -341,7 +386,7 @@ def writeTablesToHdf5(tables, filepath, **kwargs):
         v.write(filepath, path=k, append=True, format='hdf5', **kwargs)
 
 
-def readHdf5ToTables(filepath):
+def readHdf5ToApTables(filepath):
     """
     Reads `astropy.table.Table` objects from an hdf5 file.
 
@@ -705,11 +750,13 @@ def readNative(filepath, fmt=None, keys=None):
     """
     fType = fileType(filepath, fmt)
     if fType == ASTROPY_FITS:
-        return readFitsToTables(filepath)
+        return readFitsToApTables(filepath)
     if fType == ASTROPY_HDF5:
-        return readHdf5ToTables(filepath)
+        return readHdf5ToApTables(filepath)
     if fType == NUMPY_HDF5:
         return readHdf5ToDicts(filepath)
+    if fType == NUMPY_FITS:
+        return readFitsToRecarrays(filepath)
     if fType == PANDAS_HDF5:
         return readH5ToDataFrames(filepath)
     if fType == PANDAS_PARQUET:
@@ -841,10 +888,13 @@ def writeNative(odict, basename):
         pass
 
     if fType == ASTROPY_HDF5:
-        writeTablesToHdf5(odict, filepath)
+        writeApTablesToHdf5(odict, filepath)
         return filepath
     if fType == NUMPY_HDF5:
         writeDictsToHdf5(odict, filepath)
+        return filepath
+    if fType == NUMPY_FITS:
+        writeRecarraysToFits(odict, filepath)
         return filepath
     if fType == PANDAS_PARQUET:
         writeDataFramesToPq(odict, basename)
@@ -880,7 +930,7 @@ def write(obj, basename, fmt=None):
     else:
         raise TypeError("Can not write object of type %s" % type(obj))
 
-    if fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_PARQUET]:
+    if fType in [ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_PARQUET]:
         try:
             nativeTType = NATIVE_TABLE_TYPE[fType]
         except KeyError as msg:  #pragma: no cover
@@ -892,7 +942,7 @@ def write(obj, basename, fmt=None):
     if fType == ASTROPY_FITS:
         forcedOdict = convert(odict, AP_TABLE)
         filepath = "%s.fits" % basename
-        writeTablesToFits(forcedOdict, filepath)
+        writeApTablesToFits(forcedOdict, filepath)
         return filepath
     if fType == PANDAS_HDF5:
         forcedOdict = convert(odict, PD_DATAFRAME)

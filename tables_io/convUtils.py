@@ -4,19 +4,19 @@ from collections import OrderedDict
 
 import numpy as np
 
-from .lazy_modules import pd, apTable
+from .lazy_modules import pd, apTable, fits
 from .lazy_modules import HAS_ASTROPY, HAS_PANDAS
 
 from .arrayUtils import forceToPandables
 
-from .types import AP_TABLE, NUMPY_DICT, PD_DATAFRAME, tableType, istablelike
+from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, tableType, istablelike
 
 
 ### I. Single `Tablelike` conversions
 
 ### I A. Converting to `astropy.table.Table`
 
-def dataFrameToTable(df):
+def dataFrameToApTable(df):
     """
     Convert a `pandas.DataFrame` to an `astropy.table.Table`
 
@@ -46,7 +46,7 @@ def dataFrameToTable(df):
     return tab
 
 
-def convertTable(obj):
+def convertToApTable(obj):
     """
     Convert an object to an `astropy.table.Table`
 
@@ -65,15 +65,18 @@ def convertTable(obj):
         return obj
     if tType == NUMPY_DICT:
         return apTable.Table(obj)
+    if tType == NUMPY_RECARRAY:
+        return apTable.Table(obj)
     if tType == PD_DATAFRAME:
-        return dataFrameToTable(obj)
+        # try this: apTable.from_pandas(obj)
+        return dataFrameToApTable(obj)
     raise TypeError("Unsupported TableType %i" % tType)  #pragma: no cover
 
 
 
 ### I B. Converting to `OrderedDict`, (`str`, `numpy.array`)
 
-def tableToDict(tab):
+def apTableToDict(tab):
     """
     Convert an `astropy.table.Table` to an `OrderedDict` of `str` : `numpy.array`
 
@@ -91,6 +94,23 @@ def tableToDict(tab):
     for key, val in zip(tab.colnames, tab.itercols()):
         data[key] = np.array(val)
     return data
+
+
+def recarrayToDict(rec):
+    """
+    Convert an `np.recarray` to an `OrderedDict` of `str` : `numpy.array`
+
+    Parameters
+    ----------
+    rec :  `np.recarray`
+        The input recarray
+
+    Returnes
+    --------
+    data : `OrderedDict`,  (`str` : `numpy.array`)
+        The tabledata
+    """
+    return OrderedDict([(colName, rec[colName]) for colName in rec.dtype.names])
 
 
 def dataFrameToDict(df):
@@ -137,7 +157,7 @@ def hdf5GroupToDict(hg):
     return data
 
 
-def convertDict(obj):
+def convertToDict(obj):
     """
     Convert an object to an `OrderedDict`, (`str`, `numpy.array`)
 
@@ -153,18 +173,66 @@ def convertDict(obj):
     """
     tType = tableType(obj)
     if tType == AP_TABLE:
-        return tableToDict(obj)
+        return apTableToDict(obj)
     if tType == NUMPY_DICT:
         return obj
+    if tType == NUMPY_RECARRAY:
+        return recarrayToDict(obj)
     if tType == PD_DATAFRAME:
         return dataFrameToDict(obj)
     raise TypeError("Unsupported TableType %i" % tType)  #pragma: no cover
 
 
 
-### I C. Converting to `pandas.DataFrame`
+### I C. Converting to `np.recarray`
 
-def tableToDataFrame(tab):
+def apTableToRecarray(tab):
+    """
+    Convert an `astropy.table.Table` to an `numpy.recarray`
+
+    Parameters
+    ----------
+    tab :  `astropy.table.Table`
+        The table
+
+    Returnes
+    --------
+    rec : `numpy.recarray`
+        The output rec array
+    """
+    return fits.table_to_hdu(tab).data
+
+
+def convertToRecarray(obj):
+    """
+    Convert an object to an `numpy.recarray`
+
+    Parameters
+    ----------
+    obj : `object`
+       The object being converted
+
+    Returns
+    -------
+    rec : `numpy.recarray`
+        The output recarray
+    """
+    tType = tableType(obj)
+    if tType == AP_TABLE:
+        return apTableToRecarray(obj)
+    if tType == NUMPY_DICT:
+        return apTableToRecarray(apTable.Table(obj))
+    if tType == NUMPY_RECARRAY:
+        return obj
+    if tType == PD_DATAFRAME:
+        return apTableToRecarray(dataFrameToApTable(obj))
+    raise TypeError("Unsupported TableType %i" % tType)  #pragma: no cover
+
+
+
+### I D. Converting to `pandas.DataFrame`
+
+def apTableToDataFrame(tab):
     """
     Convert an `astropy.table.Table` to a `pandas.DataFrame`
 
@@ -218,7 +286,7 @@ def dictToDataFrame(odict, meta=None):
     return df
 
 
-def convertDataFrame(obj):
+def convertToDataFrame(obj):
     """
     Convert an object to a `pandas.DataFrame`
 
@@ -234,15 +302,18 @@ def convertDataFrame(obj):
     """
     tType = tableType(obj)
     if tType == AP_TABLE:
-        return tableToDataFrame(obj)
+        return apTableToDataFrame(obj)
     if tType == NUMPY_DICT:
         return dictToDataFrame(obj)
+    if tType == NUMPY_RECARRAY:
+        odict = recarrayToDict(obj)
+        return dictToDataFrame(odict)
     if tType == PD_DATAFRAME:
         return obj
     raise TypeError("Unsupported tableType %i" % tType)  #pragma: no cover
 
 
-# I D. Generic `convert`
+# I E. Generic `convert`
 
 def convertObj(obj, tType):
     """
@@ -261,18 +332,20 @@ def convertObj(obj, tType):
         The converted object
     """
     if tType == AP_TABLE:
-        return convertTable(obj)
+        return convertToApTable(obj)
     if tType == NUMPY_DICT:
-        return convertDict(obj)
+        return convertToDict(obj)
+    if tType == NUMPY_RECARRAY:
+        return convertToRecarray(obj)
     if tType == PD_DATAFRAME:
-        return convertDataFrame(obj)
+        return convertToDataFrame(obj)
     raise TypeError("Unsupported tableType %i" % tType)  #pragma: no cover
 
 
 
 ### II.  Multi-table conversion utilities
 
-def convertTables(odict):
+def convertToApTables(odict):
     """
     Convert several `objects` to `astropy.table.Table`
 
@@ -286,10 +359,10 @@ def convertTables(odict):
     tabs : `OrderedDict` of `astropy.table.Table`
         The tables
     """
-    return OrderedDict([(k, convertTable(v)) for k, v in odict.items()])
+    return OrderedDict([(k, convertToApTable(v)) for k, v in odict.items()])
 
 
-def convertDicts(odict):
+def convertToDicts(odict):
     """
     Convert several `objects` to `OrderedDict`, (`str`, `numpy.array`)
 
@@ -303,10 +376,27 @@ def convertDicts(odict):
     tabs : `OrderedDict` of `OrderedDict`, (`str`, `numpy.array`)
         The tables
     """
-    return OrderedDict([(k, convertDict(v)) for k, v in odict.items()])
+    return OrderedDict([(k, convertToDict(v)) for k, v in odict.items()])
 
 
-def convertDataFrames(odict):
+def convertToRecarrays(odict):
+    """
+    Convert several `objects` to `np.recarray`
+
+    Parameters
+    ----------
+    odict :  `Mapping`, (`str`, `Tablelike`)
+        The input objects
+
+    Returns
+    -------
+    tabs : `OrderedDict` of `np.recarray`
+        The tables
+    """
+    return OrderedDict([(k, convertToRecarray(v)) for k, v in odict.items()])
+
+
+def convertToDataFrames(odict):
     """
     Convert several `objects` to `pandas.DataFrame`
 
@@ -320,7 +410,7 @@ def convertDataFrames(odict):
     df :  `OrderedDict` of `pandas.DataFrame`
         The dataframes
     """
-    return OrderedDict([(k, convertDataFrame(v)) for k, v in odict.items()])
+    return OrderedDict([(k, convertToDataFrame(v)) for k, v in odict.items()])
 
 
 def convert(obj, tType):
@@ -343,9 +433,10 @@ def convert(obj, tType):
     if istablelike(obj):
         return convertObj(obj, tType)
 
-    funcMap = {AP_TABLE:convertTables,
-               NUMPY_DICT:convertDicts,
-               PD_DATAFRAME:convertDataFrames}
+    funcMap = {AP_TABLE:convertToApTables,
+               NUMPY_DICT:convertToDicts,
+               NUMPY_RECARRAY:convertToRecarrays,
+               PD_DATAFRAME:convertToDataFrames}
     try:
         theFunc = funcMap[tType]
     except KeyError as msg:  #pragma: no cover

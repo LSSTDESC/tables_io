@@ -3,11 +3,24 @@
 Installing tables_io
 ====================
 
-For now the only installation type that is support is installing from source.   Since `tables_io` is all python code, this is pretty easy.
+At this point you can install `tables_io` with `pip` or from source.
+
+
+Installing with pip
+-------------------
+
+This is pretty trivial.
+
+.. code-block:: bash
+
+    pip install tables_io
+
 
 
 Installing from source
 -----------------------
+
+Since `tables_io` is all python code, this is pretty easy.
 
 .. code-block:: bash
 

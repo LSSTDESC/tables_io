@@ -33,17 +33,26 @@ class ConvTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attri
     def testAstropyLoopback(self):
         """ Test writing / reading astropy tables to HDF5 """
         self._do_loopback(types.AP_TABLE, types.NUMPY_DICT)
+        self._do_loopback(types.AP_TABLE, types.NUMPY_RECARRAY)
         self._do_loopback(types.AP_TABLE, types.PD_DATAFRAME)
 
     def testNumpyLoopback(self):
         """ Test writing / reading numpy arrays to HDF5 """
         self._do_loopback(types.NUMPY_DICT, types.AP_TABLE)
+        self._do_loopback(types.NUMPY_DICT, types.NUMPY_RECARRAY)
         self._do_loopback(types.NUMPY_DICT, types.PD_DATAFRAME)
+
+    def testRecarrayLoopback(self):
+        """ Test writing / reading numpy arrays to HDF5 """
+        self._do_loopback(types.NUMPY_RECARRAY, types.NUMPY_DICT)
+        self._do_loopback(types.NUMPY_RECARRAY, types.AP_TABLE)
+        self._do_loopback(types.NUMPY_RECARRAY, types.PD_DATAFRAME)
 
     def testPandasLoopback(self):
         """ Test writing / reading pandas dataframes to HDF5 """
         self._do_loopback(types.PD_DATAFRAME, types.AP_TABLE)
         self._do_loopback(types.PD_DATAFRAME, types.NUMPY_DICT)
+        self._do_loopback(types.PD_DATAFRAME, types.NUMPY_RECARRAY)
 
 
 if __name__ == '__main__':
