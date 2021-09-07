@@ -110,11 +110,8 @@ def tableType(obj):
 
     nRow = None
     for key, val in obj.items():
-        if isinstance(val, (Mapping, apTable.Table, pd.DataFrame)):
-            raise TypeError("Column %s of type Mapping %s" %
-                            (key, type(val)))
-        if isinstance(val, (np.recarray)):
-            raise TypeError("Column %s of type np.recarray %s" %
+        if istablelike(val):
+            raise TypeError("Column %s is a table of type %s" %
                             (key, type(val)))
         if not isinstance(val, Iterable):  #pragma: no cover
             raise TypeError("Column %s of type %s is not iterable" %
