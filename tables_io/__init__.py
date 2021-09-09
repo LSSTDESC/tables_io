@@ -11,6 +11,8 @@ from . import types
 
 from . import arrayUtils
 
+from . import tablePlus
+
 from . import convUtils as conv
 
 from . import ioUtils as io
