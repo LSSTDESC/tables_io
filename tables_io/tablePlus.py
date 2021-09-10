@@ -4,6 +4,12 @@ import numpy as np
 from tables_io import types
 
 def _custom_dir(c, add):
+    '''
+    dir should return
+       * functions defined for c's class
+       * instance variables belonging to c
+       * public stuff from the contained object (some table-like thing)
+    '''
     return dir(type(c)) + list(c.__dict__.keys()) + add
 
 class DelegateBase(object):
@@ -73,13 +79,13 @@ class TablePlus(DelegateBase):
 
     def getColumnNames(self):
         # Return a set of column names belonging to the underlying table
-        if self.tableType == types.NUMPY_DICT:
+        if self._tableType == types.NUMPY_DICT:
             return set(self._tbl.keys())
-        if self.tableType == types.NUMPY_RECARRAY:
+        if self._tableType == types.NUMPY_RECARRAY:
             return set(self._tbl.dtype.fields.keys())
-        if self.tableType == PD_DATAFRAME:
+        if self._tableType == types.PD_DATAFRAME:
             return set(self._tbl.columns)
-        if self.tableType == AP_TABLE:
+        if self._tableType == types.AP_TABLE:
             return set(self._tbl.colnames)
 
     def addColumnMeta(self, columnName, d):
