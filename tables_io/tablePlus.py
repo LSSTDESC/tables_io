@@ -6,12 +6,11 @@ from tables_io import types
 def _custom_dir(c, add):
     return dir(type(c)) + list(c.__dict__.keys()) + add
 
-class MetadataBase(object):
+class DelegateBase(object):
     '''
-    This class
-    1.  Includes utilities for handling metadata
-    2.  Allows derived classes to delegate table operations to a
-        standard table of one of the supported types
+    This class allows derived classes to delegate operations to a
+    member.   Here it is used to delegate table operations to
+    a table-like member
     '''
 
     @property
@@ -21,33 +20,14 @@ class MetadataBase(object):
     def __getattr__(self, k):
         if k in self._delegate:
             return getattr(self.default, k)
-        if k in self._metadataAttributes:
-            return getattr(self, k)
         raise AttributeError(k)
     def __dir__(self):
         return _custom_dir(self, self._delegate)
 
-    def _checkColumnMeta(self, d):
-        # Check that each value key is a simple type
-        for v in d.items():
-            if not isinstance(v, (int, float, str, bool)):
-                raise ValueException(f'Value {v} is not of simple type')
-    def addColumnMeta(self, columnName, d):
-        self._checkColumnMeta(d)
-        if columnName in self._columnMeta:
-            self._columnMeta[columnName].update(d)
-        else:
-            self._columnMeta[columnName] = d
+    def __init__(self):
+        pass
 
-    def getColumnMeta(self, columnName):
-        return self._columnMeta.get(columnName)
-
-    def __init__(self, columnMeta={}, tableMeta={}):
-        self._columnMeta = columnMeta
-        self._tableMeta = tableMeta
-        self._metadataAttributes = [self.addColumnMeta, self.getColumnMeta]
-
-class TablePlus(MetadataBase):
+class TablePlus(DelegateBase):
     def __init__(self, tbl, name):
         '''
         Parameters
@@ -57,6 +37,9 @@ class TablePlus(MetadataBase):
         '''
         # If tbl is not appropriate, following will raise an exception
         self._tableType = types.tableType(tbl)
+
+        self._columnMeta = {}   # columnMeta
+        self._tableMeta = {}    # tableMeta
 
         self._name = name
         self._tbl = tbl
@@ -80,6 +63,36 @@ class TablePlus(MetadataBase):
         # Native table methods called on this object will be delegated
         # to the table
         self.default = tbl
+
+    def _checkColumnMeta(d):
+        # Check that each value key is a simple type
+        for v in d.items():
+            if not isinstance(v, (int, float, str, bool)):
+                raise ValueException(f'Value {v} is not of simple type')
+
+
+    def getColumnNames(self):
+        # Return a set of column names belonging to the underlying table
+        if self.tableType == types.NUMPY_DICT:
+            return set(self._tbl.keys())
+        if self.tableType == types.NUMPY_RECARRAY:
+            return set(self._tbl.dtype.fields.keys())
+        if self.tableType == PD_DATAFRAME:
+            return set(self._tbl.columns)
+        if self.tableType == AP_TABLE:
+            return set(self._tbl.colnames)
+
+    def addColumnMeta(self, columnName, d):
+        if not set(d.keys()).issubset(self.getColumnNames()):
+            raise ValueException('Cannot add metadata for non-existent column')
+        _checkColumnMeta(d)
+        if columnName in self._columnMeta:
+            self._columnMeta[columnName].update(d)
+        else:
+            self._columnMeta[columnName] = d
+
+    def getColumnMeta(self, columnName):
+        return self._columnMeta.get(columnName)
 
     def someFunc(self):
         print('Hello from TablePlus.someFunc')
