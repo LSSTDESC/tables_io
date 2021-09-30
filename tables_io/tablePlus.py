@@ -1,7 +1,13 @@
-import pandas as pd
+from collections import OrderedDict
+from copy import deepcopy
+
 import numpy as np
 
-from tables_io import types
+from .lazy_modules import apTable, pd
+
+from tables_io import types, convUtils
+
+# Map (ttypeFrom, ttypeTo) to conversion routine
 
 def _custom_dir(c, add):
     '''
@@ -12,7 +18,7 @@ def _custom_dir(c, add):
     '''
     return dir(type(c)) + list(c.__dict__.keys()) + add
 
-class DelegateBase(object):
+class DelegatorBase(object):
     '''
     This class allows derived classes to delegate operations to a
     member.   Here it is used to delegate table operations to
@@ -33,8 +39,11 @@ class DelegateBase(object):
     def __init__(self):
         pass
 
-class TablePlus(DelegateBase):
-    def __init__(self, tbl, name):
+class TablePlus(DelegatorBase):
+    _apReadonly = ['dtype', 'name']
+    _apPredefined = ['unit', 'format', 'description']
+
+    def __init__(self, tbl, name=None):
         '''
         Parameters
         ----------
@@ -44,8 +53,12 @@ class TablePlus(DelegateBase):
         # If tbl is not appropriate, following will raise an exception
         self._tableType = types.tableType(tbl)
 
-        self._columnMeta = {}   # columnMeta
-        self._tableMeta = {}    # tableMeta
+        if self._tableType == types.AP_TABLE:
+            self._columnMeta = None
+            self._tableMeta = None
+        else:
+            self._columnMeta = {}   # columnMeta
+            self._tableMeta = {}    # tableMeta
 
         self._name = name
         self._tbl = tbl
@@ -56,26 +69,58 @@ class TablePlus(DelegateBase):
         def tableType(self):
             return self._tableType
 
-        # Should the name be kept here or in MetadataPlus?
         @property
         def tableName(self):
             return self._name
 
-        # Not sure this one is a good idea
-        @property
-        def rawTable(self):
-            return self._tbl
+        # Not sure this one is a good idea. Or necessary
+        ##@property
+        ##def rawTable(self):
+        ##    return self._tbl
 
         # Native table methods called on this object will be delegated
         # to the table
         self.default = tbl
 
+    # Cannot delegate special methods; must override explicitly
+    def __getitem__(self, k):
+        return self._tbl.__getitem__(k)
+
     def _checkColumnMeta(d):
-        # Check that each value key is a simple type
+        '''
+        Check that each value key is a simple type
+        '''
         for v in d.items():
             if not isinstance(v, (int, float, str, bool)):
                 raise ValueException(f'Value {v} is not of simple type')
 
+    def _syncColumnMeta():
+        '''
+        See if all column metadata is associated with an actual column.
+        If not, delete entries for non-columns
+        Returns:
+        True if all column metadata is ok
+        False if deletions were needed to sync
+        '''
+
+        if self._tableType == types.AP_TABLE:    # nothing to do
+            return True
+
+        metaColumns = list(self._columnMeta.keys())
+        actualColumns = self.getColumnNames()
+
+        sync = True
+        for m in metaColumns:
+            if m not in actualColumns:
+                sync = False
+                del self._columnMeta[m]
+        return sync
+
+    def _validateTableMeta(self, meta):
+        # Check that meta is convertible to something which can be
+        # written to yaml or json; say require it to be dict or list
+        # If not raise an exception
+        pass
 
     def getColumnNames(self):
         # Return a set of column names belonging to the underlying table
@@ -89,20 +134,94 @@ class TablePlus(DelegateBase):
             return set(self._tbl.colnames)
 
     def addColumnMeta(self, columnName, d):
-        if not set(d.keys()).issubset(self.getColumnNames()):
+        '''
+        Add or update metadata (key,value pairs) for a column
+        Parameters
+        ----------
+        columnName     A column in the table
+        d              Dict-like where keys and values are of simple types
+        '''
+        if not columnName in self.getColumnNames():
             raise ValueException('Cannot add metadata for non-existent column')
         _checkColumnMeta(d)
+
+        # For astropy use native mechanism
+        # Built-in attributes are name, unit, dtype, description, format
+        # and meta (ordered dict).   Treat name and dtype as read-only.
+        if self._tableType == types.AP_TABLE:
+            dCopy = deepcopy(d)
+            for k in _apReadonly:
+                if k in dCopy:
+                    raise ValueError(
+                        f'addColumnMeta: Changing value of {k} not allowed')
+            for k in _apPredefined:
+                if k in dCopy:
+                    self.setattr(k, d[k])
+                    del dCopy[k]
+            self.meta.update(dCopy)
+            return
+
         if columnName in self._columnMeta:
             self._columnMeta[columnName].update(d)
         else:
             self._columnMeta[columnName] = d
 
     def getColumnMeta(self, columnName):
+        if self._tableType == types.AP_TABLE:
+            c = self[columnName]
+            d = deepcopy(c.meta)
+            for k in _apPredefined:
+                d[k] = c.getattr(k)
+            return d
+
         return self._columnMeta.get(columnName)
 
-    def someFunc(self):
-        print('Hello from TablePlus.someFunc')
+    def getTableMeta(self):
+        if self._tableType == types.AP_TABLE:
+            return self.meta
+        return self._tableMeta
 
-    # Cannot delegate special methods; must override explicitly
-    def __getitem__(self, k):
-        return self._tbl.__getitem__(k)
+    def setTableMeta(self, meta):
+        '''
+        Stash the meta.  If there already was a reference table metadata
+        it will be overwritten
+        '''
+        self._validateTableMeta(meta)
+        if self._tableType == types.AP_TABLE:
+            self.meta = meta
+        else:
+            self._tableMeta = meta
+        return
+
+    def convertTo(self, tType):
+        '''
+        Convert a table-with-metadata of one type to another.
+        Use convUtils to convert the table itself. Metadata only
+        needs conversion if from- to to-type is AP_TABLE
+        '''
+        if ttype == self._tableType: return
+
+        tabPlus = TablePlus(convertObj(self, tType))
+        print(type(self._columnMeta))
+
+        # Converting to AP_TABLE
+        if tType == types.AP_TABLE:
+            tabPlus._tbl.meta = self._tableMeta
+            for c,d in self._columnMeta.items():
+                tabPlus.addColumnMeta(c, d)
+            return tabPlus
+
+        # Converting from AP_TABLE
+        if self._tableType == types.AP_TABLE:
+            tabPlus._tableMeta == self._tbl.meta
+            for c in self.getColumnNames():
+                d = self._tbl[c].meta
+                for k in _apPredefined:
+                    d[k] = self._tbl[c].getattr(k)
+                tabPlus._columnMeta[c] = d
+            return tabPlus
+
+        # Otherwise just copy metadata
+        tabPlus._columnMeta = deepcopy(self._columnMeta)
+        tabPlus._tableMeta = deepcopy(self._tableMeta)
+        return tabPlus
