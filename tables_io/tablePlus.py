@@ -86,15 +86,15 @@ class TablePlus(DelegatorBase):
     def __getitem__(self, k):
         return self._tbl.__getitem__(k)
 
-    def _checkColumnMeta(d):
+    def _checkColumnMeta(self, d):
         '''
         Check that each value key is a simple type
         '''
         for v in d.items():
             if not isinstance(v, (int, float, str, bool)):
-                raise ValueException(f'Value {v} is not of simple type')
+                raise ValueError(f'Value {v} is not of simple type')
 
-    def _syncColumnMeta():
+    def _syncColumnMeta(self):
         '''
         See if all column metadata is associated with an actual column.
         If not, delete entries for non-columns
@@ -142,19 +142,19 @@ class TablePlus(DelegatorBase):
         d              Dict-like where keys and values are of simple types
         '''
         if not columnName in self.getColumnNames():
-            raise ValueException('Cannot add metadata for non-existent column')
-        _checkColumnMeta(d)
+            raise ValueError('Cannot add metadata for non-existent column')
+        self._checkColumnMeta(d)
 
         # For astropy use native mechanism
         # Built-in attributes are name, unit, dtype, description, format
         # and meta (ordered dict).   Treat name and dtype as read-only.
         if self._tableType == types.AP_TABLE:
             dCopy = deepcopy(d)
-            for k in _apReadonly:
+            for k in TablePlus._apReadonly:
                 if k in dCopy:
                     raise ValueError(
                         f'addColumnMeta: Changing value of {k} not allowed')
-            for k in _apPredefined:
+            for k in TablePlus._apPredefined:
                 if k in dCopy:
                     self.setattr(k, d[k])
                     del dCopy[k]
@@ -170,7 +170,7 @@ class TablePlus(DelegatorBase):
         if self._tableType == types.AP_TABLE:
             c = self[columnName]
             d = deepcopy(c.meta)
-            for k in _apPredefined:
+            for k in TablePlus._apPredefined:
                 d[k] = c.getattr(k)
             return d
 
@@ -199,9 +199,9 @@ class TablePlus(DelegatorBase):
         Use convUtils to convert the table itself. Metadata only
         needs conversion if from- to to-type is AP_TABLE
         '''
-        if ttype == self._tableType: return
+        if tType == self._tableType: return
 
-        tabPlus = TablePlus(convertObj(self, tType))
+        tabPlus = TablePlus(convUtils.convertObj(self, tType))
         print(type(self._columnMeta))
 
         # Converting to AP_TABLE
@@ -216,7 +216,7 @@ class TablePlus(DelegatorBase):
             tabPlus._tableMeta == self._tbl.meta
             for c in self.getColumnNames():
                 d = self._tbl[c].meta
-                for k in _apPredefined:
+                for k in TablePlus._apPredefined:
                     d[k] = self._tbl[c].getattr(k)
                 tabPlus._columnMeta[c] = d
             return tabPlus
