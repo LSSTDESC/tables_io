@@ -1,3 +1,5 @@
+""" Handle table plus associated metadata"""
+
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -18,7 +20,7 @@ def _custom_dir(c, add):
     '''
     return dir(type(c)) + list(c.__dict__.keys()) + add
 
-class DelegatorBase(object):
+class DelegatorBase:
     '''
     This class allows derived classes to delegate operations to a
     member.   Here it is used to delegate table operations to
@@ -40,6 +42,10 @@ class DelegatorBase(object):
         pass
 
 class TablePlus(DelegatorBase):
+    """
+    Instance of the class represents a table in one of the supported
+    formats plus (optional) associated metadata.
+    """
     _apReadonly = ['dtype', 'name']
     _apPredefined = ['unit', 'format', 'description']
 
@@ -82,11 +88,14 @@ class TablePlus(DelegatorBase):
         # to the table
         self.default = tbl
 
-    # Cannot delegate special methods; must override explicitly
     def __getitem__(self, k):
+        '''
+        Specific override of __getitem__, delegating to table member
+        so that [ ] syntax will be handled properly
+        '''
         return self._tbl.__getitem__(k)
 
-    def _checkColumnMeta(self, d):
+    def _checkColumnMeta(d):
         '''
         Check that each value key is a simple type
         '''
@@ -103,13 +112,13 @@ class TablePlus(DelegatorBase):
         False if deletions were needed to sync
         '''
 
+        sync = True
         if self._tableType == types.AP_TABLE:    # nothing to do
-            return True
+            return sync
 
         metaColumns = list(self._columnMeta.keys())
         actualColumns = self.getColumnNames()
 
-        sync = True
         for m in metaColumns:
             if m not in actualColumns:
                 sync = False
@@ -123,7 +132,9 @@ class TablePlus(DelegatorBase):
         pass
 
     def getColumnNames(self):
-        # Return a set of column names belonging to the underlying table
+        '''
+        Return a set of column names belonging to the underlying table
+        '''
         if self._tableType == types.NUMPY_DICT:
             return set(self._tbl.keys())
         if self._tableType == types.NUMPY_RECARRAY:
@@ -132,6 +143,7 @@ class TablePlus(DelegatorBase):
             return set(self._tbl.columns)
         if self._tableType == types.AP_TABLE:
             return set(self._tbl.colnames)
+        return NotImplementedError('Unsupported native table type')
 
     def addColumnMeta(self, columnName, d):
         '''
@@ -143,7 +155,7 @@ class TablePlus(DelegatorBase):
         '''
         if not columnName in self.getColumnNames():
             raise ValueError('Cannot add metadata for non-existent column')
-        self._checkColumnMeta(d)
+        _checkColumnMeta(d)
 
         # For astropy use native mechanism
         # Built-in attributes are name, unit, dtype, description, format
@@ -167,6 +179,11 @@ class TablePlus(DelegatorBase):
             self._columnMeta[columnName] = d
 
     def getColumnMeta(self, columnName):
+        '''
+        Get metadata associated with a particular column
+        returns:
+        a dict
+        '''
         if self._tableType == types.AP_TABLE:
             c = self[columnName]
             d = deepcopy(c.meta)
@@ -177,8 +194,11 @@ class TablePlus(DelegatorBase):
         return self._columnMeta.get(columnName)
 
     def getTableMeta(self):
+        """
+        Return a dict of table metadata
+        """
         if self._tableType == types.AP_TABLE:
-            return self.meta
+            return self._tbl.meta
         return self._tableMeta
 
     def setTableMeta(self, meta):
@@ -188,10 +208,9 @@ class TablePlus(DelegatorBase):
         '''
         self._validateTableMeta(meta)
         if self._tableType == types.AP_TABLE:
-            self.meta = meta
+            self._tbl.meta = meta
         else:
             self._tableMeta = meta
-        return
 
     def convertTo(self, tType):
         '''
@@ -199,7 +218,8 @@ class TablePlus(DelegatorBase):
         Use convUtils to convert the table itself. Metadata only
         needs conversion if from- to to-type is AP_TABLE
         '''
-        if tType == self._tableType: return
+        if tType == self._tableType:
+            return self
 
         tabPlus = TablePlus(convUtils.convertObj(self, tType))
         print(type(self._columnMeta))
