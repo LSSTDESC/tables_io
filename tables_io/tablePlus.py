@@ -245,7 +245,7 @@ class TablePlus(DelegatorBase):
 
         # Otherwise just copy metadata
         for c in self.getColumnNames():
-            tabPlust.addColumnMeta(c, self.getColumnMeta(c))
+            tabPlus.addColumnMeta(c, self.getColumnMeta(c))
         # Maybe should move the deepcopy inside setTableMeta
         tabPlus.setTableMeta(deepcopy(self._tableMeta))
         return tabPlus
