@@ -155,7 +155,7 @@ class TablePlus(DelegatorBase):
         '''
         if not columnName in self.getColumnNames():
             raise ValueError('Cannot add metadata for non-existent column')
-        _checkColumnMeta(d)
+        TablePlus._checkColumnMeta(d)
 
         # For astropy use native mechanism
         # Built-in attributes are name, unit, dtype, description, format
