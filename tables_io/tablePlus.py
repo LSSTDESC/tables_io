@@ -20,6 +20,14 @@ def _custom_dir(c, add):
     '''
     return dir(type(c)) + list(c.__dict__.keys()) + add
 
+def checkColumnMeta(d):
+    '''
+        Check that each value key is a simple type
+        '''
+    for v in d.items():
+        if not isinstance(v, (int, float, str, bool)):
+            raise ValueError(f'Value {v} is not of simple type')
+
 class DelegatorBase:
     '''
     This class allows derived classes to delegate operations to a
@@ -95,13 +103,6 @@ class TablePlus(DelegatorBase):
         '''
         return self._tbl.__getitem__(k)
 
-    def _checkColumnMeta(d):
-        '''
-        Check that each value key is a simple type
-        '''
-        for v in d.items():
-            if not isinstance(v, (int, float, str, bool)):
-                raise ValueError(f'Value {v} is not of simple type')
 
     def _syncColumnMeta(self):
         '''
@@ -155,7 +156,7 @@ class TablePlus(DelegatorBase):
         '''
         if not columnName in self.getColumnNames():
             raise ValueError('Cannot add metadata for non-existent column')
-        TablePlus._checkColumnMeta(d)
+        checkColumnMeta(d)
 
         # For astropy use native mechanism
         # Built-in attributes are name, unit, dtype, description, format
