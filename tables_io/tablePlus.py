@@ -225,24 +225,27 @@ class TablePlus(DelegatorBase):
         tabPlus = TablePlus(convUtils.convertObj(self, tType))
         print(type(self._columnMeta))
 
+
         # Converting to AP_TABLE
         if tType == types.AP_TABLE:
-            tabPlus._tbl.meta = self._tableMeta
+            tabPlus.setTableMeta(self._tableMeta)
             for c,d in self._columnMeta.items():
                 tabPlus.addColumnMeta(c, d)
             return tabPlus
 
         # Converting from AP_TABLE
         if self._tableType == types.AP_TABLE:
-            tabPlus._tableMeta == self._tbl.meta
+            tabPlus.setTableMeta(self._tbl.meta)
             for c in self.getColumnNames():
                 d = self._tbl[c].meta
                 for k in TablePlus._apPredefined:
                     d[k] = self._tbl[c].getattr(k)
-                tabPlus._columnMeta[c] = d
+                tabPlus.addColumnMeta(c, d)
             return tabPlus
 
         # Otherwise just copy metadata
-        tabPlus._columnMeta = deepcopy(self._columnMeta)
-        tabPlus._tableMeta = deepcopy(self._tableMeta)
+        for c in self.getColumnNames():
+            tabPlust.addColumnMeta(c, self.getColumnMeta(c))
+        # Maybe should move the deepcopy inside setTableMeta
+        tabPlus.setTableMeta(deepcopy(self._tableMeta))
         return tabPlus
