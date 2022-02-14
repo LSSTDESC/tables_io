@@ -2,7 +2,7 @@
 
 import sys
 import importlib.util
-
+import h5py
 
 class DeferredModuleError:
     """ Class to throw an error if you try to use a modules that wasn't loaded """
@@ -53,9 +53,9 @@ def lazyImport(modulename):
 
 
 tables = lazyImport('tables')
-apTable = lazyImport('astropy.table')
+import astropy.table as apTable # lazyImport('astropy.table')
 fits = lazyImport('astropy.io.fits')
-h5py = lazyImport('h5py')
+h5py = h5py
 pd = lazyImport('pandas')
 pq = lazyImport('pyarrow.parquet')
 
