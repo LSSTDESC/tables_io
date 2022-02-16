@@ -29,6 +29,6 @@ readNative = io.readNative
 
 read = io.read
 
-iterateNative = io.iterate
+iteratorNative = io.iteratorNative
 
-iterate = io.iterate
+iterator = io.iterator

@@ -5,7 +5,7 @@ Unit tests for io_layer module
 import os
 
 import unittest
-from tables_io import types, convert, read, write, iterate
+from tables_io import types, convert, read, write, iterator
 from tables_io.testUtils import compare_table_dicts, compare_tables, make_test_data
 from tables_io.lazy_modules import apTable
 
@@ -70,7 +70,7 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
         """ Test the chunk iterator """
         dl = []
         try:
-            for _, _, data in iterate(filepath, tType=tType, **kwargs):
+            for _, _, data in iterator(filepath, tType=tType, **kwargs):
                 dl.append(convert(data, types.AP_TABLE))
             table_iterated = apTable.vstack(dl)
             assert compare_tables(self._table, table_iterated)

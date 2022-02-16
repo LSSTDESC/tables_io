@@ -795,7 +795,7 @@ def read(filepath, tType=None, fmt=None, keys=None):
     return convert(odict, tType)
 
 
-def iterateNative(filepath, fmt=None, **kwargs):
+def iteratorNative(filepath, fmt=None, **kwargs):
     """ Read a file to the corresponding table type and iterate over the file
 
     Parameters
@@ -827,7 +827,7 @@ def iterateNative(filepath, fmt=None, **kwargs):
         raise NotImplementedError("Unsupported FileType for iterateNative %i" % fType) from msg #pragma: no cover
 
 
-def iterate(filepath, tType=None, fmt=None, **kwargs):
+def iterator(filepath, tType=None, fmt=None, **kwargs):
     """ Read a file to the corresponding table type iterate over the file
 
     Parameters
@@ -847,7 +847,7 @@ def iterate(filepath, tType=None, fmt=None, **kwargs):
         The data
 
     """
-    for start, stop, data in iterateNative(filepath, fmt, **kwargs):
+    for start, stop, data in iteratorNative(filepath, fmt, **kwargs):
         yield start, stop, convert(data, tType)
 
 
