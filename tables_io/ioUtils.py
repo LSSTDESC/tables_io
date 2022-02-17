@@ -915,7 +915,12 @@ def write(obj, basename, fmt=None):
         The output file format, If `None` this will use `writeNative`
     """
     if fmt is None:
-        return writeNative(obj, basename)
+        splitpath = os.path.splitext(basename)
+        if len(splitpath) == 1:
+            return writeNative(obj, basename)
+        basename = splitpath[0]
+        fmt = splitpath[1][1:]
+
     try:
         fType = FILE_FORMAT_SUFFIXS[fmt]
     except KeyError as msg:  #pragma: no cover
