@@ -50,7 +50,7 @@ def forceToPandables(arr, check_nrow=None):
     shape = np.shape(arr)
     nrow = shape[0]
     if check_nrow is not None and check_nrow != nrow:
-        raise ValueError("Number of rows does not match: %i != %i" % (nrow, check_nrow))
+        raise ValueError(f"Number of rows does not match: {nrow} != {check_nrow}")
     if ndim == 1:
         return arr
     if ndim == 2:
@@ -90,6 +90,30 @@ def getGroupInputDataLength(hg):
         if len(value) != nrows:
             raise ValueError(f"Group does not represent a table. Length ({len(value)}) of column {value.name} not not match length ({nrows}) of first column {firstname}")
     return nrows
+
+
+def getInitializationForODict(in_dict, nRow_out=None):
+    """ shape of arrays and dtypes in a dictionary.
+    This is useful for initialize hdf5 files
+
+    Parameters
+    ----------
+    in_dict : `dict`
+        The dictionary with the data
+    nRow_out : `int`
+        The number of rows in the output
+
+    Returns
+    -------
+    out_dict : dict (str, tuple(tuple, dtype))
+    """
+    out_dict = {}
+    for key, val in in_dict.items():
+        shape = list(np.shape(val))
+        if nRow_out is not None:
+            shape[0] = nRow_out
+        out_dict[key] = (tuple(shape), val.dtype)
+    return out_dict
 
 
 def printDictShape(in_dict):
@@ -145,7 +169,7 @@ def checkKeys(in_dicts):
     master_keys = in_dicts[0].keys()
     for in_dict in in_dicts[1:]:
         if in_dict.keys() != master_keys:  #pragma: no cover
-            raise ValueError("Keys do not match: %s != %s" % (in_dict.keys(), master_keys))
+            raise ValueError(f"Keys do not match: {list(in_dict.keys())} != {list(master_keys)}")
 
 
 def concatenateDicts(in_dicts):

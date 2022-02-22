@@ -206,9 +206,7 @@ def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None):
     data = OrderedDict()
     for i in range(0, num_rows, chunk_size):
         start = i
-        end = i+chunk_size
-        if end > num_rows:
-            end = num_rows
+        end = min(i+chunk_size, num_rows)
         for key, val in f.items():
             data[key] = readHdf5DatasetToArray(val, start, end)
         yield start, end, data
@@ -477,7 +475,7 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
         try:
             group.create_dataset(key, dtype=val.dtype, data=val.data)
         except Exception as msg:  #pragma: no cover
-            print("Warning failed to convert column %s" % msg)
+            print(f"Warning.  Failed to convert column {str(msg)}")
     fout.close()
 
 
@@ -626,7 +624,7 @@ def writeDataFramesToPq(dataFrames, filepath, **kwargs):
 
     """
     for k, v in dataFrames.items():
-        _ = v.to_parquet("%s%s.pq" % (filepath, k), **kwargs)
+        _ = v.to_parquet(f"{filepath}{k}.pq", **kwargs)
 
 
 def readPqToDataFrames(basepath, keys=None):
@@ -650,7 +648,7 @@ def readPqToDataFrames(basepath, keys=None):
         keys = [""]
     dataframes = OrderedDict()
     for key in keys:
-        dataframes[key] = readPqToDataFrame("%s%s.pq" % (basepath, key))
+        dataframes[key] = readPqToDataFrame(f"{basepath}{key}.pq")
     return dataframes
 
 
@@ -730,6 +728,31 @@ def readHdf5ToDict(filepath, groupname=None):
 
 ### II G.  Top-level interface functions
 
+def io_open(filepath, fmt=None, **kwargs):
+    """ Open a file
+
+    Parameters
+    ----------
+    filepath : `str`
+        File to load
+    fmt : `str` or `None`
+        File format, if `None` it will be taken from the file extension
+
+    Returns
+    -------
+    file
+    """
+    fType = fileType(filepath, fmt)
+    if fType in [ASTROPY_FITS, NUMPY_FITS]:
+        return fits.open(filepath, **kwargs)
+    if fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5]:
+        return h5py.File(filepath, **kwargs)
+    if fType in [PANDAS_PARQUET]:
+        #basepath = os.path.splitext(filepath)[0]
+        return pq.ParquetFile(filepath, **kwargs)
+    raise TypeError(f"Unsupported FileType {fType}")  #pragma: no cover
+
+
 def readNative(filepath, fmt=None, keys=None):
     """ Read a file to the corresponding table type
 
@@ -762,7 +785,7 @@ def readNative(filepath, fmt=None, keys=None):
     if fType == PANDAS_PARQUET:
         basepath = os.path.splitext(filepath)[0]
         return readPqToDataFrames(basepath, keys)
-    raise TypeError("Unsupported FileType %i" % fType)  #pragma: no cover
+    raise TypeError(f"Unsupported FileType {fType}")  #pragma: no cover
 
 
 def read(filepath, tType=None, fmt=None, keys=None):
@@ -824,7 +847,7 @@ def iteratorNative(filepath, fmt=None, **kwargs):
         theFunc = funcDict[fType]
         return theFunc(filepath, **kwargs)
     except KeyError as msg:
-        raise NotImplementedError("Unsupported FileType for iterateNative %i" % fType) from msg #pragma: no cover
+        raise NotImplementedError(f"Unsupported FileType for iterateNative {fType}") from msg #pragma: no cover
 
 
 def iterator(filepath, tType=None, fmt=None, **kwargs):
@@ -870,12 +893,12 @@ def writeNative(odict, basename):
     elif not odict:  #pragma: no cover
         return None
     else:  #pragma: no cover
-        raise TypeError("Can not write object of type %s" % type(odict))
+        raise TypeError(f"Can not write object of type {type(odict)}")
 
     try:
         fType = NATIVE_FORMAT[tType]
     except KeyError as msg:  #pragma: no cover
-        raise KeyError("No native format for table type %i" % tType) from msg
+        raise KeyError(f"No native format for table type {tType}") from msg
     fmt = FILE_FORMAT_SUFFIX_MAP[fType]
     filepath = basename + '.' + fmt
 
@@ -899,7 +922,7 @@ def writeNative(odict, basename):
     if fType == PANDAS_PARQUET:
         writeDataFramesToPq(odict, basename)
         return basename
-    raise TypeError("Unsupported Native file type %i" % fType)  #pragma: no cover
+    raise TypeError(f"Unsupported Native file type {fType}")  #pragma: no cover
 
 
 def write(obj, basename, fmt=None):
@@ -916,7 +939,7 @@ def write(obj, basename, fmt=None):
     """
     if fmt is None:
         splitpath = os.path.splitext(basename)
-        if len(splitpath) == 1:
+        if not splitpath[1]:
             return writeNative(obj, basename)
         basename = splitpath[0]
         fmt = splitpath[1][1:]
@@ -924,7 +947,7 @@ def write(obj, basename, fmt=None):
     try:
         fType = FILE_FORMAT_SUFFIXS[fmt]
     except KeyError as msg:  #pragma: no cover
-        raise KeyError("Unknown file format %s, options are %s" % (fmt, list(FILE_FORMAT_SUFFIXS.keys()))) from msg
+        raise KeyError(f"Unknown file format {fmt}, options are {list(FILE_FORMAT_SUFFIXS.keys())}") from msg
 
     if istablelike(obj):
         odict = OrderedDict([(DEFAULT_TABLE_KEY[fmt], obj)])
@@ -933,26 +956,26 @@ def write(obj, basename, fmt=None):
     elif not obj:
         return None
     else:
-        raise TypeError("Can not write object of type %s" % type(obj))
+        raise TypeError(f"Can not write object of type {type(obj)}")
 
     if fType in [ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_PARQUET]:
         try:
             nativeTType = NATIVE_TABLE_TYPE[fType]
         except KeyError as msg:  #pragma: no cover
-            raise KeyError("Native file type not known for %s" % (fmt)) from msg
+            raise KeyError(f"Native file type not known for {fmt}") from msg
 
         forcedOdict = convert(odict, nativeTType)
         return writeNative(forcedOdict, basename)
 
     if fType == ASTROPY_FITS:
         forcedOdict = convert(odict, AP_TABLE)
-        filepath = "%s.fits" % basename
+        filepath = f"{basename}.fits"
         writeApTablesToFits(forcedOdict, filepath)
         return filepath
     if fType == PANDAS_HDF5:
         forcedOdict = convert(odict, PD_DATAFRAME)
-        filepath = "%s.h5" % basename
+        filepath = f"{basename}.h5"
         writeDataFramesToH5(forcedOdict, filepath)
         return filepath
 
-    raise TypeError("Unsupported File type %i" % fType)  #pragma: no cover
+    raise TypeError(f"Unsupported File type {fType}")  #pragma: no cover

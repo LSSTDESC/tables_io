@@ -2,8 +2,8 @@
 
 try:
     from ._version import version
-except:  #pragma: no cover
-    version = "unknown"
+except:  #pylint: disable=bare-except
+    version = "unknown"  #pragma: no cover
 
 from .lazy_modules import *
 
@@ -28,6 +28,8 @@ write = io.write
 readNative = io.readNative
 
 read = io.read
+
+io_open = io.io_open
 
 iteratorNative = io.iteratorNative
 
