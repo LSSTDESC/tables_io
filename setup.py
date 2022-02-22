@@ -23,7 +23,8 @@ setup(
     install_requires=["numpy>=1.21.0",
                       "astropy",
                       "h5py",
-                      "pandas",
+                      "pandas;python_version>='3.8'",
+                      "pandas<1.4.*;python_version<'3.8'",
                       "pyarrow",
                       "tables",
                       "setuptools_scm"]
