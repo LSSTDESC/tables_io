@@ -105,22 +105,20 @@ def tableType(obj):
     if isinstance(obj, np.recarray):
         return NUMPY_RECARRAY
     if not isinstance(obj, Mapping):
-        raise TypeError("Object of type %s is not one of the supported types %s" %
-                        (type(obj), list(TABULAR_FORMAT_NAMES.keys())))
+        raise TypeError(f"Object of type {type(obj)} is not one of the supported types"
+                        "{list(TABULAR_FORMAT_NAMES.keys())}")
 
     nRow = None
     for key, val in obj.items():
         if istablelike(val):
-            raise TypeError("Column %s is a table of type %s" %
-                            (key, type(val)))
+            raise TypeError(f"Column {key} is a table of type {type(val)}")
         if not isinstance(val, Iterable):  #pragma: no cover
-            raise TypeError("Column %s of type %s is not iterable" %
-                            (key, type(val)))
+            raise TypeError(f"Column {key} of type {type(val)} is not iterable")
         if nRow is None:
             nRow = arrayLength(val)
         else:
             if arrayLength(val) != nRow:
-                raise IndexError("Column %s length %i != %i" % (key, arrayLength(val), nRow)) #pylint: disable=bad-string-format-type
+                raise IndexError(f"Column {key} length {arrayLength(val)} != {nRow}") #pylint: disable=bad-string-format-type
     return NUMPY_DICT
 
 
@@ -190,5 +188,5 @@ def fileType(filepath, fmt=None):
     try:
         return FILE_FORMAT_SUFFIXS[fmt]
     except KeyError as msg:
-        raise KeyError("Unknown file format %s, supported types are %s" %
-                       (fmt, list(FILE_FORMAT_SUFFIXS.keys()))) from msg
+        raise KeyError(f"Unknown file format {fmt}, supported types are"
+                       "{list(FILE_FORMAT_SUFFIXS.keys())}") from msg

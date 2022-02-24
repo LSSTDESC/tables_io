@@ -70,7 +70,7 @@ def convertToApTable(obj):
     if tType == PD_DATAFRAME:
         # try this: apTable.from_pandas(obj)
         return dataFrameToApTable(obj)
-    raise TypeError("Unsupported TableType %i" % tType)  #pragma: no cover
+    raise TypeError(f"Unsupported TableType {tType}")  #pragma: no cover
 
 
 
@@ -180,7 +180,7 @@ def convertToDict(obj):
         return recarrayToDict(obj)
     if tType == PD_DATAFRAME:
         return dataFrameToDict(obj)
-    raise TypeError("Unsupported TableType %i" % tType)  #pragma: no cover
+    raise TypeError(f"Unsupported TableType {tType}")  #pragma: no cover
 
 
 
@@ -226,7 +226,7 @@ def convertToRecarray(obj):
         return obj
     if tType == PD_DATAFRAME:
         return apTableToRecarray(dataFrameToApTable(obj))
-    raise TypeError("Unsupported TableType %i" % tType)  #pragma: no cover
+    raise TypeError(f"Unsupported TableType {tType}")  #pragma: no cover
 
 
 
@@ -310,7 +310,7 @@ def convertToDataFrame(obj):
         return dictToDataFrame(odict)
     if tType == PD_DATAFRAME:
         return obj
-    raise TypeError("Unsupported tableType %i" % tType)  #pragma: no cover
+    raise TypeError(f"Unsupported tableType {tType}")  #pragma: no cover
 
 
 # I E. Generic `convert`
@@ -339,7 +339,7 @@ def convertObj(obj, tType):
         return convertToRecarray(obj)
     if tType == PD_DATAFRAME:
         return convertToDataFrame(obj)
-    raise TypeError("Unsupported tableType %i" % tType)  #pragma: no cover
+    raise TypeError(f"Unsupported tableType {tType}")  #pragma: no cover
 
 
 
@@ -440,5 +440,5 @@ def convert(obj, tType):
     try:
         theFunc = funcMap[tType]
     except KeyError as msg:  #pragma: no cover
-        raise KeyError("Unsupported type %i" % tType) from msg
+        raise KeyError(f"Unsupported type {tType}") from msg
     return theFunc(obj)

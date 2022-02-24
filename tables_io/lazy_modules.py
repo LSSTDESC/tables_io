@@ -2,7 +2,7 @@
 
 import sys
 import importlib.util
-
+import h5py
 
 class DeferredModuleError:
     """ Class to throw an error if you try to use a modules that wasn't loaded """
@@ -16,8 +16,7 @@ class DeferredModuleError:
         return self._moduleName
 
     def __getattr__(self, item):
-        raise ImportError("Module %s was not loaded, so call to %s.%s fails" %
-                          (self.moduleName, self.moduleName, item))
+        raise ImportError(f"Module {self.moduleName} was not loaded, so call to {self.moduleName}.{item} fails")
 
 
 
@@ -39,7 +38,7 @@ def lazyImport(modulename):
     except KeyError:
         spec = importlib.util.find_spec(modulename)
         if spec is None:
-            print("Can't find module %s" % modulename)
+            print(f"Can't find module {modulename}")
             return DeferredModuleError(modulename)
         module = importlib.util.module_from_spec(spec)
         loader = importlib.util.LazyLoader(spec.loader)
@@ -53,9 +52,9 @@ def lazyImport(modulename):
 
 
 tables = lazyImport('tables')
-apTable = lazyImport('astropy.table')
+import astropy.table as apTable # lazyImport('astropy.table')
 fits = lazyImport('astropy.io.fits')
-h5py = lazyImport('h5py')
+h5py = h5py  #pylint: disable=self-assigning-variable
 pd = lazyImport('pandas')
 pq = lazyImport('pyarrow.parquet')
 

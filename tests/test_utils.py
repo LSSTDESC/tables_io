@@ -74,6 +74,23 @@ def test_concatenateDicts():
     assert np.allclose(od['mat'][10:], test_data['mat'])
 
 
+def test_getInit():
+
+    test_data = dict(scalar=np.random.uniform(size=10),
+                     vector=np.random.uniform(size=100).reshape(10, 10),
+                     mat=np.random.uniform(size=1000).reshape(10, 10, 10))
+
+    dd = arrayUtils.getInitializationForODict(test_data)
+    assert dd['scalar'][0] == (10,)
+    assert dd['vector'][0] == (10, 10)
+    assert dd['mat'][0] == (10, 10, 10)
+    dd = arrayUtils.getInitializationForODict(test_data, 12)
+    assert dd['scalar'][0] == (12,)
+    assert dd['vector'][0] == (12, 10)
+    assert dd['mat'][0] == (12, 10, 10)
+    
+    
+
 def test_types():
     """ Test the typing functions"""
     assert not types.istablelike(4)
