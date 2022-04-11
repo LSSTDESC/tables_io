@@ -28,6 +28,5 @@ setup(
                       "pandas;python_version>='3.8'",
                       "pandas<1.4.*;python_version<'3.8'",
                       "pyarrow",
-                      "tables",
-                      "setuptools_scm"]
+                      "tables"]
 )
