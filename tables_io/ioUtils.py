@@ -627,7 +627,7 @@ def writeDataFramesToPq(dataFrames, filepath, **kwargs):
         _ = v.to_parquet(f"{filepath}{k}.pq", **kwargs)
 
 
-def readPqToDataFrames(basepath, keys=None):
+def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False):
     """
     Reads `pandas.DataFrame` objects from an parquet file.
 
@@ -639,6 +639,9 @@ def readPqToDataFrames(basepath, keys=None):
     keys : `list`
         Keys for the input objects.  Used to complete filepaths
 
+    allow_missing_keys: `bool`
+        If False will raise FileNotFoundError if a key is missing
+
     Returns
     -------
     tables : `OrderedDict` of `pandas.DataFrame`
@@ -648,7 +651,12 @@ def readPqToDataFrames(basepath, keys=None):
         keys = [""]
     dataframes = OrderedDict()
     for key in keys:
-        dataframes[key] = readPqToDataFrame(f"{basepath}{key}.pq")
+        try:
+            dataframes[key] = readPqToDataFrame(f"{basepath}{key}.pq")
+        except FileNotFoundError as msg:  #pragma: no cover
+            if allow_missing_keys:
+                continue
+            raise FileNotFoundError from msg
     return dataframes
 
 
@@ -753,7 +761,7 @@ def io_open(filepath, fmt=None, **kwargs):
     raise TypeError(f"Unsupported FileType {fType}")  #pragma: no cover
 
 
-def readNative(filepath, fmt=None, keys=None):
+def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False):
     """ Read a file to the corresponding table type
 
     Parameters
@@ -762,8 +770,10 @@ def readNative(filepath, fmt=None, keys=None):
         File to load
     fmt : `str` or `None`
         File format, if `None` it will be taken from the file extension
-    groupname : `str` or `None`
-        For hdf5 files, the groupname for the data
+    keys : `list` or `None`
+        For parquet files we must specify with keys to read, as each is in its own file
+    allow_missing_keys : `bool`
+        If False will raise FileNotFoundError if a key is missing
 
     Returns
     -------
@@ -784,11 +794,11 @@ def readNative(filepath, fmt=None, keys=None):
         return readH5ToDataFrames(filepath)
     if fType == PANDAS_PARQUET:
         basepath = os.path.splitext(filepath)[0]
-        return readPqToDataFrames(basepath, keys)
+        return readPqToDataFrames(basepath, keys, allow_missing_keys)
     raise TypeError(f"Unsupported FileType {fType}")  #pragma: no cover
 
 
-def read(filepath, tType=None, fmt=None, keys=None):
+def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False):
     """ Read a file to the corresponding table type
 
     Parameters
@@ -799,8 +809,10 @@ def read(filepath, tType=None, fmt=None, keys=None):
         Table type, if `None` this will use `readNative`
     fmt : `str` or `None`
         File format, if `None` it will be taken from the file extension
-    groupname : `str` or `None`
-        For hdf5 files, the groupname for the data
+    keys : `list` or `None`
+        For parquet files we must specify with keys to read, as each is in its own file
+    allow_missing_keys : `bool`
+        If False will raise FileNotFoundError if a key is missing
 
     Returns
     -------
