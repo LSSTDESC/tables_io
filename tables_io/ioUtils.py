@@ -785,7 +785,7 @@ def read(filepath, tType=None, fmt=None, keys=None):
         The data
 
     """
-    odict = readNative(filepath, fmt, keys)
+    odict = readNative(filepath, fmt, keys, allow_missing_keys)
     if len(odict) == 1:
         for defName in ['', None, '__astropy_table__', 'data']:
             if defName in odict:
