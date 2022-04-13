@@ -181,8 +181,52 @@ def finalizeHdf5Write(fout, groupname=None, **kwds):
         group[k] = v
     fout.close()
 
+def split_tasks_by_rank(tasks, parallel_size, rank):
+    """Iterate through a list of items, yielding ones this process is responsible for/
 
-def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None):
+    Tasks are allocated in a round-robin way.
+
+    Parameters
+    ----------
+    tasks: iterable
+        Tasks to split up
+
+    """
+    for i, task in enumerate(tasks):
+        if i % parallel_size == rank:
+            yield task
+
+def data_ranges_by_rank(n_rows, chunk_rows, parallel_size, rank):
+    """Split a number of rows by process.
+
+    Given a total number of rows to read and a chunk size, yield
+    the ranges within them that this process should handle.
+
+    Parameters
+    ----------
+    n_rows: int
+        Total number of rows to split up
+
+    chunk_rows: int
+        Size of each chunk to be read.
+
+    Parallel: bool
+        Whether to split data by rank or just give all procs all data.
+        Default=True
+    """
+    n_chunks = n_rows // chunk_rows
+    if n_chunks * chunk_rows < n_rows:  # pragma: no cover
+        n_chunks += 1
+    if parallel_size > 1:
+        it = split_tasks_by_rank(range(n_chunks), parallel_size, rank)
+    else:
+        it = range(n_chunks)
+    for i in it:
+        start = i * chunk_rows
+        end = min((i + 1) * chunk_rows, n_rows)
+        yield start, end
+
+def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None, rank=0, parallel_size=1):
     """
     iterator for sending chunks of data in hdf5.
 
@@ -190,6 +234,8 @@ def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None):
     ----------
       filepath: input file name (str)
       chunk_size: size of chunk to iterate over (int)
+      rank: the rank of this process under MPI (int)
+      parallel_size: the number of processes under MPI (int)
 
     Returns
     -------
@@ -201,12 +247,13 @@ def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None):
         end: ending index (int)
         data: dictionary of all data from start:end (dict)
     """
+    if rank>=parallel_size:
+        raise TypeError(f"MPI rank {rank} larger than the total number of processes {parallel_size}")
     f, infp = readHdf5Group(filepath, groupname)
     num_rows = getGroupInputDataLength(f)
+    ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
     data = OrderedDict()
-    for i in range(0, num_rows, chunk_size):
-        start = i
-        end = min(i+chunk_size, num_rows)
+    for start, end in ranges:
         for key, val in f.items():
             data[key] = readHdf5DatasetToArray(val, start, end)
         yield start, end, data
