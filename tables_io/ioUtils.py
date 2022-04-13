@@ -8,7 +8,7 @@ import numpy as np
 from .lazy_modules import pd, pq, h5py, apTable, fits
 from .lazy_modules import HAS_TABLES, HAS_HDF5
 
-from .arrayUtils import getGroupInputDataLength, getDType
+from .arrayUtils import getGroupInputDataLength
 
 from .types import ASTROPY_FITS, ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_HDF5, PANDAS_PARQUET,\
      NATIVE_FORMAT, FILE_FORMAT_SUFFIXS, FILE_FORMAT_SUFFIX_MAP, DEFAULT_TABLE_KEY,\
@@ -473,7 +473,7 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
         group = fout.create_group(groupname)
     for key, val in odict.items():
         try:
-            group.create_dataset(key, dtype=getDType(val), data=val.data)
+            group.create_dataset(key, dtype=val.dtype, data=val.data)
         except Exception as msg:  #pragma: no cover
             print(f"Warning.  Failed to convert column {str(msg)}")
     fout.close()

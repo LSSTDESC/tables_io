@@ -90,19 +90,6 @@ def test_getInit():
     assert dd['mat'][0] == (12, 10, 10)
     
 
-def test_getDType():
-    a = np.zeros(6, int)
-    assert arrayUtils.getDType(a).name == 'int64'
-    assert arrayUtils.getDType([0]).name == 'int64'
-    assert arrayUtils.getDType([0.]).name == 'float64'
-    try:
-        arrayUtils.getDType([])
-    except ValueError:
-        pass
-    else:
-        raise ValueError("Failed to raise ValueError for getDType([])")
-
-
 def test_types():
     """ Test the typing functions"""
     assert not types.istablelike(4)
