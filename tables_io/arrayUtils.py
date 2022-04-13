@@ -129,6 +129,26 @@ def printDictShape(in_dict):
         print(key, np.shape(val))
 
 
+def getDType(data):
+    """Get and return the data type for some data going in a column
+
+    Parameters
+    ----------
+    data : any
+        The data in question
+
+    Returns
+    -------
+    dtype : `numpy.dtype`
+        The data type
+    """
+    if isinstance(data, list):
+        if not data:
+            raise ValueError("Can't get dtype for empty list")
+        return np.dtype(type(data[0]))
+    return data.dtype
+
+
 def sliceDict(in_dict, subslice):
     """Create a new `dict` by taking a slice of of every array in a `dict`
 
