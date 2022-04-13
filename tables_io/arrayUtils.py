@@ -146,7 +146,7 @@ def getDType(data):
         if not data:
             raise ValueError("Can't get dtype for empty list")
         return np.dtype(type(data[0]))
-    return val.dtype
+    return data.dtype
 
 
 def sliceDict(in_dict, subslice):
