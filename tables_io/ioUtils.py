@@ -115,17 +115,16 @@ def initializeHdf5Write(filepath, groupname=None, **kwds):
     if not os.path.exists(outdir):  #pragma: no cover
         os.makedirs(outdir, exist_ok=True)
     outf = h5py.File(filepath, "w")
-    if groupname is None:  #pragma: no cover
-        group = outf
-    else:
-        group = outf.create_group(groupname)
-
+    groups = {}
     for k, v in kwds.items():
-        group.create_dataset(k, v[0], v[1])
-    return group, outf
+        group = outf.create_group(k)
+        groups[k] = group
+        for key, shape in v.items():
+            group.create_dataset(key, shape[0], shape[1])
+    return groups, outf
 
 
-def writeDictToHdf5Chunk(fout, odict, start, end, **kwds):
+def writeDictToHdf5Chunk(groups, odict, start, end, **kwds):
     """ Writes a data chunk to an hdf5 file
 
     Parameters
@@ -156,9 +155,10 @@ def writeDictToHdf5Chunk(fout, odict, start, end, **kwds):
 
     I.e., if `key` is present in kwds in will override the name.
     """
-    for key, val in odict.items():
-        k_out = kwds.get(key, key)
-        fout[k_out][start:end] = val
+    for group_name, group in groups.items():
+        for key, val in odict[group_name].items():
+            k_out = kwds.get(key, key)
+            group[k_out][start:end] = val
 
 
 def finalizeHdf5Write(fout, groupname=None, **kwds):
