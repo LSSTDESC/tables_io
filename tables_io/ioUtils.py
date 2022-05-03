@@ -250,7 +250,7 @@ def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None, rank=0, paralle
         data: dictionary of all data from start:end (dict)
     """
     if rank>=parallel_size:
-        raise TypeError(f"MPI rank {rank} larger than the total number of processes {parallel_size}")
+        raise TypeError(f"MPI rank {rank} larger than the total number of processes {parallel_size}") #pragma: no cover
     f, infp = readHdf5Group(filepath, groupname)
     num_rows = getGroupInputDataLength(f)
     ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
