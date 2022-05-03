@@ -188,9 +188,12 @@ def split_tasks_by_rank(tasks, parallel_size, rank):
 
     Parameters
     ----------
-    tasks: iterable
-        Tasks to split up
+        tasks: Tasks to split up (iterator)  
+        parallel_size: the number of processes under MPI (int)
+        rank: the rank of this process under MPI (int)
 
+    Returns
+        output: number of the first task for this process (iterator)
     """
     for i, task in enumerate(tasks):
         if i % parallel_size == rank:
@@ -204,23 +207,22 @@ def data_ranges_by_rank(n_rows, chunk_rows, parallel_size, rank):
 
     Parameters
     ----------
-    n_rows: int
-        Total number of rows to split up
+    n_rows: Total number of rows to split up (int)
+    chunk_rows: Size of each chunk to be read (int)
+    parallel_size: the number of processes under MPI (int)
+    rank: the rank of this process under MPI (int)
 
-    chunk_rows: int
-        Size of each chunk to be read.
+    Returns
+        output:
+        iterator chunk
 
-    Parallel: bool
-        Whether to split data by rank or just give all procs all data.
-        Default=True
+        start: start index (int)
+        end: ending index (int)
     """
     n_chunks = n_rows // chunk_rows
     if n_chunks * chunk_rows < n_rows:  # pragma: no cover
         n_chunks += 1
-    if parallel_size > 1:
-        it = split_tasks_by_rank(range(n_chunks), parallel_size, rank)
-    else:
-        it = range(n_chunks)
+    it = split_tasks_by_rank(range(n_chunks), parallel_size, rank)
     for i in it:
         start = i * chunk_rows
         end = min((i + 1) * chunk_rows, n_rows)
