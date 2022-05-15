@@ -97,9 +97,8 @@ def initializeHdf5Write(filepath, **kwds):
     Notes
     -----
     The keywords should be used to create groups within the hdf5 file.
-    Each keyword should provide a dictionary between the group name
-    and a dictionary with the data set information of the form:
-     {'group': {'data1' : ( (shape1), (dtype1) ), 'data2' : ( (shape2), (dtype2) )}
+    Each keyword should provide a dictionary with the data set information of the form:
+     group = {'data1' : ( (shape1), (dtype1) ), 'data2' : ( (shape2), (dtype2) )}
 
     group : `str` 
         Name of the Hdf5 group
@@ -111,7 +110,7 @@ def initializeHdf5Write(filepath, **kwds):
         The data type for this dataset
 
     For exmaple
-    `initializeHdf5Write('test.hdf5', {'data': dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))}`
+    `initializeHdf5Write('test.hdf5', data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))`
 
     Would initialize an hdf5 file with one group and two datasets, with shapes and data types as given
     """
