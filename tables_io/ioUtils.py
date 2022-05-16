@@ -79,15 +79,13 @@ def getInputDataLengthHdf5(filepath, groupname=None):
     return nrow
 
 
-def initializeHdf5Write(filepath, groupname=None, **kwds):
+def initializeHdf5Write(filepath, **kwds):
     """ Prepares an hdf5 file for output
 
     Parameters
     ----------
     filepath : `str`
         The output file name
-    groupname : `str` or `None`
-        The output group name
 
     Returns
     -------
@@ -98,34 +96,38 @@ def initializeHdf5Write(filepath, groupname=None, **kwds):
 
     Notes
     -----
-    The keywords should be used to create_datasets within the hdf5 file.
-    Each keyword should provide a tuple of ( (shape), (dtype) )
+    The keywords should be used to create groups within the hdf5 file.
+    Each keyword should provide a dictionary with the data set information of the form:
+     group = {'data1' : ( (shape1), (dtype1) ), 'data2' : ( (shape2), (dtype2) )}
 
+    group : `str` 
+        Name of the Hdf5 group
+    data  : `str`
+        Name of the column to be written
     shape : `tuple` ( `int` )
         The shape of the data for this dataset
     dtype : `str`
         The data type for this dataset
 
     For exmaple
-    `initialize_writeout('test.hdf5', scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))`
+    `initializeHdf5Write('test.hdf5', data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))`
 
-    Would initialize an hdf5 file with two datasets, with shapes and data types as given
+    Would initialize an hdf5 file with one group and two datasets, with shapes and data types as given
     """
     outdir = os.path.dirname(os.path.abspath(filepath))
     if not os.path.exists(outdir):  #pragma: no cover
         os.makedirs(outdir, exist_ok=True)
     outf = h5py.File(filepath, "w")
-    if groupname is None:  #pragma: no cover
-        group = outf
-    else:
-        group = outf.create_group(groupname)
-
+    groups = {}
     for k, v in kwds.items():
-        group.create_dataset(k, v[0], v[1])
-    return group, outf
+        group = outf.create_group(k)
+        groups[k] = group
+        for key, shape in v.items():
+            group.create_dataset(key, shape[0], shape[1])
+    return groups, outf
 
 
-def writeDictToHdf5Chunk(fout, odict, start, end, **kwds):
+def writeDictToHdf5Chunk(groups, odict, start, end, **kwds):
     """ Writes a data chunk to an hdf5 file
 
     Parameters
@@ -156,9 +158,10 @@ def writeDictToHdf5Chunk(fout, odict, start, end, **kwds):
 
     I.e., if `key` is present in kwds in will override the name.
     """
-    for key, val in odict.items():
-        k_out = kwds.get(key, key)
-        fout[k_out][start:end] = val
+    for group_name, group in groups.items():
+        for key, val in odict[group_name].items():
+            k_out = kwds.get(key, key)
+            group[k_out][start:end] = val
 
 
 def finalizeHdf5Write(fout, groupname=None, **kwds):

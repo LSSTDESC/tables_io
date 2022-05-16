@@ -52,10 +52,10 @@ def test_write_output_file():
     zgrid = np.linspace(0, 4, nbins)
     zmode = zgrid[np.argmax(pz_pdf, axis=1)]
 
-    data_dict = dict(zmode=zmode, pz_pdf=pz_pdf)
+    data_dict = {'data': dict(zmode=zmode, pz_pdf=pz_pdf)}
 
-    group, outf = io.initializeHdf5Write(test_outfile, 'data', photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4'))
-    io.writeDictToHdf5Chunk(group, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
+    groups, outf = io.initializeHdf5Write(test_outfile, data = dict(photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4')))
+    io.writeDictToHdf5Chunk(groups, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
     io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
 
     os.unlink(test_outfile)
