@@ -79,6 +79,51 @@ def getInputDataLengthHdf5(filepath, groupname=None):
     return nrow
 
 
+def initializeHdf5WriteSingle(filepath, groupname=None, **kwds):
+    """ Prepares an hdf5 file for output
+
+    Parameters
+    ----------
+    filepath : `str`
+        The output file name
+    groupname : `str` or `None`
+        The output group name
+
+    Returns
+    -------
+    group : `h5py.File` or `h5py.Group`
+        The group to write to
+    fout : `h5py.File`
+        The output file
+
+    Notes
+    -----
+    The keywords should be used to create_datasets within the hdf5 file.
+    Each keyword should provide a tuple of ( (shape), (dtype) )
+
+    shape : `tuple` ( `int` )
+        The shape of the data for this dataset
+    dtype : `str`
+        The data type for this dataset
+
+   For exmaple
+    `initializeHdf5WriteSingle('test.hdf5', data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))`
+    Would initialize an hdf5 file with two datasets, with shapes and data types as given
+
+    """
+    outdir = os.path.dirname(os.path.abspath(filepath))
+    if not os.path.exists(outdir):  #pragma: no cover
+        os.makedirs(outdir, exist_ok=True)
+    outf = h5py.File(filepath, "w")
+    if groupname is None:
+        group = outf
+    else:
+        group = outf.create_group(groupname)
+    for key, shape in kwds.items():
+        group.create_dataset(key, shape[0], shape[1])
+    return group, outf        
+
+
 def initializeHdf5Write(filepath, **kwds):
     """ Prepares an hdf5 file for output
 
@@ -126,7 +171,42 @@ def initializeHdf5Write(filepath, **kwds):
             group.create_dataset(key, shape[0], shape[1])
     return groups, outf
 
+def writeDictToHdf5ChunkSingle(fout, odict, start, end, **kwds):
+    """ Writes a data chunk to an hdf5 file
 
+    Parameters
+    ----------
+    fout : `h5py.File`
+        The file
+
+    odict : `OrderedDict`, (`str`, `numpy.array`)
+        The data being written
+
+    start : `int`
+        Starting row number to place the data
+
+    end : `int`
+        Ending row number to place the data
+
+    Notes
+    -----
+    The kwds can be used to control the output locations, i.e., to
+    rename the columns in data_dict when they good into the output file.
+
+    For each item in data_dict, the output location is set as
+
+    `k_out = kwds.get(key, key)`
+
+    This will check the kwds to see if they contain `key` and if so, will
+    return the corresponding value.  Otherwise it will just return `key`.
+
+    I.e., if `key` is present in kwds in will override the name.
+    """
+    for key, val in odict.items():
+        k_out = kwds.get(key, key)
+        fout[k_out][start:end] = val
+
+        
 def writeDictToHdf5Chunk(groups, odict, start, end, **kwds):
     """ Writes a data chunk to an hdf5 file
 
