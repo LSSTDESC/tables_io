@@ -5,7 +5,6 @@ from collections import OrderedDict
 import numpy as np
 
 from .lazy_modules import pd, apTable, fits
-from .lazy_modules import HAS_ASTROPY, HAS_PANDAS
 
 from .arrayUtils import forceToPandables
 
@@ -30,9 +29,6 @@ def dataFrameToApTable(df):
     tab : `astropy.table.Table`
         The table
     """
-    if not HAS_ASTROPY:  #pragma: no cover
-        raise ImportError("Astropy is not available, can't make astropy tables")
-
     o_dict = OrderedDict()
     for colname in df.columns:
         col = df[colname]
@@ -246,9 +242,6 @@ def apTableToDataFrame(tab):
     df :  `pandas.DataFrame`
         The dataframe
     """
-    if not HAS_PANDAS:  #pragma: no cover
-        raise ImportError("pandas is not available, can't make DataFrame")
-
     o_dict = OrderedDict()
     for colname in tab.columns:
         col = tab[colname]

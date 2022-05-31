@@ -7,7 +7,6 @@ from collections.abc import Mapping, Iterable
 
 import numpy as np
 
-from .lazy_modules import apTable, pd
 from .arrayUtils import arrayLength
 
 # Tabular data formats
@@ -79,6 +78,20 @@ ALLOWED_FORMATS = OrderedDict([
     (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5])])
 
 
+def isDataFrame(obj):
+    for c in obj.__class__.__mro__:
+        if c.__name__ == "DataFrame" and c.__module__ == "pandas.core.frame":
+            return True
+    return False
+
+def isApTable(obj):
+    for c in obj.__class__.__mro__:
+        if c.__name__ == "Table" and c.__module__ == "astropy.table.table":
+            return True
+    return False
+
+
+
 def tableType(obj):
     """ Identify the type of table we have
 
@@ -98,10 +111,10 @@ def tableType(obj):
 
     IndexError : One of the columns in a Mapping is the wrong length
     """
-    if isinstance(obj, apTable.Table):
-        return AP_TABLE
-    if isinstance(obj, pd.DataFrame):
+    if isDataFrame(obj):
         return PD_DATAFRAME
+    if isApTable(obj):
+        return AP_TABLE
     if isinstance(obj, np.recarray):
         return NUMPY_RECARRAY
     if not isinstance(obj, Mapping):

@@ -1,7 +1,8 @@
 """ Unit tests for the fileIO module """
 
 import numpy as np
-
+import sys
+import unittest
 from tables_io import arrayUtils, types
 from tables_io.lazy_modules import lazyImport
 
@@ -105,6 +106,37 @@ def test_types():
     else:
         raise KeyError("Failed to catch unknown fileType")
 
+def test_type_finders():
+    """ Test the utils that identify apTables and data frames """
+    import pandas as pd
+    from astropy.table import Table
+
+    class DataFrameSub(pd.DataFrame):
+        pass
+
+    class TableSub(Table):
+        pass
+
+    d1 = pd.DataFrame()
+    d2 = DataFrameSub()
+    t1 = Table()
+    t2 = TableSub()
+
+    assert types.isDataFrame(d1)
+    assert types.isDataFrame(d2)
+    assert not types.isDataFrame(t1)
+    assert not types.isDataFrame(t2)
+    assert not types.isDataFrame({})
+    assert not types.isDataFrame(77)
+
+    assert not types.isApTable(d1)
+    assert not types.isApTable(d2)
+    assert types.isApTable(t1)
+    assert types.isApTable(t2)
+    assert not types.isApTable({})
+    assert not types.isApTable(77)
+
+
 
 
 def test_lazy_load():
@@ -116,3 +148,19 @@ def test_lazy_load():
         pass
     else:
         raise ImportError("lazyImport failed")
+
+@unittest.skipIf("wave" in sys.modules, "Wave module already imported")
+def test_lazy_load2():
+    """ A second test that the lazy import works"""
+    # I picked an obscure python module that is unlikely
+    # to be loaded by anything else.
+
+    wave = lazyImport("wave")
+    # should not be loaded yet
+    assert "wave" not in sys.modules
+
+    # should trigger load
+    assert "audioop" in dir(wave)
+    assert wave.sys == sys
+
+    assert "wave" in sys.modules

@@ -1,66 +1,55 @@
 """ Lazy loading modules """
 
 import sys
-import importlib.util
-import h5py
+import importlib
 
-class DeferredModuleError:
-    """ Class to throw an error if you try to use a modules that wasn't loaded """
+class LazyModule:
+    """
+    A partial implementation of a lazily imported module.
 
-    def __init__(self, moduleName):
-        self._moduleName = moduleName
+    This isn't a general solution, since it doesn't actually
+    create a module-like object, but the LazyLoader solution
+    in importlib seems not to cope with submodules like astropy.table,
+    or pyarrow.parquet, and always imports the full module.
+    """
+    def __init__(self, name):
+        self.name = name
+        self._module = None
 
     @property
-    def moduleName(self):
-        """ Return the name of the module this is associated to """
-        return self._moduleName
+    def module(self):
+        if self._module is not None:
+            return self._module
+        try:
+            self._module = importlib.import_module(self.name)
+        except ImportError:
+            raise ImportError("Cannot use selected data format, {self.modulename} not available")
+
+        return self._module
+
+
+    def __dir__(self):
+        """
+        Get the attributes of the module, to support tab-autocomplete.
+        """
+        return dir(self.module)
 
     def __getattr__(self, item):
-        raise ImportError(f"Module {self.moduleName} was not loaded, so call to {self.moduleName}.{item} fails")
-
+        """Get something from the module"""
+        return getattr(self.module, item)
 
 
 def lazyImport(modulename):
-    """ This will allow us to lazy import various modules
-
-    Parameters
-    ----------
-    modulename : `str`
-        The name of the module in question
-
-    Returns
-    -------
-    module : `importlib.LazyModule`
-        A lazy loader for the module in question
     """
-    try:
-        return sys.modules[modulename]
-    except KeyError:
-        spec = importlib.util.find_spec(modulename)
-        if spec is None:
-            print(f"Can't find module {modulename}")
-            return DeferredModuleError(modulename)
-        module = importlib.util.module_from_spec(spec)
-        loader = importlib.util.LazyLoader(spec.loader)
-        # Make module with proper locking and get it inserted into sys.modules.
-        loader.exec_module(module)
-        try:
-            _ = dir(module)
-        except ValueError:
-            pass
-    return module
+    Lazily load a module
+    """
+    return LazyModule(modulename)
+
 
 
 tables = lazyImport('tables')
-import astropy.table as apTable # lazyImport('astropy.table')
+apTable = lazyImport('astropy.table')
 fits = lazyImport('astropy.io.fits')
-h5py = h5py  #pylint: disable=self-assigning-variable
+h5py = lazyImport('h5py')
 pd = lazyImport('pandas')
 pq = lazyImport('pyarrow.parquet')
-
-HAS_TABLES = tables is not None
-HAS_PQ = pq is not None
-HAS_FITS = fits is not None
-HAS_ASTROPY = apTable is not None
-HAS_HDF5 = h5py is not None
-HAS_PANDAS = pd is not None
