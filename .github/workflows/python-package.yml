@@ -28,7 +28,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pylint pytest pytest-cov
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-	$CONDA/bin/conda update -y -c conda-forge h5py>=2.9=mpi
+        $CONDA/bin/conda update -y -c conda-forge h5py>=2.9=mpi
         python setup.py install
       env:
         CC: mpicc
