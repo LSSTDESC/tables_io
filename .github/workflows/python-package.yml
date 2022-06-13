@@ -25,7 +25,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        sudo apt install -y libopenmpi-dev libhdf5-dev
+        sudo apt install -y libopenmpi-dev libhdf5-mpi-dev
         dpkg -L libhdf5-openmpi-dev
         python -m pip install --upgrade pip
         python -m pip install pylint pytest pytest-cov
