@@ -29,9 +29,12 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pylint pytest pytest-cov
         python -m pip install jupyter
-        CC="mpicc" HDF5_MPI="ON" pip install --upgrade --force-reinstall --no-binary=h5py h5py
+        pip install --upgrade --force-reinstall --no-binary=h5py h5py
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         python setup.py install
+      env:
+        CC: mpicc
+        HDF5_MPI: ON
     - name: Lint with pylint
       run: |
         # stop the build if there are Python syntax errors or undefined names
