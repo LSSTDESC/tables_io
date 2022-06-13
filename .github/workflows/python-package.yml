@@ -25,13 +25,10 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        sudo apt install -y libopenmpi-dev libhdf5-dev
         python -m pip install --upgrade pip
         python -m pip install pylint pytest pytest-cov
-        python -m pip install jupyter
-        pip install --upgrade --force-reinstall --no-binary=h5py h5py
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        CC="mpicc" HDF5_MPI="ON" pip install --upgrade --force-reinstall --no-binary=h5py h5py
+	$CONDA/bin/conda update -y -c conda-forge h5py>=2.9=mpi
         python setup.py install
       env:
         CC: mpicc
