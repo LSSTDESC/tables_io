@@ -24,7 +24,7 @@ setup(
                       "numpy<1.22.*;python_version<'3.8'",
                       "astropy;python_version>='3.8'",
                       "astropy<5.*;python_version<'3.8'",
-                      "h5py",
+                      "h5py>=2.9=mpi*",
                       "pandas;python_version>='3.8'",
                       "pandas<1.4.*;python_version<'3.8'",
                       "pyarrow",
