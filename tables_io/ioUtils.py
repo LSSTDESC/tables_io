@@ -123,13 +123,15 @@ def initializeHdf5WriteSingle(filepath, groupname=None, **kwds):
     return group, outf        
 
 
-def initializeHdf5Write(filepath, **kwds):
+def initializeHdf5Write(filepath, comm=None, **kwds):
     """ Prepares an hdf5 file for output
 
     Parameters
     ----------
     filepath : `str`
         The output file name
+    comm: `communicator`
+        MPI commuticator to do parallel writing
 
     Returns
     -------
@@ -161,7 +163,12 @@ def initializeHdf5Write(filepath, **kwds):
     outdir = os.path.dirname(os.path.abspath(filepath))
     if not os.path.exists(outdir):  #pragma: no cover
         os.makedirs(outdir, exist_ok=True)
-    outf = h5py.File(filepath, "w")
+    if comm == None:
+        outf = h5py.File(filepath, "w")
+    else:
+        if not h5py.get_config().mpi:
+            raise TypeError(f"hdf5py module not prepared for parallel writing.") #pragma: no cover
+        outf = h5py.File(filepath, "w",driver='mpio', comm=comm)
     groups = {}
     for k, v in kwds.items():
         group = outf.create_group(k)

@@ -25,11 +25,16 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        sudo apt install -y libopenmpi-dev libhdf5-mpi-dev
         python -m pip install --upgrade pip
         python -m pip install pylint pytest pytest-cov
         python -m pip install jupyter
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        CC="mpicc" HDF5_MPI="ON" pip install --upgrade --force-reinstall --no-binary=h5py h5py
         python setup.py install
+      env:
+        CC: mpicc
+        HDF5_MPI: ON
     - name: Lint with pylint
       run: |
         # stop the build if there are Python syntax errors or undefined names
