@@ -6,7 +6,6 @@ from collections import OrderedDict
 import numpy as np
 
 from .lazy_modules import pd, pq, h5py, apTable, fits
-from .lazy_modules import HAS_TABLES, HAS_HDF5
 
 from .arrayUtils import getGroupInputDataLength
 
@@ -509,9 +508,6 @@ def writeApTablesToHdf5(tables, filepath, **kwargs):
 
     kwargs are passed to `astropy.table.Table` call.
     """
-    if not HAS_HDF5:  #pragma: no cover
-        raise ImportError("h5py is not available, can't save to hdf5")
-
     for k, v in tables.items():
         v.write(filepath, path=k, append=True, format='hdf5', **kwargs)
 
@@ -668,11 +664,6 @@ def readHdf5ToDataFrame(filepath, key=None):
     df : `pandas.DataFrame`
         The dataframe
     """
-    if not HAS_HDF5:  #pragma: no cover
-        raise ImportError("h5py is not available, can't read hdf5")
-    if not HAS_TABLES:  #pragma: no cover
-        raise ImportError("tables is not available, can't read hdf5 to dataframe")
-
     return pd.read_hdf(filepath, key)
 
 
@@ -694,8 +685,6 @@ def readH5ToDataFrames(filepath):
     We are using the file suffix 'h5' to specify 'hdf5' files written from DataFrames using `pandas`
     They have a different structure than 'hdf5' files written with `h5py` or `astropy.table`
     """
-    if not HAS_TABLES:  #pragma: no cover
-        raise ImportError("tables is not available, can't read hdf5 to dataframe")
     fin = h5py.File(filepath)
     return OrderedDict([(key, readHdf5ToDataFrame(filepath, key=key)) for key in fin.keys()])
 
@@ -712,11 +701,6 @@ def writeDataFramesToH5(dataFrames, filepath):
     filepath: `str`
         Path to output file
     """
-    if not HAS_HDF5:  #pragma: no cover
-        raise ImportError("h5py is not available, can't write hdf5")
-    if not HAS_TABLES:  #pragma: no cover
-        raise ImportError("tables is not available, can't write hdf5")
-
     for key, val in dataFrames.items():
         val.to_hdf(filepath, key)
 
