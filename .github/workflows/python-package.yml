@@ -26,11 +26,11 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt install -y libopenmpi-dev libhdf5-dev
+        dpkg -L libhdf5-openmpi-dev
         python -m pip install --upgrade pip
         python -m pip install pylint pytest pytest-cov
         python -m pip install jupyter
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        CC="mpicc" HDF5_MPI="ON" HDF5_DIR="/usr/lib/x86_64-linux-gnu/hdf5/openmpi" pip install --upgrade --force-reinstall --no-binary=h5py h5py
         python setup.py install
       env:
         CC: mpicc
