@@ -948,6 +948,7 @@ def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False):
         for defName in ['', None, '__astropy_table__', 'data']:
             if defName in odict:
                 odict = odict[defName]
+                break
     if tType is None:  #pragma: no cover
         return odict
     return convert(odict, tType)
