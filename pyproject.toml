@@ -36,7 +36,7 @@ dev = [
     "pylint",
     "pytest",
     "pytest-cov",
-    "yamllint",
+    "flake8",
 ]
 
 [build-system]
