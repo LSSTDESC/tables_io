@@ -608,7 +608,14 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
         group = fout.create_group(groupname)
     for key, val in odict.items():
         try:
-            group.create_dataset(key, dtype=val.dtype, data=val.data)
+            if isinstance(val, np.ndarray):
+                group.create_dataset(key, dtype=val.dtype, data=val.data)
+            else:
+                # In the future, it may be better to specifically case for
+                # jaxlib.xla_extension.DeviceArray here. For now, we're
+                # resorting to duck typing so we don't have to import jax just
+                # to check the type.
+                group.create_dataset(key, dtype=val.dtype, data=val.device_buffer)
         except Exception as msg:  #pragma: no cover
             print(f"Warning.  Failed to convert column {str(msg)}")
     fout.close()
