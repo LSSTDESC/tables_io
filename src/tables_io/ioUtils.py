@@ -592,7 +592,7 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
 
     Parameters
     ----------
-    odict : `Mapping`, (`str`, {`numpy.array`, `jaxlib.xla_extension.DeviceArray`})
+    odict : `Mapping`, (`str`, `numpy.array` or `jaxlib.xla_extension.DeviceArray`)
         The data being written
 
     filepath: `str`
