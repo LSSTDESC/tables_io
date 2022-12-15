@@ -587,11 +587,12 @@ def readHdf5GroupToDict(hg, start=None, end=None):
 
 def writeDictToHdf5(odict, filepath, groupname, **kwargs):
     """
-    Writes a dictionary of `numpy.array` to a single hdf5 file
+    Writes a dictionary of `numpy.array` or `jaxlib.xla_extension.DeviceArray`
+    to a single hdf5 file
 
     Parameters
     ----------
-    odict : `Mapping`, (`str`, `numpy.array`)
+    odict : `Mapping`, (`str`, {`numpy.array`, `jaxlib.xla_extension.DeviceArray`})
         The data being written
 
     filepath: `str`
