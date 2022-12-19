@@ -22,7 +22,7 @@ dynamic = ["version"]
 dependencies = [
     "numpy>=1.21.0",
     "astropy",
-    "h5py",
+    "h5py>=2.9",
     "pandas",
     "pyarrow",
     "tables",
@@ -30,7 +30,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "h5py>=2.9=mpi*",
     "mpi4py",
     "coverage",
     "pylint",
