@@ -9,6 +9,7 @@ from tables_io import types, convert, io_open, read, write, iterator
 from tables_io.testUtils import compare_table_dicts, compare_tables, make_test_data
 from tables_io.lazy_modules import apTable
 
+import jax.numpy as jnp
 
 class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attributes
     """ Test the utility functions """
@@ -37,6 +38,21 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
             for key in keys:
                 self._files.append("%s%s.%s" % (basepath, key, fmt))
         odict_r = read(filepath, tType=tType, fmt=fmt, keys=keys)
+        tables_r = convert(odict_r, types.AP_TABLE)
+        assert compare_table_dicts(self._tables, tables_r)
+
+    def _do_loopback_jax(self, basepath, fmt, keys=None):
+        """ Utility function to do loopback tests writing data as a jax array """
+        odict_c = convert(self._tables, types.NUMPY_DICT)
+        for key, val in odict_c["data"].items():
+            odict_c["data"][key] = jnp.array(val)
+        filepath = write(odict_c, basepath, fmt)
+        if keys is None:
+            self._files.append(filepath)
+        else:
+            for key in keys:
+                self._files.append("%s%s.%s" % (basepath, key, fmt))
+        odict_r = read(filepath, tType=types.NUMPY_DICT, fmt=fmt, keys=keys)
         tables_r = convert(odict_r, types.AP_TABLE)
         assert compare_table_dicts(self._tables, tables_r)
 
@@ -126,6 +142,10 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
         self._do_iterator('test_out_single.hdf5', types.NUMPY_DICT, False, chunk_size=50)
         self._do_open('test_out_single.hdf5')
         self._do_open('test_out.hdf5')
+
+    def testHdf5LoopbackWithJaxArray(self):
+        """ Test writing / reading astropy tables to HDF5 with a jax array """
+        self._do_loopback_jax('test_out', 'hdf5')
         
     def testH5Loopback(self):
         """ Test writing / reading pandas dataframes to HDF5 """

@@ -36,6 +36,8 @@ dev = [
     "pytest",
     "pytest-cov",
     "flake8",
+    "jax",
+    "jaxlib",
 ]
 
 [build-system]
@@ -112,7 +114,7 @@ addopts = [
     "--cov=tables_io",
     "--cov-report=html"
 ]
-flake8-ignore = "E203"
+#flake8-ignore = "E203"
 
 [tool.mypy]
 disallow_untyped_defs = true
