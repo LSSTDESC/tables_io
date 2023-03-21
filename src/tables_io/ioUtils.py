@@ -123,6 +123,14 @@ def initializeHdf5WriteSingle(filepath, groupname=None, **kwds):
     return group, outf        
 
 
+def initializeHdf5WriteFromData(filename, outSizeDict, comm=None, **kwds):
+    kwds_conv = {}
+    for key in kwds.keys():
+        if key in outSizeDict:
+            kwds_conv[key] = outSizeDict[key]
+    return initializeHdf5Write(filename, comm=comm, **kwds_conv)
+
+
 def initializeHdf5Write(filepath, comm=None, **kwds):
     """ Prepares an hdf5 file for output
 
