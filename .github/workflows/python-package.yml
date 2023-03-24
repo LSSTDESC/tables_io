@@ -38,7 +38,7 @@ jobs:
         mamba install \
           "numpy>=1.21.0" \
           "astropy" \
-          "h5py>=2.9" \
+          "h5py>=2.9=*mpi_openmpi*" \
           "pandas" \
           "pyarrow" \
           "pytables" \
