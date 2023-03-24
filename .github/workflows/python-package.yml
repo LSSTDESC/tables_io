@@ -13,29 +13,29 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
     strategy:
       matrix:
         python-version: [3.8, 3.9, "3.10"]
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+    - uses: conda-incubator/setup-miniconda@v2
       with:
         python-version: ${{ matrix.python-version }}
+        channels: conda-forge,defaults
+        channel-priority: strict
+        show-channel-urls: true
+        miniforge-version: latest
+        miniforge-variant: Mambaforge
+        use-mamba: true
+        environment-file: environment.yml
+        activate-environment: tables_io
     - name: Install dependencies
       run: |
-        sudo apt install -y libopenmpi-dev libhdf5-mpi-dev
-        python -m pip install --upgrade pip
-        python -m pip install pylint pytest pytest-cov
-        python -m pip install jupyter
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        CC="mpicc" HDF5_MPI="ON" pip install --upgrade --force-reinstall --no-binary=h5py h5py
-        pip install .
-        pip install .[dev]
-      env:
-        CC: mpicc
-        HDF5_MPI: ON
+        pip install --no-deps .
     - name: Lint with pylint
       run: |
         # stop the build if there are Pylint errors
