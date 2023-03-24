@@ -1,11 +1,9 @@
-name: test  # default testing environment name from conda-incubator
-dependencies:
-  - numpy>=1.21.0
-  - astropy
-  - h5py=*=mpi_openmpi*
-  - pandas
-  - pyarrow
-  - tables
-  - mpi4py
-  - jax
-  - jaxlib
+numpy>=1.21.0
+astropy
+h5py=*=mpi_openmpi*
+pandas
+pyarrow
+tables
+mpi4py
+jax
+jaxlib
