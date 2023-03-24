@@ -41,10 +41,11 @@ jobs:
           "h5py>=2.9" \
           "pandas" \
           "pyarrow" \
-          "tables" \
+          "pytables" \
           mpi4py \
           "hdf5=*=*mpi_openmpi*" \
           pylint pytest pytest-cov jupyter \
+          pip setuptools \
           "coverage" \
           "flake8" \
           "jax"
