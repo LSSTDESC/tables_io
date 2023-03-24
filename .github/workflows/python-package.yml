@@ -22,7 +22,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
     - uses: conda-incubator/setup-miniconda@v2
       with:
         python-version: ${{ matrix.python-version }}
@@ -32,23 +31,10 @@ jobs:
         miniforge-version: latest
         miniforge-variant: Mambaforge
         use-mamba: true
-
+        environment-file: environment.yml
+        activate-environment: tables_io
     - name: Install dependencies
       run: |
-        mamba install \
-          "numpy>=1.21.0" \
-          "astropy" \
-          "h5py>=2.9=*mpi_openmpi*" \
-          "pandas" \
-          "pyarrow" \
-          "pytables" \
-          mpi4py \
-          "hdf5=*=*mpi_openmpi*" \
-          pylint pytest pytest-cov jupyter \
-          pip setuptools \
-          "coverage" \
-          "flake8" \
-          "jax"
         pip install --no-deps .
     - name: Lint with pylint
       run: |
