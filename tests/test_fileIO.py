@@ -97,5 +97,28 @@ def test_write_output_file_single():
     io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
 
     os.unlink(test_outfile)
+def test_write_output_parallel_file_single():
+    from mpi4py import MPI
+    comm = MPI.COMM_WORLD
+    """ Test writing an output file """
+    npdf = 40
+    nbins = 21
+    pz_pdf = np.random.uniform(size=(npdf, nbins))
+    zgrid = np.linspace(0, 4, nbins)
+    zmode = zgrid[np.argmax(pz_pdf, axis=1)]
 
+    data_dict = dict(zmode=zmode, pz_pdf=pz_pdf)
+
+    group, outf = io.initializeHdf5WriteSingle(test_outfile, 'data', photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4'), comm=comm)
+    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
+    io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
+
+    os.unlink(test_outfile)
+
+    group, outf = io.initializeHdf5WriteSingle(test_outfile, None, photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4'), comm=comm)
+    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
+    io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
+
+
+    os.unlink(test_outfile)
     

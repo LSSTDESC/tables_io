@@ -78,7 +78,7 @@ def getInputDataLengthHdf5(filepath, groupname=None):
     return nrow
 
 
-def initializeHdf5WriteSingle(filepath, groupname=None, **kwds):
+def initializeHdf5WriteSingle(filepath, groupname=None, comm=None, **kwds):
     """ Prepares an hdf5 file for output
 
     Parameters
@@ -113,7 +113,12 @@ def initializeHdf5WriteSingle(filepath, groupname=None, **kwds):
     outdir = os.path.dirname(os.path.abspath(filepath))
     if not os.path.exists(outdir):  #pragma: no cover
         os.makedirs(outdir, exist_ok=True)
-    outf = h5py.File(filepath, "w")
+    if comm == None:
+        outf = h5py.File(filepath, "w")
+    else:
+        if not h5py.get_config().mpi:
+            raise TypeError(f"hdf5py module not prepared for parallel writing.") #pragma: no cover
+        outf = h5py.File(filepath, "w",driver='mpio', comm=comm)
     if groupname is None:
         group = outf
     else:
