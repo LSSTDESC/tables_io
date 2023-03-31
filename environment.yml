@@ -20,3 +20,4 @@ dependencies:
   - coverage
   - flake8
   - jax
+  - jaxlib
