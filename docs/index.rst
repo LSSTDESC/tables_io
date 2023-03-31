@@ -77,7 +77,7 @@ effectively 5 and a half different file formats
     df.to_hdf(filepath, key)
 
     
-5. 'parquet', as used to store pandas datafames, e.g., as produced by:
+5. 'parquet' ('parq' or 'pq' are also valid file suffixes), as used to store pandas datafames, e.g., as produced by:
 
    
 .. code-block:: python
