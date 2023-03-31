@@ -47,6 +47,8 @@ FILE_FORMAT_SUFFIXS = OrderedDict([
     ('hdf5', NUMPY_HDF5),
     ('fit', NUMPY_FITS),
     ('h5', PANDAS_HDF5),
+    ('parquet', PANDAS_PARQUET),
+    ('parq', PANDAS_PARQUET),
     ('pq', PANDAS_PARQUET)])
 
 DEFAULT_TABLE_KEY = OrderedDict([
@@ -55,6 +57,8 @@ DEFAULT_TABLE_KEY = OrderedDict([
     ('hdf5', None),
     ('fit', ''),
     ('h5', 'data'),
+    ('parquet', ''),
+    ('parq', ''),
     ('pq', '')])
 
 FILE_FORMATS = OrderedDict([(val, key) for key, val in FILE_FORMAT_NAMES.items()])
