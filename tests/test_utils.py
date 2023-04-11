@@ -2,9 +2,11 @@
 
 import numpy as np
 import sys
+import pytest
 import unittest
 from tables_io import arrayUtils, types
-from tables_io.lazy_modules import lazyImport
+from tables_io.testUtils import check_deps
+from tables_io.lazy_modules import lazyImport, apTable, pd
 
 
 def test_array_length():
@@ -106,6 +108,8 @@ def test_types():
     else:
         raise KeyError("Failed to catch unknown fileType")
 
+
+@pytest.mark.skipif(not check_deps([apTable, pd]), reason="Missing an IO package")
 def test_type_finders():
     """ Test the utils that identify apTables and data frames """
     import pandas as pd

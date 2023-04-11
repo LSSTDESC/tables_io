@@ -2,8 +2,12 @@
 
 import os
 import numpy as np
+import pytest
 
 from tables_io import io
+from tables_io.testUtils import check_deps
+from tables_io.lazy_modules import apTable, fits, pd, h5py, pq, pq
+
 
 h5_data_file = 'tests/data/pandas_test_hdf5.h5'
 parquet_data_file = 'tests/data/parquet_test.parquet'
@@ -12,16 +16,21 @@ no_group_file = 'tests/data/no_groupname_test.hdf5'
 test_outfile = './test_out.h5'
 
 
+
+@pytest.mark.skipif(not check_deps([h5py, pq]), reason="Missing HDF5 or parquet")
 def test_pandas_readin():
     """ Test the pandas reading """
     _ = io.readH5ToDict(h5_data_file)
     _ = io.readPqToDict(parquet_data_file)
 
 
+@pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_no_groupname():
     """ Test the load_training_data function for a file with no groupname """
     _ = io.readHdf5ToDict(no_group_file, groupname=None)
 
+
+@pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_get_input_data_length_hdf5():
     """ Test the get_input_data_size_hdf5 function """
     assert io.getInputDataLengthHdf5(no_group_file) == 10
@@ -33,6 +42,7 @@ def test_get_input_data_length_hdf5():
         raise ValueError("Failed to catch ValueError for mismatched column lengths")
 
 
+@pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_iter_chunk_hdf5_data():
     """ Test the hdf5 data chunk iterator """
     for itr in io.iterHdf5ToDict(no_group_file, chunk_size=2):
@@ -44,6 +54,7 @@ def test_iter_chunk_hdf5_data():
             assert np.size(val) <= 3
 
 
+@pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_file():
     """ Test writing an output file """
     npdf = 40
@@ -59,6 +70,8 @@ def test_write_output_file():
     io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
     os.unlink(test_outfile)
 
+
+@pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_parallel_file():
     from mpi4py import MPI
     """ Testing parallel write """
@@ -75,7 +88,9 @@ def test_write_output_parallel_file():
     io.writeDictToHdf5Chunk(groups, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
     io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
     os.unlink(test_outfile)
-    
+
+
+@pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_file_single():
     """ Test writing an output file """
     npdf = 40
@@ -97,6 +112,9 @@ def test_write_output_file_single():
     io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
 
     os.unlink(test_outfile)
+
+
+@pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_parallel_file_single():
     from mpi4py import MPI
     comm = MPI.COMM_WORLD
