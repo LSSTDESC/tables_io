@@ -3,13 +3,16 @@ Unit tests for io_layer module
 """
 
 import os
+import pytest
 
 import unittest
 
 from tables_io import types, convert, TableDict
-from tables_io.testUtils import compare_table_dicts, make_test_data
+from tables_io.testUtils import compare_table_dicts, make_test_data, check_deps
+from tables_io.lazy_modules import apTable, jnp, h5py, pq
 
 
+@pytest.mark.skipif(not check_deps([apTable, h5py, pq, jnp]), reason="Missing an IO package")
 class TableDictTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attributes
     """ Test the utility functions """
 

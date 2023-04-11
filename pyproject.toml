@@ -21,15 +21,21 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "numpy>=1.21.0",
+]
+
+[project.optional-dependencies]
+io = [
+    "astropy",
+    "tables",
+    "h5py>=2.9",
+    "pandas",
+    "pyarrow",
+]
+dev = [
     "astropy",
     "h5py>=2.9",
     "pandas",
     "pyarrow",
-    "tables",
-]
-
-[project.optional-dependencies]
-dev = [
     "mpi4py",
     "coverage",
     "pylint",
@@ -39,6 +45,7 @@ dev = [
     "jax",
     "jaxlib",
 ]
+
 
 [build-system]
 requires = ["setuptools>=61", "wheel", "setuptools_scm[toml]>=6.2"]

@@ -3,10 +3,19 @@ Unit tests for io_layer module
 """
 
 import unittest
+import pytest
 from tables_io import types, convert, convertObj
-from tables_io.testUtils import compare_table_dicts, make_test_data
+from tables_io.testUtils import compare_table_dicts, make_test_data, check_deps
+from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
 
+def test_deps():
+    assert check_deps([tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp])    
+    dummy = 0
+    assert not check_deps([dummy])
+
+
+@pytest.mark.skipif(not check_deps([apTable, pd]), reason="Missing panda or astropy.table")
 class ConvTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attributes
     """ Test the utility functions """
 
