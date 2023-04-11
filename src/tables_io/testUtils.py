@@ -8,7 +8,7 @@ from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd,
 
 def check_deps(deps=None):
     missing = False
-    if deps is None:
+    if deps is None:  #pragma: no cover
         deps = [tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp]
     for mod in deps:
         try:

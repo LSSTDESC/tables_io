@@ -11,6 +11,8 @@ from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd,
 
 def test_deps():
     assert check_deps([tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp])    
+    dummy = 0
+    assert not check_deps([dummy])
 
 
 @pytest.mark.skipif(not check_deps([apTable, pd]), reason="Missing panda or astropy.table")
