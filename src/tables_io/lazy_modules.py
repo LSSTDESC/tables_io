@@ -1,6 +1,5 @@
 """ Lazy loading modules """
 
-import sys
 import importlib
 
 class LazyModule:
@@ -22,8 +21,8 @@ class LazyModule:
             return self._module
         try:
             self._module = importlib.import_module(self.name)
-        except ImportError:
-            raise ImportError("Cannot use selected data format, {self.modulename} not available")
+        except ImportError as err:
+            raise ImportError(f"Cannot use selected data format, {self.name} not available") from err
 
         return self._module
 
@@ -49,7 +48,9 @@ def lazyImport(modulename):
 
 tables = lazyImport('tables')
 apTable = lazyImport('astropy.table')
+apDiffUtils = lazyImport('astropy.utils.diff')
 fits = lazyImport('astropy.io.fits')
 h5py = lazyImport('h5py')
 pd = lazyImport('pandas')
 pq = lazyImport('pyarrow.parquet')
+jnp = lazyImport('jax.numpy')
