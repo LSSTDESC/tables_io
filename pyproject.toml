@@ -24,18 +24,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-fits = [
-    "astropy",
-]
-hdf5 = [
-    "tables",
-    "h5py>=2.9",
-]
-parquet = [
-    "pandas",
-    "pyarrow",
-]
-all_io = [
+io = [
     "astropy",
     "tables",
     "h5py>=2.9",
