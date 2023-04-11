@@ -88,7 +88,9 @@ def getGroupInputDataLength(hg):
     firstname = hg[firstkey].name
     for value in hg.values():
         if len(value) != nrows:
-            raise ValueError(f"Group does not represent a table. Length ({len(value)}) of column {value.name} not not match length ({nrows}) of first column {firstname}")
+            raise ValueError(f"Group does not represent a table. Length ({len(value)})"
+                             f"of column {value.name} not not match length ({nrows}) of"
+                             f"first column {firstname}")
     return nrows
 
 

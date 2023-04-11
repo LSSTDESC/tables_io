@@ -3,7 +3,7 @@
 try:
     from ._version import version
 except:  #pylint: disable=bare-except   #pragma: no cover
-    version = "unknown"  
+    version = "unknown"
 
 from .lazy_modules import *
 

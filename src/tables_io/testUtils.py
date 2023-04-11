@@ -1,10 +1,22 @@
 """
 Utilities for testing
 """
-
+import sys
 import numpy as np
-from astropy.table import Table as apTable
-from astropy.utils.diff import report_diff_values
+from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
+
+
+def check_deps(deps=None):
+    missing = False
+    if deps is None:
+        deps = [tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp]
+    for mod in deps:
+        try:
+            _ = mod.__file__
+        except Exception as err:  #pylint: disable=broad-exception-caught
+            sys.stderr.write(f"Missing {err}")
+            missing = True
+    return not missing
 
 
 def compare_tables(t1, t2):
@@ -58,7 +70,7 @@ def compare_table_dicts(d1, d2, strict=False):
         except KeyError:  #pragma: no cover
             vv = d2[k.upper()]
         if strict:  #pragma: no cover
-            identical &= report_diff_values(v, vv)
+            identical &= apDiffUtils.report_diff_values(v, vv)
         else:  #pragma: no cover
             identical &= compare_tables(v, vv)
     return identical
@@ -73,11 +85,11 @@ def make_test_data():
     vect = np.random.uniform(size=nrow*vect_size).reshape(nrow, vect_size)
     matrix = np.random.uniform(size=nrow*mat_size*mat_size).reshape(nrow, mat_size, mat_size)
     data = dict(scalar=scalar, vect=vect, matrix=matrix)
-    table = apTable(data)
+    table = apTable.Table(data)
     table.meta['a'] = 1
     table.meta['b'] = None
     table.meta['c'] = [3, 4, 5]
-    small_table = apTable(dict(a=np.ones(21), b=np.zeros(21)))
+    small_table = apTable.Table(dict(a=np.ones(21), b=np.zeros(21)))
     small_table.meta['small'] = True
-    tables = dict(data=table, md=small_table)
-    return tables
+    out_tables = dict(data=table, md=small_table)
+    return out_tables

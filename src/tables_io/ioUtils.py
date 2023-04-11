@@ -113,11 +113,11 @@ def initializeHdf5WriteSingle(filepath, groupname=None, comm=None, **kwds):
     outdir = os.path.dirname(os.path.abspath(filepath))
     if not os.path.exists(outdir):  #pragma: no cover
         os.makedirs(outdir, exist_ok=True)
-    if comm == None:
+    if comm is None:
         outf = h5py.File(filepath, "w")
     else:
         if not h5py.get_config().mpi:
-            raise TypeError(f"hdf5py module not prepared for parallel writing.") #pragma: no cover
+            raise TypeError("hdf5py module not prepared for parallel writing.") #pragma: no cover
         outf = h5py.File(filepath, "w",driver='mpio', comm=comm)
     if groupname is None:
         group = outf
@@ -125,7 +125,7 @@ def initializeHdf5WriteSingle(filepath, groupname=None, comm=None, **kwds):
         group = outf.create_group(groupname)
     for key, shape in kwds.items():
         group.create_dataset(key, shape[0], shape[1])
-    return group, outf        
+    return group, outf
 
 
 def initializeHdf5Write(filepath, comm=None, **kwds):
@@ -151,7 +151,7 @@ def initializeHdf5Write(filepath, comm=None, **kwds):
     Each keyword should provide a dictionary with the data set information of the form:
      group = {'data1' : ( (shape1), (dtype1) ), 'data2' : ( (shape2), (dtype2) )}
 
-    group : `str` 
+    group : `str`
         Name of the Hdf5 group
     data  : `str`
         Name of the column to be written
@@ -168,11 +168,11 @@ def initializeHdf5Write(filepath, comm=None, **kwds):
     outdir = os.path.dirname(os.path.abspath(filepath))
     if not os.path.exists(outdir):  #pragma: no cover
         os.makedirs(outdir, exist_ok=True)
-    if comm == None:
+    if comm is None:
         outf = h5py.File(filepath, "w")
     else:
         if not h5py.get_config().mpi:
-            raise TypeError(f"hdf5py module not prepared for parallel writing.") #pragma: no cover
+            raise TypeError("hdf5py module not prepared for parallel writing.") #pragma: no cover
         outf = h5py.File(filepath, "w",driver='mpio', comm=comm)
     groups = {}
     for k, v in kwds.items():
@@ -217,7 +217,7 @@ def writeDictToHdf5ChunkSingle(fout, odict, start, end, **kwds):
         k_out = kwds.get(key, key)
         fout[k_out][start:end] = val
 
-        
+
 def writeDictToHdf5Chunk(groups, odict, start, end, **kwds):
     """ Writes a data chunk to an hdf5 file
 
@@ -282,7 +282,7 @@ def split_tasks_by_rank(tasks, parallel_size, rank):
 
     Parameters
     ----------
-        tasks: Tasks to split up (iterator)  
+        tasks: Tasks to split up (iterator)
         parallel_size: the number of processes under MPI (int)
         rank: the rank of this process under MPI (int)
 
@@ -344,7 +344,8 @@ def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None, rank=0, paralle
         data: dictionary of all data from start:end (dict)
     """
     if rank>=parallel_size:
-        raise TypeError(f"MPI rank {rank} larger than the total number of processes {parallel_size}") #pragma: no cover
+        raise TypeError(f"MPI rank {rank} larger than the total "
+                        f"number of processes {parallel_size}") #pragma: no cover
     f, infp = readHdf5Group(filepath, groupname)
     num_rows = getGroupInputDataLength(f)
     ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
@@ -996,7 +997,9 @@ def iteratorNative(filepath, fmt=None, **kwargs):
         theFunc = funcDict[fType]
         return theFunc(filepath, **kwargs)
     except KeyError as msg:
-        raise NotImplementedError(f"Unsupported FileType for iterateNative {fType}") from msg #pragma: no cover
+        raise NotImplementedError(
+            f"Unsupported FileType for iterateNative {fType}"
+        ) from msg #pragma: no cover
 
 
 def iterator(filepath, tType=None, fmt=None, **kwargs):
