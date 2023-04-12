@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-io = [
+full = [
     "astropy",
     "tables",
     "h5py>=2.9",
