@@ -760,17 +760,20 @@ def writeDataFramesToPq(dataFrames, filepath, **kwargs):
         Path to output file
 
     """
+    basepath, ext = os.path.splitext(filepath)
+    if not ext:
+        ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
     for k, v in dataFrames.items():
-        _ = v.to_parquet(f"{filepath}{k}.pq", **kwargs)
+        _ = v.to_parquet(f"{basepath}{k}{ext}", **kwargs)
 
 
-def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False):
+def readPqToDataFrames(filepath, keys=None, allow_missing_keys=False):
     """
     Reads `pandas.DataFrame` objects from an parquet file.
 
     Parameters
     ----------
-    basepath: `str`
+    filepath: `str`
         Path to input file
 
     keys : `list`
@@ -787,9 +790,12 @@ def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False):
     if keys is None:  #pragma: no cover
         keys = [""]
     dataframes = OrderedDict()
+    basepath, ext = os.path.splitext(filepath)
+    if not ext:
+        ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
     for key in keys:
         try:
-            dataframes[key] = readPqToDataFrame(f"{basepath}{key}.pq")
+            dataframes[key] = readPqToDataFrame(f"{basepath}{key}{ext}")
         except FileNotFoundError as msg:  #pragma: no cover
             if allow_missing_keys:
                 continue
@@ -930,8 +936,7 @@ def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False):
     if fType == PANDAS_HDF5:
         return readH5ToDataFrames(filepath)
     if fType == PANDAS_PARQUET:
-        basepath = os.path.splitext(filepath)[0]
-        return readPqToDataFrames(basepath, keys, allow_missing_keys)
+        return readPqToDataFrames(filepath, keys, allow_missing_keys)
     raise TypeError(f"Unsupported FileType {fType}")  #pragma: no cover
 
 
@@ -1026,15 +1031,15 @@ def iterator(filepath, tType=None, fmt=None, **kwargs):
         yield start, stop, convert(data, tType)
 
 
-def writeNative(odict, basename):
+def writeNative(odict, filepath):
     """ Write a file or files with tables
 
     Parameters
     ----------
     odict : `OrderedDict`, (`str`, `Tablelike`)
         The data to write
-    basename : `str`
-        Basename for the file to write.  The suffix will be applied based on the object type.
+    filepath : `str`
+        File name for the file to write.  If there's no suffix, it will be applied based on the object type.
     """
     istable = False
     if istablelike(odict):
@@ -1052,7 +1057,8 @@ def writeNative(odict, basename):
     except KeyError as msg:  #pragma: no cover
         raise KeyError(f"No native format for table type {tType}") from msg
     fmt = FILE_FORMAT_SUFFIX_MAP[fType]
-    filepath = basename + '.' + fmt
+    if not os.path.splitext(filepath)[1]:
+        filepath = filepath + '.' + fmt
 
     if istable:
         odict = OrderedDict([(DEFAULT_TABLE_KEY[fmt], odict)])
@@ -1072,29 +1078,31 @@ def writeNative(odict, basename):
         writeRecarraysToFits(odict, filepath)
         return filepath
     if fType == PANDAS_PARQUET:
-        writeDataFramesToPq(odict, basename)
-        return basename
+        writeDataFramesToPq(odict, filepath)
+        return filepath
     raise TypeError(f"Unsupported Native file type {fType}")  #pragma: no cover
 
 
-def write(obj, basename, fmt=None):
+def write(obj, filepath, fmt=None):
     """ Write a file or files with tables
 
     Parameters
     ----------
     obj : `Tablelike` or `TableDictLike`
         The data to write
-    basename : `str`
-        Basename for the file to write.  The suffix will be applied based on the object type.
+    filepath : `str`
+        File name for the file to write. If there's no suffix, it will be applied based on the object type.
     fmt : `str` or `None`
         The output file format, If `None` this will use `writeNative`
     """
+    splitpath = os.path.splitext(filepath)
     if fmt is None:
-        splitpath = os.path.splitext(basename)
         if not splitpath[1]:
-            return writeNative(obj, basename)
-        basename = splitpath[0]
+            return writeNative(obj, filepath)
         fmt = splitpath[1][1:]
+
+    if not splitpath[1]:
+        filepath += "." + fmt
 
     try:
         fType = FILE_FORMAT_SUFFIXS[fmt]
@@ -1117,16 +1125,14 @@ def write(obj, basename, fmt=None):
             raise KeyError(f"Native file type not known for {fmt}") from msg
 
         forcedOdict = convert(odict, nativeTType)
-        return writeNative(forcedOdict, basename)
+        return writeNative(forcedOdict, filepath)
 
     if fType == ASTROPY_FITS:
         forcedOdict = convert(odict, AP_TABLE)
-        filepath = f"{basename}.fits"
         writeApTablesToFits(forcedOdict, filepath)
         return filepath
     if fType == PANDAS_HDF5:
         forcedOdict = convert(odict, PD_DATAFRAME)
-        filepath = f"{basename}.h5"
         writeDataFramesToH5(forcedOdict, filepath)
         return filepath
 
