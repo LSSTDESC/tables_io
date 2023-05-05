@@ -32,7 +32,10 @@ jobs:
         activate-environment: tables_io
     - name: Install dependencies
       run: |
+        sudo apt-get update
+        python -m pip install --upgrade pip
         pip install --no-deps .
+        pip install pytest
     - name: Run unit tests with pytest
       run: |
         python -m pytest tests --cov=tables_io --cov-report=xml

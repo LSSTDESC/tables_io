@@ -10,6 +10,6 @@ module_name: tables_io
 mypy_type_checking: none
 preferred_linter: pylint
 project_license: MIT
-project_name: tables_io
+project_name: tables-io
 use_gitlfs: none
 use_isort: false
