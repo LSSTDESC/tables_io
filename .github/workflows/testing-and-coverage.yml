@@ -47,6 +47,3 @@ jobs:
     - name: Analyze code with linter
       run: |
         pylint -rn -sn --recursive=y ./src --rcfile=./src/.pylintrc
-    - name: Build docs
-      run: |
-        sphinx-build -T -E -b html -d docs/build/doctrees ./docs docs/build/html
