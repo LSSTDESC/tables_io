@@ -201,4 +201,4 @@ Documentation Contents
 
    install
    tables_io
-   
+   API Reference <autoapi/index>   
