@@ -35,9 +35,15 @@ jobs:
         sudo apt-get update
         python -m pip install --upgrade pip
         pip install --no-deps .
-        pip install pytest
+        pip install pytest pylint pycov
     - name: Run unit tests with pytest
       run: |
         python -m pytest tests --cov=tables_io --cov-report=xml
     - name: Upload coverage report to codecov
       uses: codecov/codecov-action@v3
+    - name: Analyze code with linter
+      run: |
+        pylint -rn -sn --recursive=y ./src --rcfile=./src/.pylintrc
+    - name: Build docs
+      run: |
+        sphinx-build -T -E -b html -d docs/build/doctrees ./docs docs/build/html
