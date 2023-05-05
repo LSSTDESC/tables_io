@@ -2,6 +2,7 @@
 name = "tables-io"
 license = {file = "LICENSE"}
 readme = "README.md"
+description = "Input/output and conversion functions for tabular data"
 authors = [
     { name = "Eric Charles", email = "echarles@slac.stanford.edu" }
 ]
