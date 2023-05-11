@@ -409,7 +409,7 @@ def iterPqToDataFrame(filepath,chunk_size=100_000,columns=None,**kwargs):
         end: ending index (int)
         data: `pandas.DataFrame` of all data from start:end (dict)
     """
-    parquet_file = pq.read_table(filepath, **kwargs)
+    parquet_file = pq.read_table(filepath, columns=columns, **kwargs)
     start = 0
     end = 0
     for table_chunk in parquet_file.to_batches(max_chunksize=chunk_size):
