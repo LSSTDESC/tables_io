@@ -1,12 +1,14 @@
 """ Unit tests for the fileIO module """
 
-import numpy as np
 import sys
-import pytest
 import unittest
+
+import numpy as np
+import pytest
+
 from tables_io import arrayUtils, types
+from tables_io.lazy_modules import apTable, lazyImport, pd
 from tables_io.testUtils import check_deps
-from tables_io.lazy_modules import lazyImport, apTable, pd
 
 
 def test_array_length():
@@ -164,7 +166,7 @@ def test_lazy_load2():
     assert "wave" not in sys.modules
 
     # should trigger load
-    assert "audioop" in dir(wave)
+    assert "WAVE_FORMAT_PCM" in dir(wave)
     assert wave.sys == sys
 
     assert "wave" in sys.modules
