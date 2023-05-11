@@ -46,4 +46,4 @@ jobs:
       uses: codecov/codecov-action@v3
     - name: Analyze code with linter
       run: |
-        pylint -rn -sn --recursive=y ./src --rcfile=./src/.pylintrc
+        pylint -rn -sn --recursive=y ./src

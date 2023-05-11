@@ -18,7 +18,6 @@ dynamic = ["version"]
 dependencies = [
     "numpy>=1.21.0",
     "deprecated",
-    "ipykernel", # Support for Jupyter notebooks
 ]
 
 # On a mac, install optional dependencies with `pip install '.[dev]'` (include the single quotes)
@@ -78,3 +77,66 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:"
 ]
+
+[tool.black]
+line-length = 110
+target-version = ["py310"]
+
+[tool.pydocstyle]
+convention = "numpy"
+add_select = [
+    "D212" # Multi-line docstring summary should start at the first line
+]
+add-ignore = [
+    "D105", # Missing docstring in magic method
+    "D102", # Missing docstring in public method (needed for docstring inheritance)
+    "D100", # Missing docstring in public module
+    # Below are required to allow multi-line summaries.
+    "D200", # One-line docstring should fit on one line with quotes
+    "D205", # 1 blank line required between summary line and description
+    "D400", # First line should end with a period
+    # Properties shouldn't be written in imperative mode. This will be fixed
+    # post 6.1.1, see https://github.com/PyCQA/pydocstyle/pull/546
+    "D401",
+]
+
+[tool.pylint]
+disable = [
+    "abstract-method",
+    "invalid-name",
+    "too-many-statements",
+    "missing-module-docstring",
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "too-few-public-methods",
+    "duplicate-code",
+    "use-dict-literal",
+    "broad-exception-caught",
+]
+max-line-length = 110
+max-locals = 50
+max-branches = 25
+max-public-methods = 50
+max-module-lines = 1500
+
+[tool.isort]
+profile = "black"
+line_length = 110
+
+[tool.pytest.ini_options]
+addopts = [
+    "--cov=tables_io",
+    "--cov-report=html"
+]
+#flake8-ignore = "E203"
+
+[tool.mypy]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+ignore_missing_imports = true
+namespace_packages = true
+show_error_codes = true
+strict_equality = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
