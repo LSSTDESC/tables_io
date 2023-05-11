@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 import numpy as np
 
-from .lazy_modules import pd, pq, h5py, apTable, fits
+from .lazy_modules import pa, pd, pq, h5py, apTable, fits
 
 from .arrayUtils import getGroupInputDataLength
 
@@ -391,7 +391,7 @@ def iterH5ToDataFrame(filepath, chunk_size=100_000, groupname=None):
     #infp.close()
 
 
-def iterPqToDataFrame(filepath):
+def iterPqToDataFrame(filepath,chunk_size=100_000,columns=None,**kwargs):
     """
     iterator for sending chunks of data in parquet
 
@@ -404,12 +404,20 @@ def iterPqToDataFrame(filepath):
     output:
         iterator chunk
 
-    Currently only implemented for hdf5, returns `tuple`
+    Returns `tuple`
         start: start index (int)
         end: ending index (int)
         data: `pandas.DataFrame` of all data from start:end (dict)
     """
-    raise NotImplementedError("iterPqToDataFrame")
+    parquet_file = pq.read_table(filepath, **kwargs)
+    start = 0
+    end = 0
+    for table_chunk in parquet_file.to_batches(max_chunksize=chunk_size):
+        data = pa.Table.from_batches([table_chunk]).to_pandas()
+        num_rows = len(data)
+        end += num_rows
+        yield start, end, data
+        start += num_rows
 
 
 ### II.   Reading and Writing Files
