@@ -160,8 +160,8 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
         """ Test writing / reading pandas dataframes to parquet """
         self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', list(self._tables.keys()))
         self._do_loopback_single(types.PD_DATAFRAME, 'test_out_single', 'pq', [''])
-        self._do_iterator('test_out_single.pq', types.PD_DATAFRAME, True)
-        self._do_open('test_out_single.pq', in_context=False)
+        self._do_iterator('test_out_single.pq', types.PD_DATAFRAME)
+        self._do_open('test_out_single.pq')
         
     def testBad(self):  #pylint: disable=no-self-use
         """ Test that bad calls to write are dealt with """
