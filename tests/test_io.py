@@ -81,8 +81,6 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
 
         basepath_native = "%s_native" % basepath
         filepath_native = write(obj_c, basepath_native)
-        if keys is not None:
-            filepath_native += ".pq"
         self._files.append(filepath_native)
         obj_r_native = read(filepath_native, tType=tType, keys=keys)
         table_r_native = convert(obj_r_native, types.AP_TABLE)
