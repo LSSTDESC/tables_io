@@ -29,20 +29,26 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
             if os.path.exists(ff):
                 os.unlink(ff)
 
-    def _do_loopback(self, tType, basepath, fmt, keys=None):
+    def _do_loopback(self, tType, basepath, fmt, keys=None, **kwargs):
         """ Utility function to do loopback tests """
         odict_c = convert(self._tables, tType)
         filepath = write(odict_c, basepath, fmt)
+        expected_tables = {}
         if keys is None:
             self._files.append(filepath)
+            expected_tables = self._tables
         else:
             for key in keys:
                 self._files.append("%s%s.%s" % (basepath, key, fmt))
-        odict_r = read(filepath, tType=tType, fmt=fmt, keys=keys)
+                expected_tables[key] = self._tables[key]
+        odict_r = read(filepath, tType=tType, fmt=fmt, keys=keys, **kwargs)
         tables_r = convert(odict_r, types.AP_TABLE)
-        assert compare_table_dicts(self._tables, tables_r)
+        if keys is not None and len(keys) == 1 and "data" in keys:
+            assert compare_tables(expected_tables[key], tables_r, **kwargs)
+        else:
+            assert compare_table_dicts(expected_tables, tables_r, **kwargs)
 
-    def _do_loopback_jax(self, basepath, fmt, keys=None):
+    def _do_loopback_jax(self, basepath, fmt, keys=None, **kwargs):
         """ Utility function to do loopback tests writing data as a jax array """
         odict_c = convert(self._tables, types.NUMPY_DICT)
         for key, val in odict_c["data"].items():
@@ -53,11 +59,11 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
         else:
             for key in keys:
                 self._files.append("%s%s.%s" % (basepath, key, fmt))
-        odict_r = read(filepath, tType=types.NUMPY_DICT, fmt=fmt, keys=keys)
+        odict_r = read(filepath, tType=types.NUMPY_DICT, fmt=fmt, keys=keys, **kwargs)
         tables_r = convert(odict_r, types.AP_TABLE)
-        assert compare_table_dicts(self._tables, tables_r)
+        assert compare_table_dicts(self._tables, tables_r, **kwargs)
 
-    def _do_loopback_single(self, tType, basepath, fmt, keys=None):
+    def _do_loopback_single(self, tType, basepath, fmt, keys=None, **kwargs):
         """ Utility function to do loopback tests """
         obj_c = convert(self._table, tType)
         filepath = write(obj_c, basepath, fmt)
@@ -72,9 +78,9 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
         else:
             for key in keys:
                 self._files.append("%s%s.%s" % (basepath, key, fmt))
-        obj_r = read(filepath, tType=tType, fmt=fmt, keys=keys)
+        obj_r = read(filepath, tType=tType, fmt=fmt, keys=keys, **kwargs)
         table_r = convert(obj_r, types.AP_TABLE)
-        assert compare_tables(self._table, table_r)
+        assert compare_tables(self._table, table_r, **kwargs)
 
         if types.FILE_FORMAT_SUFFIXS[fmt] not in types.NATIVE_TABLE_TYPE:
             return
@@ -86,17 +92,17 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
         self._files.append(filepath_native)
         obj_r_native = read(filepath_native, tType=tType, keys=keys)
         table_r_native = convert(obj_r_native, types.AP_TABLE)
-        assert compare_tables(self._table, table_r_native)
+        assert compare_tables(self._table, table_r_native, **kwargs)
 
 
-    def _do_iterator(self, filepath, tType, expectFail=False, **kwargs):
+    def _do_iterator(self, filepath, tType, expectFail=False, chunk_size=50, **kwargs):
         """ Test the chunk iterator """
         dl = []
         try:
-            for _, _, data in iterator(filepath, tType=tType, **kwargs):
+            for _, _, data in iterator(filepath, tType=tType, chunk_size=chunk_size, **kwargs):
                 dl.append(convert(data, types.AP_TABLE))
             table_iterated = apTable.vstack(dl)
-            assert compare_tables(self._table, table_iterated)
+            assert compare_tables(self._table, table_iterated, **kwargs)
         except NotImplementedError as msg:
             if expectFail:
                 pass
@@ -159,8 +165,13 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
     def testPQLoopback(self):
         """ Test writing / reading pandas dataframes to parquet """
         self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', list(self._tables.keys()))
+        self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', ['data'])
+        self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', ['md'])
+        self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', ['data'], columns=['scalar'])
+        self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', ['md'], columns=['a'])
         self._do_loopback_single(types.PD_DATAFRAME, 'test_out_single', 'pq', [''])
-        self._do_iterator('test_out_single.pq', types.PD_DATAFRAME)
+        self._do_iterator('test_out_single.pq', types.PD_DATAFRAME, chunk_size=50)
+        self._do_iterator('test_out_single.pq', types.PD_DATAFRAME, chunk_size=50, columns=['scalar'])
         self._do_open('test_out_single.pq')
         
     def testBad(self):  #pylint: disable=no-self-use
