@@ -76,7 +76,7 @@ NATIVE_TABLE_TYPE = OrderedDict([(val, key) for key, val in NATIVE_FORMAT.items(
 
 # Allowed formats to write various table types
 ALLOWED_FORMATS = OrderedDict([
-    (AP_TABLE, [ASTROPY_HDF5, ASTROPY_HDF5]),
+    (AP_TABLE, [ASTROPY_FITS, ASTROPY_HDF5]),
     (NUMPY_DICT, [NUMPY_HDF5]),
     (NUMPY_RECARRAY, [ASTROPY_FITS]),
     (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5])])
@@ -206,4 +206,4 @@ def fileType(filepath, fmt=None):
         return FILE_FORMAT_SUFFIXS[fmt]
     except KeyError as msg:
         raise KeyError(f"Unknown file format {fmt}, supported types are"
-                       "{list(FILE_FORMAT_SUFFIXS.keys())}") from msg
+                       f"{list(FILE_FORMAT_SUFFIXS.keys())}") from msg
