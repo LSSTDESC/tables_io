@@ -795,8 +795,14 @@ def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False, columns=No
     allow_missing_keys: `bool`
         If False will raise FileNotFoundError if a key is missing
 
-    columns : `list` (`str`) or `None`
-        Names of the columns to read, `None` will read all the columns
+    columns : `dict` of `list (str)`, `list` (`str`), or `None`
+        Names of the columns to read.
+            - if a dictionary, keys are the `keys`, and values are a list of string column names. 
+                for each keyed table, only the columns in the value list will be loaded. 
+                if the key is not found, all columns will be loaded.
+            - if a list, only the columns in the list will be loaded.
+            - `None` will read all the columns
+
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
@@ -809,7 +815,14 @@ def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False, columns=No
     dataframes = OrderedDict()
     for key in keys:
         try:
-            dataframes[key] = readPqToDataFrame(f"{basepath}{key}.pq", columns=columns, **kwargs)
+            column_list = None
+            if pd.api.types.is_dict_like(columns):
+                column_list = columns[key]
+            elif pd.api.types.is_list_like(columns):
+                column_list = columns
+            print("column_list", column_list)
+
+            dataframes[key] = readPqToDataFrame(f"{basepath}{key}.pq", columns=column_list, **kwargs)
         except FileNotFoundError as msg:  #pragma: no cover
             if allow_missing_keys:
                 continue
@@ -982,10 +995,10 @@ def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False, **
     """
     odict = readNative(filepath, fmt, keys, allow_missing_keys, **kwargs)
     if len(odict) == 1:
-        for defName in ['', None, '__astropy_table__', 'data']:
-            if defName in odict:
-                odict = odict[defName]
-                break
+        # For special keys, use the table alone without an enclosing dictionary.
+        single_dict_key = list(odict.keys())[0]
+        if single_dict_key in ['', None, '__astropy_table__', 'data']:
+            odict = odict[single_dict_key]
     if tType is None:  #pragma: no cover
         return odict
     return convert(odict, tType)

@@ -8,7 +8,7 @@ import pytest
 import unittest
 from tables_io import types, convert, io_open, read, write, iterator
 from tables_io.testUtils import compare_table_dicts, compare_tables, make_test_data, check_deps
-from tables_io.lazy_modules import apTable, jnp, h5py, pq
+from tables_io.lazy_modules import apTable, jnp, h5py, pd, pq
 
 
 @pytest.mark.skipif(not check_deps([apTable, h5py, pq, jnp]), reason="Missing an IO package")
@@ -29,24 +29,29 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
             if os.path.exists(ff):
                 os.unlink(ff)
 
-    def _do_loopback(self, tType, basepath, fmt, keys=None, **kwargs):
+    def _do_loopback(self, tType, basepath, fmt,**kwargs):
+        """ Utility function to do loopback tests """
+        odict_c = convert(self._tables, tType)
+        filepath = write(odict_c, basepath, fmt)
+        self._files.append(filepath)
+        odict_r = read(filepath, tType=tType, fmt=fmt, **kwargs)
+        tables_r = convert(odict_r, types.AP_TABLE)
+        assert compare_table_dicts(self._tables, tables_r, **kwargs)
+   
+    def _do_loopback_with_keys(self, tType, basepath, fmt, keys, **kwargs):
         """ Utility function to do loopback tests """
         odict_c = convert(self._tables, tType)
         filepath = write(odict_c, basepath, fmt)
         expected_tables = {}
-        if keys is None:
-            self._files.append(filepath)
-            expected_tables = self._tables
-        else:
-            for key in keys:
-                self._files.append("%s%s.%s" % (basepath, key, fmt))
-                expected_tables[key] = self._tables[key]
+        for key in keys:
+            self._files.append("%s%s.%s" % (basepath, key, fmt))
+            expected_tables[key] = self._tables[key]
         odict_r = read(filepath, tType=tType, fmt=fmt, keys=keys, **kwargs)
         tables_r = convert(odict_r, types.AP_TABLE)
-        if keys is not None and len(keys) == 1 and "data" in keys:
-            assert compare_tables(expected_tables[key], tables_r, **kwargs)
-        else:
+        if pd.api.types.is_dict_like(tables_r):
             assert compare_table_dicts(expected_tables, tables_r, **kwargs)
+        else:
+            assert compare_tables(list(expected_tables.values())[0], tables_r, **kwargs)         
 
     def _do_loopback_jax(self, basepath, fmt, keys=None, **kwargs):
         """ Utility function to do loopback tests writing data as a jax array """
@@ -164,11 +169,12 @@ class IoTestCase(unittest.TestCase):  #pylint: disable=too-many-instance-attribu
         
     def testPQLoopback(self):
         """ Test writing / reading pandas dataframes to parquet """
-        self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', list(self._tables.keys()))
-        self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', ['data'])
-        self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', ['md'])
-        self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', ['data'], columns=['scalar'])
-        self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', ['md'], columns=['a'])
+        self._do_loopback_with_keys(types.PD_DATAFRAME, 'test_out', 'pq', list(self._tables.keys()))
+        self._do_loopback_with_keys(types.PD_DATAFRAME, 'test_out', 'pq', ['data'])
+        self._do_loopback_with_keys(types.PD_DATAFRAME, 'test_out', 'pq', ['md'])
+        self._do_loopback_with_keys(types.PD_DATAFRAME, 'test_out', 'pq', ['data'], columns=['scalar'])
+        self._do_loopback_with_keys(types.PD_DATAFRAME, 'test_out', 'pq', ['md'], columns=['a'])
+        # self._do_loopback(types.PD_DATAFRAME, 'test_out', 'pq', ['data','md'], columns={'md':['a'],'data':['scalar']})
         self._do_loopback_single(types.PD_DATAFRAME, 'test_out_single', 'pq', [''])
         self._do_iterator('test_out_single.pq', types.PD_DATAFRAME, chunk_size=50)
         self._do_iterator('test_out_single.pq', types.PD_DATAFRAME, chunk_size=50, columns=['scalar'])
