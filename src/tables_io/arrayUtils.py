@@ -1,7 +1,9 @@
 """Array-related utility functions for tables_io"""
 
 from collections import OrderedDict
+
 import numpy as np
+
 
 def arrayLength(arr):
     """ Get the length of an array
@@ -164,7 +166,10 @@ def checkKeys(in_dicts):
     in_dicts : `list`, (`OrderedDict`, (`str`, `numpy.array`))
         The dictionaries for which compare keys
 
-    Raises KeyError if one does not match.
+    Raises
+    ------
+    KeyError
+        if keys do not match
     """
     if not in_dicts:  #pragma: no cover
         return

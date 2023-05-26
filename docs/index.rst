@@ -200,5 +200,4 @@ Documentation Contents
    :maxdepth: 3
 
    install
-   tables_io
    API Reference <autoapi/index>   

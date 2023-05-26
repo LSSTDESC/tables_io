@@ -1,9 +1,8 @@
 """Type defintions for tables_io"""
 
 import os
-
 from collections import OrderedDict
-from collections.abc import Mapping, Iterable
+from collections.abc import Iterable, Mapping
 
 import numpy as np
 
@@ -111,9 +110,10 @@ def tableType(obj):
 
     Raises
     ------
-    TypeError : The object is not a supported type
-
-    IndexError : One of the columns in a Mapping is the wrong length
+    TypeError
+        The object is not a supported type
+    IndexError
+        One of the columns in a Mapping is the wrong length
     """
     if isDataFrame(obj):
         return PD_DATAFRAME
@@ -198,7 +198,8 @@ def fileType(filepath, fmt=None):
 
     Raises
     ------
-    KeyError : The file format is not a support value
+    KeyError
+        The file format is not a support value
     """
     if fmt is None:
         fmt = os.path.splitext(filepath)[1][1:]
