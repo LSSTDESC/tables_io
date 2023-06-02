@@ -5,18 +5,28 @@ from collections import OrderedDict
 
 import numpy as np
 
-from .lazy_modules import pa, pd, pq, h5py, apTable, fits
-
 from .arrayUtils import getGroupInputDataLength
-
-from .types import ASTROPY_FITS, ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_HDF5, PANDAS_PARQUET,\
-     NATIVE_FORMAT, FILE_FORMAT_SUFFIXS, FILE_FORMAT_SUFFIX_MAP, DEFAULT_TABLE_KEY,\
-     NATIVE_TABLE_TYPE, AP_TABLE, PD_DATAFRAME,\
-     fileType, tableType, istablelike, istabledictlike
-
-from .convUtils import dataFrameToDict, hdf5GroupToDict, convert
-
-
+from .convUtils import convert, dataFrameToDict, hdf5GroupToDict
+from .lazy_modules import apTable, fits, h5py, pa, pd, pq
+from .types import (
+    AP_TABLE,
+    ASTROPY_FITS,
+    ASTROPY_HDF5,
+    DEFAULT_TABLE_KEY,
+    FILE_FORMAT_SUFFIX_MAP,
+    FILE_FORMAT_SUFFIXS,
+    NATIVE_FORMAT,
+    NATIVE_TABLE_TYPE,
+    NUMPY_FITS,
+    NUMPY_HDF5,
+    PANDAS_HDF5,
+    PANDAS_PARQUET,
+    PD_DATAFRAME,
+    fileType,
+    istabledictlike,
+    istablelike,
+    tableType,
+)
 
 ### I. Iteration functions
 
@@ -24,8 +34,7 @@ from .convUtils import dataFrameToDict, hdf5GroupToDict, convert
 ### I A. HDF5 partial read/write functions
 
 def readHdf5DatasetToArray(dataset, start=None, end=None):
-    """
-    Reads part of a hdf5 dataset into a `numpy.array`
+    """Reads part of a hdf5 dataset into a `numpy.array`
 
     Parameters
     ----------
@@ -105,8 +114,8 @@ def initializeHdf5WriteSingle(filepath, groupname=None, comm=None, **kwds):
     dtype : `str`
         The data type for this dataset
 
-   For exmaple
-    `initializeHdf5WriteSingle('test.hdf5', data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))`
+    For example
+    ``initializeHdf5WriteSingle('test.hdf5', data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))``
     Would initialize an hdf5 file with two datasets, with shapes and data types as given
 
     """
@@ -149,7 +158,7 @@ def initializeHdf5Write(filepath, comm=None, **kwds):
     -----
     The keywords should be used to create groups within the hdf5 file.
     Each keyword should provide a dictionary with the data set information of the form:
-     group = {'data1' : ( (shape1), (dtype1) ), 'data2' : ( (shape2), (dtype2) )}
+    ``group = {'data1' : ( (shape1), (dtype1) ), 'data2' : ( (shape2), (dtype2) )}``
 
     group : `str`
         Name of the Hdf5 group
@@ -160,8 +169,8 @@ def initializeHdf5Write(filepath, comm=None, **kwds):
     dtype : `str`
         The data type for this dataset
 
-    For exmaple
-    `initializeHdf5Write('test.hdf5', data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))`
+    For example
+    ``initializeHdf5Write('test.hdf5', data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))``
 
     Would initialize an hdf5 file with one group and two datasets, with shapes and data types as given
     """
@@ -206,7 +215,7 @@ def writeDictToHdf5ChunkSingle(fout, odict, start, end, **kwds):
 
     For each item in data_dict, the output location is set as
 
-    `k_out = kwds.get(key, key)`
+    ``k_out = kwds.get(key, key)``
 
     This will check the kwds to see if they contain `key` and if so, will
     return the corresponding value.  Otherwise it will just return `key`.
@@ -282,12 +291,17 @@ def split_tasks_by_rank(tasks, parallel_size, rank):
 
     Parameters
     ----------
-        tasks: Tasks to split up (iterator)
-        parallel_size: the number of processes under MPI (int)
-        rank: the rank of this process under MPI (int)
+    tasks: iterator
+        Tasks to split up
+    parallel_size: int
+        the number of processes under MPI
+    rank: int
+        the rank of this process under MPI
 
     Returns
-        output: number of the first task for this process (iterator)
+    -------
+    output: iterator
+        number of the first task for this process
     """
     for i, task in enumerate(tasks):
         if i % parallel_size == rank:
@@ -301,17 +315,21 @@ def data_ranges_by_rank(n_rows, chunk_rows, parallel_size, rank):
 
     Parameters
     ----------
-    n_rows: Total number of rows to split up (int)
-    chunk_rows: Size of each chunk to be read (int)
-    parallel_size: the number of processes under MPI (int)
-    rank: the rank of this process under MPI (int)
+    n_rows: int
+        Total number of rows to split up
+    chunk_rows: int
+        Size of each chunk to be read
+    parallel_size: int
+        the number of processes under MPI
+    rank: int
+        the rank of this process under MPI
 
-    Returns
-        output:
-        iterator chunk
-
-        start: start index (int)
-        end: ending index (int)
+    Yields
+    ------
+    start: int
+        start index 
+    end: int
+        ending index 
     """
     n_chunks = n_rows // chunk_rows
     if n_chunks * chunk_rows < n_rows:  # pragma: no cover
@@ -326,22 +344,27 @@ def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None, rank=0, paralle
     """
     iterator for sending chunks of data in hdf5.
 
+    Currently only implemented for hdf5, returns `tuple`
+
     Parameters
     ----------
-      filepath: input file name (str)
-      chunk_size: size of chunk to iterate over (int)
-      rank: the rank of this process under MPI (int)
-      parallel_size: the number of processes under MPI (int)
+    filepath: str
+        input file name
+    chunk_size: int
+        size of chunk to iterate over
+    rank: int
+        the rank of this process under MPI
+    parallel_size: int
+        the number of processes under MPI
 
-    Returns
+    Yields
     -------
-    output:
-        iterator chunk
-
-    Currently only implemented for hdf5, returns `tuple`
-        start: start index (int)
-        end: ending index (int)
-        data: dictionary of all data from start:end (dict)
+    start: int
+        start index 
+    end: int
+        ending index 
+    data: dict
+        dictionary of all data from start:end
     """
     if rank>=parallel_size:
         raise TypeError(f"MPI rank {rank} larger than the total "
@@ -363,18 +386,15 @@ def iterH5ToDataFrame(filepath, chunk_size=100_000, groupname=None):
 
     Parameters
     ----------
-      filepath: input file name (str)
-      chunk_size: size of chunk to iterate over (int)
+    filepath: str
+        input file name
+    chunk_size: int
+        size of chunk to iterate over
 
     Returns
     -------
     output:
         iterator chunk
-
-    Currently only implemented for hdf5, returns `tuple`
-        start: start index (int)
-        end: ending index (int)
-        data: pandas.DataFrame of all data from start:end (dict)
     """
     raise NotImplementedError("iterH5ToDataFrame")
 
@@ -397,21 +417,20 @@ def iterPqToDataFrame(filepath,chunk_size=100_000,columns=None,**kwargs):
 
     Parameters
     ----------
-    filepath: input file name (str)
+    filepath: str
+        input file name
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
     **kwargs : additional arguments to pass to the native file reader
 
-    Returns
-    -------
-    output:
-        iterator chunk
-
-
-    Returns `tuple`
-        start: start index (int)
-        end: ending index (int)
-        data: `pandas.DataFrame` of all data from start:end (dict)
+    Yields
+    ------
+    start: int
+        start index 
+    end: int
+        ending index 
+    data: `pandas.DataFrame`
+        data frame of all data from start:end
     """
     parquet_file = pq.read_table(filepath, columns=columns, **kwargs)
     start = 0
@@ -436,11 +455,10 @@ def writeApTablesToFits(tables, filepath, **kwargs):
     ----------
     tables : `dict` of `astropy.table.Table`
         Keys will be HDU names, values will be tables
-
     filepath: `str`
         Path to output file
-
-    kwargs are passed to `astropy.io.fits.writeto` call.
+    kwargs:
+        kwargs are passed to `astropy.io.fits.writeto` call.
     """
     out_list = [fits.PrimaryHDU()]
     for k, v in tables.items():
@@ -485,8 +503,8 @@ def writeRecarraysToFits(recarrays, filepath, **kwargs):
 
     filepath: `str`
         Path to output file
-
-    kwargs are passed to `astropy.io.fits.writeto` call.
+    kwargs:
+        kwargs are passed to `astropy.io.fits.writeto` call.
     """
     out_list = [fits.PrimaryHDU()]
     for k, v in recarrays.items():
@@ -530,8 +548,8 @@ def writeApTablesToHdf5(tables, filepath, **kwargs):
 
     filepath: `str`
         Path to output file
-
-    kwargs are passed to `astropy.table.Table` call.
+    kwargs:
+        kwargs are passed to `astropy.table.Table` call.
     """
     for k, v in tables.items():
         v.write(filepath, path=k, append=True, format='hdf5', **kwargs)
@@ -546,7 +564,7 @@ def readHdf5ToApTables(filepath):
     filepath: `str`
         Path to input file
 
-     Returns
+    Returns
     -------
     tables : `OrderedDict` of `astropy.table.Table`
         Keys will be 'paths', values will be tables

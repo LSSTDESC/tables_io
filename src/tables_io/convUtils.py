@@ -4,12 +4,9 @@ from collections import OrderedDict
 
 import numpy as np
 
-from .lazy_modules import pd, apTable, fits
-
 from .arrayUtils import forceToPandables
-
-from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, tableType, istablelike
-
+from .lazy_modules import apTable, fits, pd
+from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, istablelike, tableType
 
 ### I. Single `Tablelike` conversions
 
@@ -81,7 +78,7 @@ def apTableToDict(tab):
     tab :  `astropy.table.Table`
         The table
 
-    Returnes
+    Returns
     --------
     data : `OrderedDict`,  (`str` : `numpy.array`)
         The tabledata
@@ -101,7 +98,7 @@ def recarrayToDict(rec):
     rec :  `np.recarray`
         The input recarray
 
-    Returnes
+    Returns
     --------
     data : `OrderedDict`,  (`str` : `numpy.array`)
         The tabledata
@@ -118,7 +115,7 @@ def dataFrameToDict(df):
     df :  `pandas.DataFrame`
         The dataframe
 
-    Returnes
+    Returns
     --------
     data : `OrderedDict`,  (`str` : `numpy.array`)
         The tabledata
@@ -142,7 +139,7 @@ def hdf5GroupToDict(hg):
     hg :  `h5py.File` or `h5py.Group`
         The hdf5 object
 
-    Returnes
+    Returns
     --------
     data : `OrderedDict`,  (`str` : `numpy.array`)
         The tabledata
@@ -191,7 +188,7 @@ def apTableToRecarray(tab):
     tab :  `astropy.table.Table`
         The table
 
-    Returnes
+    Returns
     --------
     rec : `numpy.recarray`
         The output rec array
@@ -317,7 +314,7 @@ def convertObj(obj, tType):
     obj : `object`
        The object being converted
     tType : `int`
-       The type of object to convert to, one of `TABULAR_FORMAT_NAMES`
+       The type of object to convert to, one of `TABULAR_FORMAT_NAMES.keys()`
 
     Returns
     -------
