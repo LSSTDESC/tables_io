@@ -19,7 +19,7 @@ def check_deps(deps=None):
     return not missing
 
 
-def compare_tables(t1, t2):
+def compare_tables(t1, t2, columns=None):
     """ Compare all the tables in two `astropy.table.Table`)
 
     Parameters
@@ -38,6 +38,9 @@ def compare_tables(t1, t2):
     -----
     For now this explicitly flattens each of the columns, to avoid issues with shape
     """
+    if columns:
+        t1.keep_columns(columns)
+        t2.keep_columns(columns)
     if sorted(t1.colnames) != sorted(t2.colnames):  #pragma: no cover
         return False
     for cname in t1.colnames:
@@ -48,7 +51,7 @@ def compare_tables(t1, t2):
     return True
 
 
-def compare_table_dicts(d1, d2, strict=False):
+def compare_table_dicts(d1, d2, strict=False, columns=None):
     """ Compare all the tables in two `OrderedDict`, (`str`, `astropy.table.Table`)
 
     Parameters
@@ -72,7 +75,7 @@ def compare_table_dicts(d1, d2, strict=False):
         if strict:  #pragma: no cover
             identical &= apDiffUtils.report_diff_values(v, vv)
         else:  #pragma: no cover
-            identical &= compare_tables(v, vv)
+            identical &= compare_tables(v, vv, columns=columns)
     return identical
 
 
