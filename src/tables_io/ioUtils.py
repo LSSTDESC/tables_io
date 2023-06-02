@@ -397,12 +397,16 @@ def iterPqToDataFrame(filepath,chunk_size=100_000,columns=None,**kwargs):
 
     Parameters
     ----------
-      filepath: input file name (str)
+    filepath: input file name (str)
+    columns : `list` (`str`) or `None`
+        Names of the columns to read, `None` will read all the columns
+    **kwargs : additional arguments to pass to the native file reader
 
     Returns
     -------
     output:
         iterator chunk
+
 
     Returns `tuple`
         start: start index (int)
@@ -738,7 +742,7 @@ def writeDataFramesToH5(dataFrames, filepath):
 
 ### II E.  Reading and Writing `pandas.DataFrame` to/from `parquet`
 
-def readPqToDataFrame(filepath):
+def readPqToDataFrame(filepath, columns=None, **kwargs):
     """
     Reads a `pandas.DataFrame` object from an parquet file.
 
@@ -747,12 +751,16 @@ def readPqToDataFrame(filepath):
     filepath: `str`
         Path to input file
 
+    columns : `list` (`str`) or `None`
+        Names of the columns to read, `None` will read all the columns
+    **kwargs : additional arguments to pass to the native file reader
+
     Returns
     -------
     df : `pandas.DataFrame`
         The data frame
     """
-    return pd.read_parquet(filepath, engine='pyarrow')
+    return pd.read_parquet(filepath, engine='pyarrow', columns=columns, **kwargs)
 
 
 def writeDataFramesToPq(dataFrames, filepath, **kwargs):
@@ -772,7 +780,7 @@ def writeDataFramesToPq(dataFrames, filepath, **kwargs):
         _ = v.to_parquet(f"{filepath}{k}.pq", **kwargs)
 
 
-def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False):
+def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False, columns=None, **kwargs):
     """
     Reads `pandas.DataFrame` objects from an parquet file.
 
@@ -787,6 +795,16 @@ def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False):
     allow_missing_keys: `bool`
         If False will raise FileNotFoundError if a key is missing
 
+    columns : `dict` of `list (str)`, `list` (`str`), or `None`
+        Names of the columns to read.
+            - if a dictionary, keys are the `keys`, and values are a list of string column names. 
+                for each keyed table, only the columns in the value list will be loaded. 
+                if the key is not found, all columns will be loaded.
+            - if a list, only the columns in the list will be loaded.
+            - `None` will read all the columns
+
+    **kwargs : additional arguments to pass to the native file reader
+
     Returns
     -------
     tables : `OrderedDict` of `pandas.DataFrame`
@@ -797,17 +815,24 @@ def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False):
     dataframes = OrderedDict()
     for key in keys:
         try:
-            dataframes[key] = readPqToDataFrame(f"{basepath}{key}.pq")
+            column_list = None
+            if pd.api.types.is_dict_like(columns):
+                column_list = columns[key]
+            elif pd.api.types.is_list_like(columns):
+                column_list = columns
+            print("column_list", column_list)
+
+            dataframes[key] = readPqToDataFrame(f"{basepath}{key}.pq", columns=column_list, **kwargs)
         except FileNotFoundError as msg:  #pragma: no cover
             if allow_missing_keys:
                 continue
-            raise FileNotFoundError from msg
+            raise msg
     return dataframes
 
 
 ### II F.  Reading and Writing to `OrderedDict`, (`str`, `numpy.array`)
 
-def readPqToDict(filepath, columns=None):
+def readPqToDict(filepath, columns=None, **kwargs):
     """ Open a parquet file and return a dictionary of `numpy.array`
 
     Parameters
@@ -817,13 +842,14 @@ def readPqToDict(filepath, columns=None):
 
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
+    **kwargs : additional arguments to pass to the native file reader
 
     Returns
     -------
     tab : `OrderedDict` (`str` : `numpy.array`)
        The data
     """
-    tab = pq.read_table(filepath, columns=columns)
+    tab = pq.read_table(filepath, columns=columns, **kwargs)
     return OrderedDict([(c_name, col.to_numpy()) for c_name, col in zip(tab.column_names, tab.itercolumns())])
 
 
@@ -906,7 +932,7 @@ def io_open(filepath, fmt=None, **kwargs):
     raise TypeError(f"Unsupported FileType {fType}")  #pragma: no cover
 
 
-def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False):
+def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs):
     """ Read a file to the corresponding table type
 
     Parameters
@@ -919,6 +945,7 @@ def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False):
         For parquet files we must specify with keys to read, as each is in its own file
     allow_missing_keys : `bool`
         If False will raise FileNotFoundError if a key is missing
+    **kwargs : additional arguments to pass to the native file reader
 
     Returns
     -------
@@ -939,11 +966,11 @@ def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False):
         return readH5ToDataFrames(filepath)
     if fType == PANDAS_PARQUET:
         basepath = os.path.splitext(filepath)[0]
-        return readPqToDataFrames(basepath, keys, allow_missing_keys)
+        return readPqToDataFrames(basepath, keys, allow_missing_keys, **kwargs)
     raise TypeError(f"Unsupported FileType {fType}")  #pragma: no cover
 
 
-def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False):
+def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False, **kwargs):
     """ Read a file to the corresponding table type
 
     Parameters
@@ -955,9 +982,10 @@ def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False):
     fmt : `str` or `None`
         File format, if `None` it will be taken from the file extension
     keys : `list` or `None`
-        For parquet files we must specify with keys to read, as each is in its own file
+        For parquet files we must specify which keys to read, as each is in its own file
     allow_missing_keys : `bool`
         If False will raise FileNotFoundError if a key is missing
+    **kwargs : additional arguments to pass to the native file reader
 
     Returns
     -------
@@ -965,12 +993,12 @@ def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False):
         The data
 
     """
-    odict = readNative(filepath, fmt, keys, allow_missing_keys)
+    odict = readNative(filepath, fmt, keys, allow_missing_keys, **kwargs)
     if len(odict) == 1:
-        for defName in ['', None, '__astropy_table__', 'data']:
-            if defName in odict:
-                odict = odict[defName]
-                break
+        # For special keys, use the table alone without an enclosing dictionary.
+        single_dict_key = list(odict.keys())[0]
+        if single_dict_key in ['', None, '__astropy_table__', 'data']:
+            odict = odict[single_dict_key]
     if tType is None:  #pragma: no cover
         return odict
     return convert(odict, tType)
