@@ -12,14 +12,15 @@ from tables_io.testUtils import check_deps
 
 
 def test_array_length():
-    """ Test the pandas reading """
+    """Test the pandas reading"""
     assert arrayUtils.arrayLength(4) == 0
     assert arrayUtils.arrayLength(np.ones(5)) == 5
     assert arrayUtils.arrayLength(np.ones((5, 5, 5))) == 5
     assert arrayUtils.arrayLength([3, 4, 4]) == 3
 
+
 def test_force_to_pandasable():
-    """ Test the force_to_pandasable function """
+    """Test the force_to_pandasable function"""
     rv = np.random.uniform(size=100)
     assert arrayUtils.forceToPandables(4) == 4
     assert np.allclose(arrayUtils.forceToPandables(rv), rv)
@@ -39,64 +40,71 @@ def test_force_to_pandasable():
 
 
 def test_slice_dict():
-    """ Test the slice_dict method """
-    test_data = dict(scalar=np.random.uniform(size=10),
-                     vector=np.random.uniform(size=100).reshape(10, 10),
-                     mat=np.random.uniform(size=1000).reshape(10, 10, 10))
+    """Test the slice_dict method"""
+    test_data = dict(
+        scalar=np.random.uniform(size=10),
+        vector=np.random.uniform(size=100).reshape(10, 10),
+        mat=np.random.uniform(size=1000).reshape(10, 10, 10),
+    )
     sliced = arrayUtils.sliceDict(test_data, 1)
-    assert np.allclose(sliced['scalar'], test_data['scalar'][1])
-    assert np.allclose(sliced['vector'], test_data['vector'][1])
-    assert np.allclose(sliced['mat'], test_data['mat'][1])
+    assert np.allclose(sliced["scalar"], test_data["scalar"][1])
+    assert np.allclose(sliced["vector"], test_data["vector"][1])
+    assert np.allclose(sliced["mat"], test_data["mat"][1])
 
     mask = np.zeros((10), bool)
     mask[1] = True
     mask[4] = True
     sliced = arrayUtils.sliceDict(test_data, mask)
-    assert np.allclose(sliced['scalar'], test_data['scalar'][mask])
-    assert np.allclose(sliced['vector'], test_data['vector'][mask])
-    assert np.allclose(sliced['mat'], test_data['mat'][mask])
+    assert np.allclose(sliced["scalar"], test_data["scalar"][mask])
+    assert np.allclose(sliced["vector"], test_data["vector"][mask])
+    assert np.allclose(sliced["mat"], test_data["mat"][mask])
 
 
 def test_print_dict_shape():
-    """ Test the print_dict_shape method """
-    test_data = dict(scalar=np.random.uniform(size=10),
-                     vector=np.random.uniform(size=100).reshape(10, 10),
-                     mat=np.random.uniform(size=1000).reshape(10, 10, 10))
+    """Test the print_dict_shape method"""
+    test_data = dict(
+        scalar=np.random.uniform(size=10),
+        vector=np.random.uniform(size=100).reshape(10, 10),
+        mat=np.random.uniform(size=1000).reshape(10, 10, 10),
+    )
     arrayUtils.printDictShape(test_data)
 
 
 def test_concatenateDicts():
-    """ Test the print_dict_shape method """
-    test_data = dict(scalar=np.random.uniform(size=10),
-                     vector=np.random.uniform(size=100).reshape(10, 10),
-                     mat=np.random.uniform(size=1000).reshape(10, 10, 10))
+    """Test the print_dict_shape method"""
+    test_data = dict(
+        scalar=np.random.uniform(size=10),
+        vector=np.random.uniform(size=100).reshape(10, 10),
+        mat=np.random.uniform(size=1000).reshape(10, 10, 10),
+    )
     od = arrayUtils.concatenateDicts([test_data, test_data])
-    assert np.allclose(od['scalar'][0:10], test_data['scalar'])
-    assert np.allclose(od['vector'][0:10], test_data['vector'])
-    assert np.allclose(od['mat'][0:10], test_data['mat'])
-    assert np.allclose(od['scalar'][10:], test_data['scalar'])
-    assert np.allclose(od['vector'][10:], test_data['vector'])
-    assert np.allclose(od['mat'][10:], test_data['mat'])
+    assert np.allclose(od["scalar"][0:10], test_data["scalar"])
+    assert np.allclose(od["vector"][0:10], test_data["vector"])
+    assert np.allclose(od["mat"][0:10], test_data["mat"])
+    assert np.allclose(od["scalar"][10:], test_data["scalar"])
+    assert np.allclose(od["vector"][10:], test_data["vector"])
+    assert np.allclose(od["mat"][10:], test_data["mat"])
 
 
 def test_getInit():
-
-    test_data = dict(scalar=np.random.uniform(size=10),
-                     vector=np.random.uniform(size=100).reshape(10, 10),
-                     mat=np.random.uniform(size=1000).reshape(10, 10, 10))
+    test_data = dict(
+        scalar=np.random.uniform(size=10),
+        vector=np.random.uniform(size=100).reshape(10, 10),
+        mat=np.random.uniform(size=1000).reshape(10, 10, 10),
+    )
 
     dd = arrayUtils.getInitializationForODict(test_data)
-    assert dd['scalar'][0] == (10,)
-    assert dd['vector'][0] == (10, 10)
-    assert dd['mat'][0] == (10, 10, 10)
+    assert dd["scalar"][0] == (10,)
+    assert dd["vector"][0] == (10, 10)
+    assert dd["mat"][0] == (10, 10, 10)
     dd = arrayUtils.getInitializationForODict(test_data, 12)
-    assert dd['scalar'][0] == (12,)
-    assert dd['vector'][0] == (12, 10)
-    assert dd['mat'][0] == (12, 10, 10)
-    
+    assert dd["scalar"][0] == (12,)
+    assert dd["vector"][0] == (12, 10)
+    assert dd["mat"][0] == (12, 10, 10)
+
 
 def test_types():
-    """ Test the typing functions"""
+    """Test the typing functions"""
     assert not types.istablelike(4)
     assert types.istablelike(dict(a=np.ones(4)))
     assert not types.istablelike(dict(a=np.ones(4), b=np.ones(5)))
@@ -104,7 +112,7 @@ def test_types():
     assert not types.istabledictlike(dict(a=np.ones(4)))
     assert types.istabledictlike(dict(data=dict(a=np.ones(4))))
     try:
-        types.fileType('xx.out')
+        types.fileType("xx.out")
     except KeyError:
         pass
     else:
@@ -113,7 +121,7 @@ def test_types():
 
 @pytest.mark.skipif(not check_deps([apTable, pd]), reason="Missing an IO package")
 def test_type_finders():
-    """ Test the utils that identify apTables and data frames """
+    """Test the utils that identify apTables and data frames"""
     import pandas as pd
     from astropy.table import Table
 
@@ -143,11 +151,9 @@ def test_type_finders():
     assert not types.isApTable(77)
 
 
-
-
 def test_lazy_load():
-    """ Test that the lazy import works"""
-    noModule = lazyImport('thisModuleDoesnotExist')
+    """Test that the lazy import works"""
+    noModule = lazyImport("thisModuleDoesnotExist")
     try:
         noModule.d
     except ImportError:
@@ -155,9 +161,10 @@ def test_lazy_load():
     else:
         raise ImportError("lazyImport failed")
 
+
 @unittest.skipIf("wave" in sys.modules, "Wave module already imported")
 def test_lazy_load2():
-    """ A second test that the lazy import works"""
+    """A second test that the lazy import works"""
     # I picked an obscure python module that is unlikely
     # to be loaded by anything else.
 

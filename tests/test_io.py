@@ -183,7 +183,9 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_loopback_with_keys(types.PD_DATAFRAME, "test_out", "pq", ["md"])
         self._do_loopback_with_keys(types.PD_DATAFRAME, "test_out", "pq", ["data"], columns=["scalar"])
         self._do_loopback_with_keys(types.PD_DATAFRAME, "test_out", "pq", ["md"], columns=["a"])
-        self._do_loopback_with_keys(types.PD_DATAFRAME, 'test_out', 'pq', ['data','md'], columns={'md':['a'],'data':['scalar']})
+        self._do_loopback_with_keys(
+            types.PD_DATAFRAME, "test_out", "pq", ["data", "md"], columns={"md": ["a"], "data": ["scalar"]}
+        )
         self._do_loopback_single(types.PD_DATAFRAME, "test_out_single", "pq", [""])
         self._do_iterator("test_out_single.pq", types.PD_DATAFRAME, chunk_size=50)
         self._do_iterator("test_out_single.pq", types.PD_DATAFRAME, chunk_size=50, columns=["scalar"])
