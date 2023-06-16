@@ -9,33 +9,32 @@ from tables_io.testUtils import check_deps
 from tables_io.lazy_modules import apTable, fits, pd, h5py, pq, pq
 
 
-h5_data_file = 'tests/data/pandas_test_hdf5.h5'
-parquet_data_file = 'tests/data/parquet_test.parquet'
-no_group_file = 'tests/data/no_groupname_test.hdf5'
+h5_data_file = "tests/data/pandas_test_hdf5.h5"
+parquet_data_file = "tests/data/parquet_test.parquet"
+no_group_file = "tests/data/no_groupname_test.hdf5"
 
-test_outfile = './test_out.h5'
-
+test_outfile = "./test_out.h5"
 
 
 @pytest.mark.skipif(not check_deps([h5py, pq]), reason="Missing HDF5 or parquet")
 def test_pandas_readin():
-    """ Test the pandas reading """
+    """Test the pandas reading"""
     _ = io.readH5ToDict(h5_data_file)
     _ = io.readPqToDict(parquet_data_file)
 
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_no_groupname():
-    """ Test the load_training_data function for a file with no groupname """
+    """Test the load_training_data function for a file with no groupname"""
     _ = io.readHdf5ToDict(no_group_file, groupname=None)
 
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_get_input_data_length_hdf5():
-    """ Test the get_input_data_size_hdf5 function """
+    """Test the get_input_data_size_hdf5 function"""
     assert io.getInputDataLengthHdf5(no_group_file) == 10
     try:
-        _ = io.getInputDataLengthHdf5(h5_data_file, 'df')
+        _ = io.getInputDataLengthHdf5(h5_data_file, "df")
     except ValueError:
         pass
     else:
@@ -44,7 +43,7 @@ def test_get_input_data_length_hdf5():
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_iter_chunk_hdf5_data():
-    """ Test the hdf5 data chunk iterator """
+    """Test the hdf5 data chunk iterator"""
     for itr in io.iterHdf5ToDict(no_group_file, chunk_size=2):
         for val in itr[2].values():
             assert np.size(val) == 2
@@ -56,24 +55,27 @@ def test_iter_chunk_hdf5_data():
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_file():
-    """ Test writing an output file """
+    """Test writing an output file"""
     npdf = 40
     nbins = 21
     pz_pdf = np.random.uniform(size=(npdf, nbins))
     zgrid = np.linspace(0, 4, nbins)
     zmode = zgrid[np.argmax(pz_pdf, axis=1)]
 
-    data_dict = {'data': dict(zmode=zmode, pz_pdf=pz_pdf)}
+    data_dict = {"data": dict(zmode=zmode, pz_pdf=pz_pdf)}
 
-    groups, outf = io.initializeHdf5Write(test_outfile, data = dict(photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4')))
-    io.writeDictToHdf5Chunk(groups, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
-    io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
+    groups, outf = io.initializeHdf5Write(
+        test_outfile, data=dict(photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4"))
+    )
+    io.writeDictToHdf5Chunk(groups, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
     os.unlink(test_outfile)
 
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_parallel_file():
     from mpi4py import MPI
+
     """ Testing parallel write """
     comm = MPI.COMM_WORLD
     npdf = 40
@@ -82,17 +84,19 @@ def test_write_output_parallel_file():
     zgrid = np.linspace(0, 4, nbins)
     zmode = zgrid[np.argmax(pz_pdf, axis=1)]
 
-    data_dict = {'data': dict(zmode=zmode, pz_pdf=pz_pdf)}
+    data_dict = {"data": dict(zmode=zmode, pz_pdf=pz_pdf)}
 
-    groups, outf = io.initializeHdf5Write(test_outfile, data = dict(photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4')), comm=comm)
-    io.writeDictToHdf5Chunk(groups, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
-    io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
+    groups, outf = io.initializeHdf5Write(
+        test_outfile, data=dict(photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4")), comm=comm
+    )
+    io.writeDictToHdf5Chunk(groups, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
     os.unlink(test_outfile)
 
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_file_single():
-    """ Test writing an output file """
+    """Test writing an output file"""
     npdf = 40
     nbins = 21
     pz_pdf = np.random.uniform(size=(npdf, nbins))
@@ -101,15 +105,19 @@ def test_write_output_file_single():
 
     data_dict = dict(zmode=zmode, pz_pdf=pz_pdf)
 
-    group, outf = io.initializeHdf5WriteSingle(test_outfile, 'data', photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4'))
-    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
-    io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
+    group, outf = io.initializeHdf5WriteSingle(
+        test_outfile, "data", photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4")
+    )
+    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
 
     os.unlink(test_outfile)
 
-    group, outf = io.initializeHdf5WriteSingle(test_outfile, None, photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4'))
-    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
-    io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
+    group, outf = io.initializeHdf5WriteSingle(
+        test_outfile, None, photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4")
+    )
+    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
 
     os.unlink(test_outfile)
 
@@ -117,6 +125,7 @@ def test_write_output_file_single():
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_parallel_file_single():
     from mpi4py import MPI
+
     comm = MPI.COMM_WORLD
     """ Test writing an output file """
     npdf = 40
@@ -127,16 +136,18 @@ def test_write_output_parallel_file_single():
 
     data_dict = dict(zmode=zmode, pz_pdf=pz_pdf)
 
-    group, outf = io.initializeHdf5WriteSingle(test_outfile, 'data', photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4'), comm=comm)
-    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
-    io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
+    group, outf = io.initializeHdf5WriteSingle(
+        test_outfile, "data", photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4"), comm=comm
+    )
+    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
 
     os.unlink(test_outfile)
 
-    group, outf = io.initializeHdf5WriteSingle(test_outfile, None, photoz_mode=((npdf,), 'f4'), photoz_pdf=((npdf, nbins), 'f4'), comm=comm)
-    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode='photoz_mode', pz_pdf='photoz_pdf')
-    io.finalizeHdf5Write(outf, 'md', zgrid=zgrid)
-
+    group, outf = io.initializeHdf5WriteSingle(
+        test_outfile, None, photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4"), comm=comm
+    )
+    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
 
     os.unlink(test_outfile)
-    

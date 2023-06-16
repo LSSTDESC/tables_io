@@ -18,7 +18,7 @@ class TableDict(OrderedDict):
         try:
             _ = tableType(value)
         except TypeError as msg:
-            raise TypeError("item %s was not recognized as a table.") from msg
+            raise TypeError(f"item {value} was not recognized as a table.") from msg
 
         return OrderedDict.__setitem__(self, key, value)
 
