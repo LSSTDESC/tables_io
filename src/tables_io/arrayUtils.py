@@ -6,7 +6,7 @@ import numpy as np
 
 
 def arrayLength(arr):
-    """ Get the length of an array
+    """Get the length of an array
 
     The works on scalars and arrays, so it is safe to use
 
@@ -63,7 +63,7 @@ def forceToPandables(arr, check_nrow=None):
 
 
 def getGroupInputDataLength(hg):
-    """ Return the length of a HDF5 group
+    """Return the length of a HDF5 group
 
     Parameters
     ----------
@@ -90,14 +90,16 @@ def getGroupInputDataLength(hg):
     firstname = hg[firstkey].name
     for value in hg.values():
         if len(value) != nrows:
-            raise ValueError(f"Group does not represent a table. Length ({len(value)})"
-                             f"of column {value.name} not not match length ({nrows}) of"
-                             f"first column {firstname}")
+            raise ValueError(
+                f"Group does not represent a table. Length ({len(value)})"
+                f"of column {value.name} not not match length ({nrows}) of"
+                f"first column {firstname}"
+            )
     return nrows
 
 
 def getInitializationForODict(in_dict, nRow_out=None):
-    """ shape of arrays and dtypes in a dictionary.
+    """shape of arrays and dtypes in a dictionary.
     This is useful for initialize hdf5 files
 
     Parameters
@@ -153,7 +155,7 @@ def sliceDict(in_dict, subslice):
     for key, val in in_dict.items():
         try:
             out_dict[key] = val[subslice]
-        except (KeyError, TypeError):  #pragma: no cover
+        except (KeyError, TypeError):  # pragma: no cover
             out_dict[key] = val
     return out_dict
 
@@ -171,11 +173,11 @@ def checkKeys(in_dicts):
     KeyError
         if keys do not match
     """
-    if not in_dicts:  #pragma: no cover
+    if not in_dicts:  # pragma: no cover
         return
     master_keys = in_dicts[0].keys()
     for in_dict in in_dicts[1:]:
-        if in_dict.keys() != master_keys:  #pragma: no cover
+        if in_dict.keys() != master_keys:  # pragma: no cover
             raise ValueError(f"Keys do not match: {list(in_dict.keys())} != {list(master_keys)}")
 
 
@@ -192,7 +194,7 @@ def concatenateDicts(in_dicts):
     out_dict : `dict`
         The stacked dicionary
     """
-    if not in_dicts:  #pragma: no cover
+    if not in_dicts:  # pragma: no cover
         return OrderedDict()
     checkKeys(in_dicts)
     out_dict = OrderedDict([(key, None) for key in in_dicts[0].keys()])

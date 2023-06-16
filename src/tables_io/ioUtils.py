@@ -33,6 +33,7 @@ from .types import (
 
 ### I A. HDF5 partial read/write functions
 
+
 def readHdf5DatasetToArray(dataset, start=None, end=None):
     """Reads part of a hdf5 dataset into a `numpy.array`
 
@@ -58,7 +59,7 @@ def readHdf5DatasetToArray(dataset, start=None, end=None):
 
 
 def getInputDataLengthHdf5(filepath, groupname=None):
-    """ Open an HDF5 file and return the size of a group
+    """Open an HDF5 file and return the size of a group
 
     Parameters
     ----------
@@ -88,7 +89,7 @@ def getInputDataLengthHdf5(filepath, groupname=None):
 
 
 def initializeHdf5WriteSingle(filepath, groupname=None, comm=None, **kwds):
-    """ Prepares an hdf5 file for output
+    """Prepares an hdf5 file for output
 
     Parameters
     ----------
@@ -120,14 +121,14 @@ def initializeHdf5WriteSingle(filepath, groupname=None, comm=None, **kwds):
 
     """
     outdir = os.path.dirname(os.path.abspath(filepath))
-    if not os.path.exists(outdir):  #pragma: no cover
+    if not os.path.exists(outdir):  # pragma: no cover
         os.makedirs(outdir, exist_ok=True)
     if comm is None:
         outf = h5py.File(filepath, "w")
     else:
         if not h5py.get_config().mpi:
-            raise TypeError("hdf5py module not prepared for parallel writing.") #pragma: no cover
-        outf = h5py.File(filepath, "w",driver='mpio', comm=comm)
+            raise TypeError("hdf5py module not prepared for parallel writing.")  # pragma: no cover
+        outf = h5py.File(filepath, "w", driver="mpio", comm=comm)
     if groupname is None:
         group = outf
     else:
@@ -138,7 +139,7 @@ def initializeHdf5WriteSingle(filepath, groupname=None, comm=None, **kwds):
 
 
 def initializeHdf5Write(filepath, comm=None, **kwds):
-    """ Prepares an hdf5 file for output
+    """Prepares an hdf5 file for output
 
     Parameters
     ----------
@@ -175,14 +176,14 @@ def initializeHdf5Write(filepath, comm=None, **kwds):
     Would initialize an hdf5 file with one group and two datasets, with shapes and data types as given
     """
     outdir = os.path.dirname(os.path.abspath(filepath))
-    if not os.path.exists(outdir):  #pragma: no cover
+    if not os.path.exists(outdir):  # pragma: no cover
         os.makedirs(outdir, exist_ok=True)
     if comm is None:
         outf = h5py.File(filepath, "w")
     else:
         if not h5py.get_config().mpi:
-            raise TypeError("hdf5py module not prepared for parallel writing.") #pragma: no cover
-        outf = h5py.File(filepath, "w",driver='mpio', comm=comm)
+            raise TypeError("hdf5py module not prepared for parallel writing.")  # pragma: no cover
+        outf = h5py.File(filepath, "w", driver="mpio", comm=comm)
     groups = {}
     for k, v in kwds.items():
         group = outf.create_group(k)
@@ -191,8 +192,9 @@ def initializeHdf5Write(filepath, comm=None, **kwds):
             group.create_dataset(key, shape[0], shape[1])
     return groups, outf
 
+
 def writeDictToHdf5ChunkSingle(fout, odict, start, end, **kwds):
-    """ Writes a data chunk to an hdf5 file
+    """Writes a data chunk to an hdf5 file
 
     Parameters
     ----------
@@ -228,7 +230,7 @@ def writeDictToHdf5ChunkSingle(fout, odict, start, end, **kwds):
 
 
 def writeDictToHdf5Chunk(groups, odict, start, end, **kwds):
-    """ Writes a data chunk to an hdf5 file
+    """Writes a data chunk to an hdf5 file
 
     Parameters
     ----------
@@ -265,7 +267,7 @@ def writeDictToHdf5Chunk(groups, odict, start, end, **kwds):
 
 
 def finalizeHdf5Write(fout, groupname=None, **kwds):
-    """ Write any last data and closes an hdf5 file
+    """Write any last data and closes an hdf5 file
 
     Parameters
     ----------
@@ -276,13 +278,14 @@ def finalizeHdf5Write(fout, groupname=None, **kwds):
     -----
     The keywords can be used to write additional data
     """
-    if groupname is None:  #pragma: no cover
+    if groupname is None:  # pragma: no cover
         group = fout
     else:
         group = fout.create_group(groupname)
     for k, v in kwds.items():
         group[k] = v
     fout.close()
+
 
 def split_tasks_by_rank(tasks, parallel_size, rank):
     """Iterate through a list of items, yielding ones this process is responsible for/
@@ -307,6 +310,7 @@ def split_tasks_by_rank(tasks, parallel_size, rank):
         if i % parallel_size == rank:
             yield task
 
+
 def data_ranges_by_rank(n_rows, chunk_rows, parallel_size, rank):
     """Split a number of rows by process.
 
@@ -327,9 +331,9 @@ def data_ranges_by_rank(n_rows, chunk_rows, parallel_size, rank):
     Yields
     ------
     start: int
-        start index 
+        start index
     end: int
-        ending index 
+        ending index
     """
     n_chunks = n_rows // chunk_rows
     if n_chunks * chunk_rows < n_rows:  # pragma: no cover
@@ -339,6 +343,7 @@ def data_ranges_by_rank(n_rows, chunk_rows, parallel_size, rank):
         start = i * chunk_rows
         end = min((i + 1) * chunk_rows, n_rows)
         yield start, end
+
 
 def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None, rank=0, parallel_size=1):
     """
@@ -360,15 +365,16 @@ def iterHdf5ToDict(filepath, chunk_size=100_000, groupname=None, rank=0, paralle
     Yields
     -------
     start: int
-        start index 
+        start index
     end: int
-        ending index 
+        ending index
     data: dict
         dictionary of all data from start:end
     """
-    if rank>=parallel_size:
-        raise TypeError(f"MPI rank {rank} larger than the total "
-                        f"number of processes {parallel_size}") #pragma: no cover
+    if rank >= parallel_size:
+        raise TypeError(
+            f"MPI rank {rank} larger than the total " f"number of processes {parallel_size}"
+        )  # pragma: no cover
     f, infp = readHdf5Group(filepath, groupname)
     num_rows = getGroupInputDataLength(f)
     ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
@@ -399,19 +405,19 @@ def iterH5ToDataFrame(filepath, chunk_size=100_000, groupname=None):
     raise NotImplementedError("iterH5ToDataFrame")
 
     # This does't work b/c of the difference in structure
-    #f, infp = readHdf5Group(filepath, groupname)
-    #num_rows = getGroupInputDataLength(f)
-    #for i in range(0, num_rows, chunk_size):
+    # f, infp = readHdf5Group(filepath, groupname)
+    # num_rows = getGroupInputDataLength(f)
+    # for i in range(0, num_rows, chunk_size):
     #    start = i
     #    end = i+chunk_size
     #    if end > num_rows:
     #        end = num_rows
     #    data = pd.read_hdf(filepath, start=start, stop=end)
     #    yield start, end, data
-    #infp.close()
+    # infp.close()
 
 
-def iterPqToDataFrame(filepath,chunk_size=100_000,columns=None,**kwargs):
+def iterPqToDataFrame(filepath, chunk_size=100_000, columns=None, **kwargs):
     """
     iterator for sending chunks of data in parquet
 
@@ -426,9 +432,9 @@ def iterPqToDataFrame(filepath,chunk_size=100_000,columns=None,**kwargs):
     Yields
     ------
     start: int
-        start index 
+        start index
     end: int
-        ending index 
+        ending index
     data: `pandas.DataFrame`
         data frame of all data from start:end
     """
@@ -446,6 +452,7 @@ def iterPqToDataFrame(filepath,chunk_size=100_000,columns=None,**kwargs):
 ### II.   Reading and Writing Files
 
 ### II A.  Reading and Writing `astropy.table.Table` to/from FITS files
+
 
 def writeApTablesToFits(tables, filepath, **kwargs):
     """
@@ -492,6 +499,7 @@ def readFitsToApTables(filepath):
 
 ### II A'.  Reading and Writing `` to/from FITS files
 
+
 def writeRecarraysToFits(recarrays, filepath, **kwargs):
     """
     Writes a dictionary of `np.recarray` to a single FITS file
@@ -535,7 +543,9 @@ def readFitsToRecarrays(filepath):
         tables[hdu.name.lower()] = hdu.data
     return tables
 
+
 ### II B.  Reading and Writing `astropy.table.Table` to/from `hdf5`
+
 
 def writeApTablesToHdf5(tables, filepath, **kwargs):
     """
@@ -552,7 +562,7 @@ def writeApTablesToHdf5(tables, filepath, **kwargs):
         kwargs are passed to `astropy.table.Table` call.
     """
     for k, v in tables.items():
-        v.write(filepath, path=k, append=True, format='hdf5', **kwargs)
+        v.write(filepath, path=k, append=True, format="hdf5", **kwargs)
 
 
 def readHdf5ToApTables(filepath):
@@ -572,14 +582,15 @@ def readHdf5ToApTables(filepath):
     fin = h5py.File(filepath)
     tables = OrderedDict()
     for k in fin.keys():
-        tables[k] = apTable.Table.read(filepath, path=k, format='hdf5')
+        tables[k] = apTable.Table.read(filepath, path=k, format="hdf5")
     return tables
 
 
 ### II C.  Reading and Writing `OrderedDict`, (`str`, `numpy.array`) to/from `hdf5`
 
+
 def readHdf5Group(filepath, groupname=None):
-    """ Read and return group from an hdf5 file.
+    """Read and return group from an hdf5 file.
 
     Parameters
     ----------
@@ -596,7 +607,7 @@ def readHdf5Group(filepath, groupname=None):
         The input file (returned so that the used can explicitly close the file)
     """
     infp = h5py.File(filepath, "r")
-    if groupname is None:  #pragma: no cover
+    if groupname is None:  # pragma: no cover
         return infp, infp
     return infp[groupname], infp
 
@@ -638,8 +649,8 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
         The groupname for the data
     """
     # pylint: disable=unused-argument
-    fout = h5py.File(filepath, 'a')
-    if groupname is None:  #pragma: no cover
+    fout = h5py.File(filepath, "a")
+    if groupname is None:  # pragma: no cover
         group = fout
     else:
         group = fout.create_group(groupname)
@@ -653,7 +664,7 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
                 # resorting to duck typing so we don't have to import jax just
                 # to check the type.
                 group.create_dataset(key, dtype=val.dtype, data=val.device_buffer)
-        except Exception as msg:  #pragma: no cover
+        except Exception as msg:  # pragma: no cover
             print(f"Warning.  Failed to convert column {str(msg)}")
     fout.close()
 
@@ -696,8 +707,8 @@ def readHdf5ToDicts(filepath):
     return OrderedDict([(key, readHdf5GroupToDict(val)) for key, val in fin.items()])
 
 
-
 ### II C.  Reading and Writing `pandas.DataFrame` to/from `hdf5`
+
 
 def readHdf5ToDataFrame(filepath, key=None):
     """
@@ -719,7 +730,7 @@ def readHdf5ToDataFrame(filepath, key=None):
 
 
 def readH5ToDataFrames(filepath):
-    """ Open an h5 file and and return a dictionary of `pandas.DataFrame`
+    """Open an h5 file and and return a dictionary of `pandas.DataFrame`
 
     Parameters
     ----------
@@ -756,9 +767,8 @@ def writeDataFramesToH5(dataFrames, filepath):
         val.to_hdf(filepath, key)
 
 
-
-
 ### II E.  Reading and Writing `pandas.DataFrame` to/from `parquet`
+
 
 def readPqToDataFrame(filepath, columns=None, **kwargs):
     """
@@ -778,7 +788,7 @@ def readPqToDataFrame(filepath, columns=None, **kwargs):
     df : `pandas.DataFrame`
         The data frame
     """
-    return pd.read_parquet(filepath, engine='pyarrow', columns=columns, **kwargs)
+    return pd.read_parquet(filepath, engine="pyarrow", columns=columns, **kwargs)
 
 
 def writeDataFramesToPq(dataFrames, filepath, **kwargs):
@@ -815,8 +825,8 @@ def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False, columns=No
 
     columns : `dict` of `list (str)`, `list` (`str`), or `None`
         Names of the columns to read.
-            - if a dictionary, keys are the `keys`, and values are a list of string column names. 
-                for each keyed table, only the columns in the value list will be loaded. 
+            - if a dictionary, keys are the `keys`, and values are a list of string column names.
+                for each keyed table, only the columns in the value list will be loaded.
                 if the key is not found, all columns will be loaded.
             - if a list, only the columns in the list will be loaded.
             - `None` will read all the columns
@@ -828,7 +838,7 @@ def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False, columns=No
     tables : `OrderedDict` of `pandas.DataFrame`
         Keys will be taken from keys
     """
-    if keys is None:  #pragma: no cover
+    if keys is None:  # pragma: no cover
         keys = [""]
     dataframes = OrderedDict()
     for key in keys:
@@ -841,7 +851,7 @@ def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False, columns=No
             print("column_list", column_list)
 
             dataframes[key] = readPqToDataFrame(f"{basepath}{key}.pq", columns=column_list, **kwargs)
-        except FileNotFoundError as msg:  #pragma: no cover
+        except FileNotFoundError as msg:  # pragma: no cover
             if allow_missing_keys:
                 continue
             raise msg
@@ -850,8 +860,9 @@ def readPqToDataFrames(basepath, keys=None, allow_missing_keys=False, columns=No
 
 ### II F.  Reading and Writing to `OrderedDict`, (`str`, `numpy.array`)
 
+
 def readPqToDict(filepath, columns=None, **kwargs):
-    """ Open a parquet file and return a dictionary of `numpy.array`
+    """Open a parquet file and return a dictionary of `numpy.array`
 
     Parameters
     ----------
@@ -872,7 +883,7 @@ def readPqToDict(filepath, columns=None, **kwargs):
 
 
 def readH5ToDict(filepath, groupname=None):
-    """ Open an h5 file and and return a dictionary of `numpy.array`
+    """Open an h5 file and and return a dictionary of `numpy.array`
 
     Parameters
     ----------
@@ -897,7 +908,7 @@ def readH5ToDict(filepath, groupname=None):
 
 
 def readHdf5ToDict(filepath, groupname=None):
-    """ Read in h5py hdf5 data, return a dictionary of all of the keys
+    """Read in h5py hdf5 data, return a dictionary of all of the keys
 
     Parameters
     ----------
@@ -925,8 +936,9 @@ def readHdf5ToDict(filepath, groupname=None):
 
 ### II G.  Top-level interface functions
 
+
 def io_open(filepath, fmt=None, **kwargs):
-    """ Open a file
+    """Open a file
 
     Parameters
     ----------
@@ -945,13 +957,13 @@ def io_open(filepath, fmt=None, **kwargs):
     if fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5]:
         return h5py.File(filepath, **kwargs)
     if fType in [PANDAS_PARQUET]:
-        #basepath = os.path.splitext(filepath)[0]
+        # basepath = os.path.splitext(filepath)[0]
         return pq.ParquetFile(filepath, **kwargs)
-    raise TypeError(f"Unsupported FileType {fType}")  #pragma: no cover
+    raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
 
 
 def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs):
-    """ Read a file to the corresponding table type
+    """Read a file to the corresponding table type
 
     Parameters
     ----------
@@ -985,11 +997,11 @@ def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs
     if fType == PANDAS_PARQUET:
         basepath = os.path.splitext(filepath)[0]
         return readPqToDataFrames(basepath, keys, allow_missing_keys, **kwargs)
-    raise TypeError(f"Unsupported FileType {fType}")  #pragma: no cover
+    raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
 
 
 def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False, **kwargs):
-    """ Read a file to the corresponding table type
+    """Read a file to the corresponding table type
 
     Parameters
     ----------
@@ -1015,15 +1027,15 @@ def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False, **
     if len(odict) == 1:
         # For special keys, use the table alone without an enclosing dictionary.
         single_dict_key = list(odict.keys())[0]
-        if single_dict_key in ['', None, '__astropy_table__', 'data']:
+        if single_dict_key in ["", None, "__astropy_table__", "data"]:
             odict = odict[single_dict_key]
-    if tType is None:  #pragma: no cover
+    if tType is None:  # pragma: no cover
         return odict
     return convert(odict, tType)
 
 
 def iteratorNative(filepath, fmt=None, **kwargs):
-    """ Read a file to the corresponding table type and iterate over the file
+    """Read a file to the corresponding table type and iterate over the file
 
     Parameters
     ----------
@@ -1043,9 +1055,7 @@ def iteratorNative(filepath, fmt=None, **kwargs):
 
     """
     fType = fileType(filepath, fmt)
-    funcDict = {NUMPY_HDF5:iterHdf5ToDict,
-                PANDAS_HDF5:iterH5ToDataFrame,
-                PANDAS_PARQUET:iterPqToDataFrame}
+    funcDict = {NUMPY_HDF5: iterHdf5ToDict, PANDAS_HDF5: iterH5ToDataFrame, PANDAS_PARQUET: iterPqToDataFrame}
 
     try:
         theFunc = funcDict[fType]
@@ -1053,11 +1063,11 @@ def iteratorNative(filepath, fmt=None, **kwargs):
     except KeyError as msg:
         raise NotImplementedError(
             f"Unsupported FileType for iterateNative {fType}"
-        ) from msg #pragma: no cover
+        ) from msg  # pragma: no cover
 
 
 def iterator(filepath, tType=None, fmt=None, **kwargs):
-    """ Read a file to the corresponding table type iterate over the file
+    """Read a file to the corresponding table type iterate over the file
 
     Parameters
     ----------
@@ -1081,7 +1091,7 @@ def iterator(filepath, tType=None, fmt=None, **kwargs):
 
 
 def writeNative(odict, basename):
-    """ Write a file or files with tables
+    """Write a file or files with tables
 
     Parameters
     ----------
@@ -1096,17 +1106,17 @@ def writeNative(odict, basename):
         tType = tableType(odict)
     elif istabledictlike(odict):
         tType = tableType(list(odict.values())[0])
-    elif not odict:  #pragma: no cover
+    elif not odict:  # pragma: no cover
         return None
-    else:  #pragma: no cover
+    else:  # pragma: no cover
         raise TypeError(f"Can not write object of type {type(odict)}")
 
     try:
         fType = NATIVE_FORMAT[tType]
-    except KeyError as msg:  #pragma: no cover
+    except KeyError as msg:  # pragma: no cover
         raise KeyError(f"No native format for table type {tType}") from msg
     fmt = FILE_FORMAT_SUFFIX_MAP[fType]
-    filepath = basename + '.' + fmt
+    filepath = basename + "." + fmt
 
     if istable:
         odict = OrderedDict([(DEFAULT_TABLE_KEY[fmt], odict)])
@@ -1128,11 +1138,11 @@ def writeNative(odict, basename):
     if fType == PANDAS_PARQUET:
         writeDataFramesToPq(odict, basename)
         return basename
-    raise TypeError(f"Unsupported Native file type {fType}")  #pragma: no cover
+    raise TypeError(f"Unsupported Native file type {fType}")  # pragma: no cover
 
 
 def write(obj, basename, fmt=None):
-    """ Write a file or files with tables
+    """Write a file or files with tables
 
     Parameters
     ----------
@@ -1152,7 +1162,7 @@ def write(obj, basename, fmt=None):
 
     try:
         fType = FILE_FORMAT_SUFFIXS[fmt]
-    except KeyError as msg:  #pragma: no cover
+    except KeyError as msg:  # pragma: no cover
         raise KeyError(f"Unknown file format {fmt}, options are {list(FILE_FORMAT_SUFFIXS.keys())}") from msg
 
     if istablelike(obj):
@@ -1167,7 +1177,7 @@ def write(obj, basename, fmt=None):
     if fType in [ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_PARQUET]:
         try:
             nativeTType = NATIVE_TABLE_TYPE[fType]
-        except KeyError as msg:  #pragma: no cover
+        except KeyError as msg:  # pragma: no cover
             raise KeyError(f"Native file type not known for {fmt}") from msg
 
         forcedOdict = convert(odict, nativeTType)
@@ -1184,4 +1194,4 @@ def write(obj, basename, fmt=None):
         writeDataFramesToH5(forcedOdict, filepath)
         return filepath
 
-    raise TypeError(f"Unsupported File type {fType}")  #pragma: no cover
+    raise TypeError(f"Unsupported File type {fType}")  # pragma: no cover
