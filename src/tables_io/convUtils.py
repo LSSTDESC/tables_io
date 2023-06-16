@@ -12,6 +12,7 @@ from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, istableli
 
 ### I A. Converting to `astropy.table.Table`
 
+
 def dataFrameToApTable(df):
     """
     Convert a `pandas.DataFrame` to an `astropy.table.Table`
@@ -29,13 +30,13 @@ def dataFrameToApTable(df):
     o_dict = OrderedDict()
     for colname in df.columns:
         col = df[colname]
-        if col.dtype.name == 'object':
+        if col.dtype.name == "object":
             o_dict[colname] = np.vstack(col.to_numpy())
         else:
             o_dict[colname] = col.to_numpy()
     tab = apTable.Table(o_dict)
     for k, v in df.attrs.items():
-        tab.meta[k] = v  #pragma: no cover
+        tab.meta[k] = v  # pragma: no cover
     return tab
 
 
@@ -63,11 +64,11 @@ def convertToApTable(obj):
     if tType == PD_DATAFRAME:
         # try this: apTable.from_pandas(obj)
         return dataFrameToApTable(obj)
-    raise TypeError(f"Unsupported TableType {tType}")  #pragma: no cover
-
+    raise TypeError(f"Unsupported TableType {tType}")  # pragma: no cover
 
 
 ### I B. Converting to `OrderedDict`, (`str`, `numpy.array`)
+
 
 def apTableToDict(tab):
     """
@@ -123,7 +124,7 @@ def dataFrameToDict(df):
     data = OrderedDict()
     for key in df.keys():
         col = df[key]
-        if col.dtype.name == 'object':
+        if col.dtype.name == "object":
             data[key] = np.vstack(col.to_numpy())
         else:
             data[key] = np.array(col)
@@ -173,11 +174,11 @@ def convertToDict(obj):
         return recarrayToDict(obj)
     if tType == PD_DATAFRAME:
         return dataFrameToDict(obj)
-    raise TypeError(f"Unsupported TableType {tType}")  #pragma: no cover
-
+    raise TypeError(f"Unsupported TableType {tType}")  # pragma: no cover
 
 
 ### I C. Converting to `np.recarray`
+
 
 def apTableToRecarray(tab):
     """
@@ -219,11 +220,11 @@ def convertToRecarray(obj):
         return obj
     if tType == PD_DATAFRAME:
         return apTableToRecarray(dataFrameToApTable(obj))
-    raise TypeError(f"Unsupported TableType {tType}")  #pragma: no cover
-
+    raise TypeError(f"Unsupported TableType {tType}")  # pragma: no cover
 
 
 ### I D. Converting to `pandas.DataFrame`
+
 
 def apTableToDataFrame(tab):
     """
@@ -245,7 +246,7 @@ def apTableToDataFrame(tab):
         o_dict[colname] = forceToPandables(col.data)
     df = pd.DataFrame(o_dict)
     for k, v in tab.meta.items():
-        df.attrs[k] = v  #pragma: no cover
+        df.attrs[k] = v  # pragma: no cover
     return df
 
 
@@ -270,7 +271,7 @@ def dictToDataFrame(odict, meta=None):
     for k, v in odict.items():
         outdict[k] = forceToPandables(v)
     df = pd.DataFrame(outdict)
-    if meta is not None:  #pragma: no cover
+    if meta is not None:  # pragma: no cover
         for k, v in meta.items():
             df.attrs[k] = v
     return df
@@ -300,10 +301,11 @@ def convertToDataFrame(obj):
         return dictToDataFrame(odict)
     if tType == PD_DATAFRAME:
         return obj
-    raise TypeError(f"Unsupported tableType {tType}")  #pragma: no cover
+    raise TypeError(f"Unsupported tableType {tType}")  # pragma: no cover
 
 
 # I E. Generic `convert`
+
 
 def convertObj(obj, tType):
     """
@@ -329,11 +331,11 @@ def convertObj(obj, tType):
         return convertToRecarray(obj)
     if tType == PD_DATAFRAME:
         return convertToDataFrame(obj)
-    raise TypeError(f"Unsupported tableType {tType}")  #pragma: no cover
-
+    raise TypeError(f"Unsupported tableType {tType}")  # pragma: no cover
 
 
 ### II.  Multi-table conversion utilities
+
 
 def convertToApTables(odict):
     """
@@ -423,12 +425,14 @@ def convert(obj, tType):
     if istablelike(obj):
         return convertObj(obj, tType)
 
-    funcMap = {AP_TABLE:convertToApTables,
-               NUMPY_DICT:convertToDicts,
-               NUMPY_RECARRAY:convertToRecarrays,
-               PD_DATAFRAME:convertToDataFrames}
+    funcMap = {
+        AP_TABLE: convertToApTables,
+        NUMPY_DICT: convertToDicts,
+        NUMPY_RECARRAY: convertToRecarrays,
+        PD_DATAFRAME: convertToDataFrames,
+    }
     try:
         theFunc = funcMap[tType]
-    except KeyError as msg:  #pragma: no cover
+    except KeyError as msg:  # pragma: no cover
         raise KeyError(f"Unsupported type {tType}") from msg
     return theFunc(obj)

@@ -2,6 +2,7 @@
 
 import importlib
 
+
 class LazyModule:
     """
     A partial implementation of a lazily imported module.
@@ -11,6 +12,7 @@ class LazyModule:
     in importlib seems not to cope with submodules like astropy.table,
     or pyarrow.parquet, and always imports the full module.
     """
+
     def __init__(self, name):
         self.name = name
         self._module = None
@@ -25,7 +27,6 @@ class LazyModule:
             raise ImportError(f"Cannot use selected data format, {self.name} not available") from err
 
         return self._module
-
 
     def __dir__(self):
         """
@@ -45,13 +46,12 @@ def lazyImport(modulename):
     return LazyModule(modulename)
 
 
-
-tables = lazyImport('tables')
-apTable = lazyImport('astropy.table')
-apDiffUtils = lazyImport('astropy.utils.diff')
-fits = lazyImport('astropy.io.fits')
-h5py = lazyImport('h5py')
-pa = lazyImport('pyarrow')
-pd = lazyImport('pandas')
-pq = lazyImport('pyarrow.parquet')
-jnp = lazyImport('jax.numpy')
+tables = lazyImport("tables")
+apTable = lazyImport("astropy.table")
+apDiffUtils = lazyImport("astropy.utils.diff")
+fits = lazyImport("astropy.io.fits")
+h5py = lazyImport("h5py")
+pa = lazyImport("pyarrow")
+pd = lazyImport("pandas")
+pq = lazyImport("pyarrow.parquet")
+jnp = lazyImport("jax.numpy")

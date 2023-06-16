@@ -8,19 +8,19 @@ from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd,
 
 def check_deps(deps=None):
     missing = False
-    if deps is None:  #pragma: no cover
+    if deps is None:  # pragma: no cover
         deps = [tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp]
     for mod in deps:
         try:
             _ = mod.__file__
-        except Exception as err:  #pylint: disable=broad-exception-caught
+        except Exception as err:  # pylint: disable=broad-exception-caught
             sys.stderr.write(f"Missing {err}")
             missing = True
     return not missing
 
 
 def compare_tables(t1, t2, columns=None):
-    """ Compare all the tables in two `astropy.table.Table`)
+    """Compare all the tables in two `astropy.table.Table`)
 
     Parameters
     ----------
@@ -41,18 +41,18 @@ def compare_tables(t1, t2, columns=None):
     if columns:
         t1.keep_columns(columns)
         t2.keep_columns(columns)
-    if sorted(t1.colnames) != sorted(t2.colnames):  #pragma: no cover
+    if sorted(t1.colnames) != sorted(t2.colnames):  # pragma: no cover
         return False
     for cname in t1.colnames:
         c1 = t1[cname]
         c2 = t2[cname]
-        if not np.allclose(np.array(c1).flat, np.array(c2).flat):  #pragma: no cover
+        if not np.allclose(np.array(c1).flat, np.array(c2).flat):  # pragma: no cover
             return False
     return True
 
 
 def compare_table_dicts(d1, d2, strict=False, columns=None):
-    """ Compare all the tables in two `OrderedDict`, (`str`, `astropy.table.Table`)
+    """Compare all the tables in two `OrderedDict`, (`str`, `astropy.table.Table`)
 
     Parameters
     ----------
@@ -70,29 +70,29 @@ def compare_table_dicts(d1, d2, strict=False, columns=None):
     for k, v in d1.items():
         try:
             vv = d2[k]
-        except KeyError:  #pragma: no cover
+        except KeyError:  # pragma: no cover
             vv = d2[k.upper()]
-        if strict:  #pragma: no cover
+        if strict:  # pragma: no cover
             identical &= apDiffUtils.report_diff_values(v, vv)
-        else:  #pragma: no cover
+        else:  # pragma: no cover
             identical &= compare_tables(v, vv, columns=columns)
     return identical
 
 
 def make_test_data():
-    """ Make and return some test data """
+    """Make and return some test data"""
     nrow = 1000
     vect_size = 20
     mat_size = 5
     scalar = np.random.uniform(size=nrow)
-    vect = np.random.uniform(size=nrow*vect_size).reshape(nrow, vect_size)
-    matrix = np.random.uniform(size=nrow*mat_size*mat_size).reshape(nrow, mat_size, mat_size)
+    vect = np.random.uniform(size=nrow * vect_size).reshape(nrow, vect_size)
+    matrix = np.random.uniform(size=nrow * mat_size * mat_size).reshape(nrow, mat_size, mat_size)
     data = dict(scalar=scalar, vect=vect, matrix=matrix)
     table = apTable.Table(data)
-    table.meta['a'] = 1
-    table.meta['b'] = None
-    table.meta['c'] = [3, 4, 5]
+    table.meta["a"] = 1
+    table.meta["b"] = None
+    table.meta["c"] = [3, 4, 5]
     small_table = apTable.Table(dict(a=np.ones(21), b=np.zeros(21)))
-    small_table.meta['small'] = True
+    small_table.meta["small"] = True
     out_tables = dict(data=table, md=small_table)
     return out_tables

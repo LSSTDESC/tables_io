@@ -13,7 +13,6 @@ class TableDict(OrderedDict):
     and to read and write files, either as FITS or HDF5 files.
     """
 
-
     def __setitem__(self, key, value):
         try:
             _ = tableType(value)
@@ -23,7 +22,7 @@ class TableDict(OrderedDict):
         return OrderedDict.__setitem__(self, key, value)
 
     def write(self, basepath, fmt=None):
-        """ Write tables to the corresponding file type
+        """Write tables to the corresponding file type
 
         Parameters
         ----------
@@ -35,7 +34,7 @@ class TableDict(OrderedDict):
         return write(self, basepath, fmt)
 
     def convert(self, tType):
-        """ Build a new TableDict by converting all the table in the object to a different type
+        """Build a new TableDict by converting all the table in the object to a different type
 
         Parameters
         ----------
@@ -49,10 +48,9 @@ class TableDict(OrderedDict):
         """
         return TableDict(convert(self, tType))
 
-
     @classmethod
     def read(cls, filepath, tType=None, fmt=None, keys=None):
-        """ Read a file to the corresponding table type
+        """Read a file to the corresponding table type
 
         Parameters
         ----------

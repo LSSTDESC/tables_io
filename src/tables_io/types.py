@@ -14,11 +14,14 @@ NUMPY_DICT = 1
 NUMPY_RECARRAY = 2
 PD_DATAFRAME = 3
 
-TABULAR_FORMAT_NAMES = OrderedDict([
-    ('astropyTable', AP_TABLE),
-    ('numpyDict', NUMPY_DICT),
-    ('numpyRecarray', NUMPY_RECARRAY),
-    ('pandasDataFrame', PD_DATAFRAME)])
+TABULAR_FORMAT_NAMES = OrderedDict(
+    [
+        ("astropyTable", AP_TABLE),
+        ("numpyDict", NUMPY_DICT),
+        ("numpyRecarray", NUMPY_RECARRAY),
+        ("pandasDataFrame", PD_DATAFRAME),
+    ]
+)
 
 TABULAR_FORMATS = OrderedDict([(val, key) for key, val in TABULAR_FORMAT_NAMES.items()])
 
@@ -31,54 +34,69 @@ NUMPY_FITS = 3
 PANDAS_HDF5 = 4
 PANDAS_PARQUET = 5
 
-FILE_FORMAT_NAMES = OrderedDict([
-    ('astropyFits', ASTROPY_FITS),
-    ('astropyHdf5', ASTROPY_HDF5),
-    ('numpyHdf5', NUMPY_HDF5),
-    ('numpyFits', NUMPY_FITS),
-    ('pandasHdf5', PANDAS_HDF5),
-    ('pandaParquet', PANDAS_PARQUET)])
+FILE_FORMAT_NAMES = OrderedDict(
+    [
+        ("astropyFits", ASTROPY_FITS),
+        ("astropyHdf5", ASTROPY_HDF5),
+        ("numpyHdf5", NUMPY_HDF5),
+        ("numpyFits", NUMPY_FITS),
+        ("pandasHdf5", PANDAS_HDF5),
+        ("pandaParquet", PANDAS_PARQUET),
+    ]
+)
 
 # Default suffixes for various file formats
-FILE_FORMAT_SUFFIXS = OrderedDict([
-    ('fits', ASTROPY_FITS),
-    ('hf5', ASTROPY_HDF5),
-    ('hdf5', NUMPY_HDF5),
-    ('fit', NUMPY_FITS),
-    ('h5', PANDAS_HDF5),
-    ('parquet', PANDAS_PARQUET),
-    ('parq', PANDAS_PARQUET),
-    ('pq', PANDAS_PARQUET)])
+FILE_FORMAT_SUFFIXS = OrderedDict(
+    [
+        ("fits", ASTROPY_FITS),
+        ("hf5", ASTROPY_HDF5),
+        ("hdf5", NUMPY_HDF5),
+        ("fit", NUMPY_FITS),
+        ("h5", PANDAS_HDF5),
+        ("parquet", PANDAS_PARQUET),
+        ("parq", PANDAS_PARQUET),
+        ("pq", PANDAS_PARQUET),
+    ]
+)
 
-DEFAULT_TABLE_KEY = OrderedDict([
-    ('fits', ''),
-    ('hf5', None),
-    ('hdf5', None),
-    ('fit', ''),
-    ('h5', 'data'),
-    ('parquet', ''),
-    ('parq', ''),
-    ('pq', '')])
+DEFAULT_TABLE_KEY = OrderedDict(
+    [
+        ("fits", ""),
+        ("hf5", None),
+        ("hdf5", None),
+        ("fit", ""),
+        ("h5", "data"),
+        ("parquet", ""),
+        ("parq", ""),
+        ("pq", ""),
+    ]
+)
 
 FILE_FORMATS = OrderedDict([(val, key) for key, val in FILE_FORMAT_NAMES.items()])
 
 FILE_FORMAT_SUFFIX_MAP = OrderedDict([(val, key) for key, val in FILE_FORMAT_SUFFIXS.items()])
 
 # Default format to write various table types
-NATIVE_FORMAT = OrderedDict([
-    (AP_TABLE, ASTROPY_HDF5),
-    (NUMPY_DICT, NUMPY_HDF5),
-    (NUMPY_RECARRAY, NUMPY_FITS),
-    (PD_DATAFRAME, PANDAS_PARQUET)])
+NATIVE_FORMAT = OrderedDict(
+    [
+        (AP_TABLE, ASTROPY_HDF5),
+        (NUMPY_DICT, NUMPY_HDF5),
+        (NUMPY_RECARRAY, NUMPY_FITS),
+        (PD_DATAFRAME, PANDAS_PARQUET),
+    ]
+)
 
 NATIVE_TABLE_TYPE = OrderedDict([(val, key) for key, val in NATIVE_FORMAT.items()])
 
 # Allowed formats to write various table types
-ALLOWED_FORMATS = OrderedDict([
-    (AP_TABLE, [ASTROPY_FITS, ASTROPY_HDF5]),
-    (NUMPY_DICT, [NUMPY_HDF5]),
-    (NUMPY_RECARRAY, [ASTROPY_FITS]),
-    (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5])])
+ALLOWED_FORMATS = OrderedDict(
+    [
+        (AP_TABLE, [ASTROPY_FITS, ASTROPY_HDF5]),
+        (NUMPY_DICT, [NUMPY_HDF5]),
+        (NUMPY_RECARRAY, [ASTROPY_FITS]),
+        (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5]),
+    ]
+)
 
 
 def isDataFrame(obj):
@@ -87,6 +105,7 @@ def isDataFrame(obj):
             return True
     return False
 
+
 def isApTable(obj):
     for c in obj.__class__.__mro__:
         if c.__name__ == "Table" and c.__module__ == "astropy.table.table":
@@ -94,9 +113,8 @@ def isApTable(obj):
     return False
 
 
-
 def tableType(obj):
-    """ Identify the type of table we have
+    """Identify the type of table we have
 
     Parameters
     ----------
@@ -122,25 +140,29 @@ def tableType(obj):
     if isinstance(obj, np.recarray):
         return NUMPY_RECARRAY
     if not isinstance(obj, Mapping):
-        raise TypeError(f"Object of type {type(obj)} is not one of the supported types"
-                        f"{list(TABULAR_FORMAT_NAMES.keys())}")
+        raise TypeError(
+            f"Object of type {type(obj)} is not one of the supported types"
+            f"{list(TABULAR_FORMAT_NAMES.keys())}"
+        )
 
     nRow = None
     for key, val in obj.items():
         if istablelike(val):
             raise TypeError(f"Column {key} is a table of type {type(val)}")
-        if not isinstance(val, Iterable):  #pragma: no cover
+        if not isinstance(val, Iterable):  # pragma: no cover
             raise TypeError(f"Column {key} of type {type(val)} is not iterable")
         if nRow is None:
             nRow = arrayLength(val)
         else:
             if arrayLength(val) != nRow:
-                raise IndexError(f"Column {key} length {arrayLength(val)} != {nRow}") #pylint: disable=bad-string-format-type
+                raise IndexError(
+                    f"Column {key} length {arrayLength(val)} != {nRow}"
+                )  # pylint: disable=bad-string-format-type
     return NUMPY_DICT
 
 
 def istablelike(obj):
-    """ Test to see if an object is one of the supported table types
+    """Test to see if an object is one of the supported table types
 
     Parameters
     ----------
@@ -160,7 +182,7 @@ def istablelike(obj):
 
 
 def istabledictlike(obj):
-    """ Test to see if an object is a `Mapping`, (`str`, `Tablelike`)
+    """Test to see if an object is a `Mapping`, (`str`, `Tablelike`)
 
     Parameters
     ----------
@@ -181,7 +203,7 @@ def istabledictlike(obj):
 
 
 def fileType(filepath, fmt=None):
-    """ Identify the type of file we have
+    """Identify the type of file we have
 
     Parameters
     ----------
@@ -206,5 +228,6 @@ def fileType(filepath, fmt=None):
     try:
         return FILE_FORMAT_SUFFIXS[fmt]
     except KeyError as msg:
-        raise KeyError(f"Unknown file format {fmt}, supported types are"
-                       f"{list(FILE_FORMAT_SUFFIXS.keys())}") from msg
+        raise KeyError(
+            f"Unknown file format {fmt}, supported types are" f"{list(FILE_FORMAT_SUFFIXS.keys())}"
+        ) from msg
