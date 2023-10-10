@@ -14,7 +14,7 @@ def check_deps(deps=None):
         try:
             _ = mod.__file__
         except Exception as err:  # pylint: disable=broad-exception-caught
-            sys.stderr.write(f"Missing {mod} {err}")
+            sys.stderr.write(f"Missing {mod.name} {err}")
             missing = True
     return not missing
 
