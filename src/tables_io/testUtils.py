@@ -3,7 +3,7 @@ Utilities for testing
 """
 import sys
 import numpy as np
-from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
+from tables_io.lazy_modules import LazyModule, tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
 
 def check_deps(deps=None):
@@ -14,7 +14,8 @@ def check_deps(deps=None):
         try:
             _ = mod.__file__
         except Exception as err:  # pylint: disable=broad-exception-caught
-            sys.stderr.write(f"Missing {mod.name} {err}")
+            if isinstance(mod, LazyModule):
+                sys.stderr.write(f"Missing {mod} {err}")
             missing = True
     return not missing
 
