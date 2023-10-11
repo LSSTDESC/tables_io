@@ -11,13 +11,14 @@ def check_deps(deps=None):
     if deps is None:  # pragma: no cover
         deps = [tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp]
     for mod in deps:
+        if not isinstance(mod, LazyModule):
+            sys.stderr.write(f"{mod} is not LazyModule: {err}")
+            missing = True
+            continue
         try:
             _ = dir(mod)
         except Exception as err:  # pylint: disable=broad-exception-caught
-            if isinstance(mod, LazyModule):
-                sys.stderr.write(f"Missing {mod.name} because {err}")
-            else:
-                sys.stderr.write(f"{mod} is not LazyModule: {err}")
+            sys.stderr.write(f"Missing {mod.name} because {err}")
             missing = True
     return not missing
 
