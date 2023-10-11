@@ -12,7 +12,7 @@ def check_deps(deps=None):
         deps = [tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp]
     for mod in deps:
         try:
-            _ = mod.__file__
+            _ = dir(mod)
         except Exception as err:  # pylint: disable=broad-exception-caught
             if isinstance(mod, LazyModule):
                 sys.stderr.write(f"Missing {mod.name} because {err}")
