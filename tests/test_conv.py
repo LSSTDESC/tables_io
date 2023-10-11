@@ -21,7 +21,7 @@ def test_deps_jnp():
     assert check_deps([jnp])
 
 
-def test_bad_deps()
+def test_bad_deps():
     dummy = 0
     assert not check_deps([dummy])
     
