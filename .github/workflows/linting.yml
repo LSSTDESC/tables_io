@@ -1,11 +1,13 @@
-# This workflow will run daily at 06:45.
-# It will install Python dependencies and run tests with a variety of Python versions.
+# This workflow will install Python dependencies, then perform static linting analysis.
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Unit test smoke test
+name: Lint
 
 on:
-  schedule:
-    - cron: 45 6 * * *
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -36,7 +38,9 @@ jobs:
         sudo apt-get update
         python -m pip install --upgrade pip
         pip install --no-deps .
-        pip install pytest pytest-cov
-    - name: Run unit tests with pytest
+        pip install pytest pylint pytest-cov
+    - name: Analyze code with linter
       run: |
-        python -m pytest tests
+        pylint -rn -sn --recursive=y ./src
+      # the following line allows the CI test to pass, even if pylint fails
+      continue-on-error: true

@@ -58,7 +58,7 @@ def forceToPandables(arr, check_nrow=None):
     if ndim == 2:
         return list(arr)
     shape = np.shape(arr)
-    ncol = np.product(shape[1:])
+    ncol = np.prod(shape[1:])
     return list(arr.reshape(nrow, ncol))
 
 
