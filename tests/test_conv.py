@@ -8,11 +8,23 @@ from tables_io.testUtils import compare_table_dicts, check_deps
 from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
 
+@pytest.mark.parametrize(
+    "mod",
+    [tables, apTable, apDiffUtils, fits, h5py, pd, pq]
+)
 def test_deps():
-    assert check_deps([tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp])
+    assert check_deps(mod)
+
+
+@pytest.mark.skipif(not check_deps([jnp]), reason="Failed to load jax.numpy")
+def test_deps_jnp():
+    assert check_deps(jnp)
+
+
+def test_bad_deps()
     dummy = 0
     assert not check_deps([dummy])
-
+    
 
 @pytest.mark.skipif(not check_deps([apTable, pd]), reason="Missing panda or astropy.table")
 @pytest.mark.parametrize(
