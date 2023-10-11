@@ -10,9 +10,9 @@ from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd,
 
 @pytest.mark.parametrize(
     "mod",
-    [tables, apTable, apDiffUtils, fits, h5py, pd, pq]
+    [tables, apTable, apDiffUtils, fits, h5py, pd, pq],
 )
-def test_deps():
+def test_deps(mod):
     assert check_deps([mod])
 
 
