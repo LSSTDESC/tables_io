@@ -15,7 +15,9 @@ def check_deps(deps=None):
             _ = mod.__file__
         except Exception as err:  # pylint: disable=broad-exception-caught
             if isinstance(mod, LazyModule):
-                sys.stderr.write(f"Missing {mod.name} {err}")
+                sys.stderr.write(f"Missing {mod.name} because {err}")
+            else:
+                sys.stderr.write(f"{mod} is not LazyModule: {err}")
             missing = True
     return not missing
 
