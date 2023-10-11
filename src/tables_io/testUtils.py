@@ -12,7 +12,7 @@ def check_deps(deps=None):
         deps = [tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp]
     for mod in deps:
         if not isinstance(mod, LazyModule):
-            sys.stderr.write(f"{mod} is not LazyModule: {err}")
+            sys.stderr.write(f"{mod} is not LazyModule: {type(mod)}")
             missing = True
             continue
         try:
