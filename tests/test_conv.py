@@ -13,12 +13,12 @@ from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd,
     [tables, apTable, apDiffUtils, fits, h5py, pd, pq]
 )
 def test_deps():
-    assert check_deps(mod)
+    assert check_deps([mod])
 
 
 @pytest.mark.skipif(not check_deps([jnp]), reason="Failed to load jax.numpy")
 def test_deps_jnp():
-    assert check_deps(jnp)
+    assert check_deps([jnp])
 
 
 def test_bad_deps()
