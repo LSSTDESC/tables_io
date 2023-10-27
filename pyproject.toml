@@ -58,8 +58,6 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 write_to = "src/tables_io/_version.py"
 
-[tool.setuptools.package-data]
-
 [tool.pylint]
 disable = [
     "abstract-method",
