@@ -607,7 +607,7 @@ def readHdf5Group(filepath, groupname=None):
         The input file (returned so that the used can explicitly close the file)
     """
     infp = h5py.File(filepath, "r")
-    if groupname is None:  # pragma: no cover
+    if groupname is None or not groupname:  # pragma: no cover
         return infp, infp
     return infp[groupname], infp
 
