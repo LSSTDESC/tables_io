@@ -476,7 +476,7 @@ def writeApTablesToFits(tables, filepath, **kwargs):
     hdu_list.writeto(filepath, **kwargs)
 
 
-def readFitsToApTables(filepath):
+def readFitsToApTables(filepath, keys=None):
     """
     Reads `astropy.table.Table` objects from a FITS file.
 
@@ -484,6 +484,9 @@ def readFitsToApTables(filepath):
     ----------
     filepath: `str`
         Path to input file
+
+    keys : `list` or `None`
+        Which tables to read
 
     Returns
     -------
@@ -493,6 +496,9 @@ def readFitsToApTables(filepath):
     fin = fits.open(filepath)
     tables = OrderedDict()
     for hdu in fin[1:]:
+        if keys is not None:
+            if hdu.name.lower() not in keys:
+                continue
         tables[hdu.name.lower()] = apTable.Table.read(filepath, hdu=hdu.name)
     return tables
 
@@ -523,7 +529,7 @@ def writeRecarraysToFits(recarrays, filepath, **kwargs):
     hdu_list.writeto(filepath, **kwargs)
 
 
-def readFitsToRecarrays(filepath):
+def readFitsToRecarrays(filepath, keys=None):
     """
     Reads `np.recarray` objects from a FITS file.
 
@@ -531,6 +537,9 @@ def readFitsToRecarrays(filepath):
     ----------
     filepath: `str`
         Path to input file
+
+    keys : `list` or `None`
+        Which tables to read
 
     Returns
     -------
@@ -540,6 +549,8 @@ def readFitsToRecarrays(filepath):
     fin = fits.open(filepath)
     tables = OrderedDict()
     for hdu in fin[1:]:
+        if keys is not None and hdu.name.lower() not in keys:
+            continue
         tables[hdu.name.lower()] = hdu.data
     return tables
 
@@ -565,7 +576,7 @@ def writeApTablesToHdf5(tables, filepath, **kwargs):
         v.write(filepath, path=k, append=True, format="hdf5", **kwargs)
 
 
-def readHdf5ToApTables(filepath):
+def readHdf5ToApTables(filepath, keys=None):
     """
     Reads `astropy.table.Table` objects from an hdf5 file.
 
@@ -573,6 +584,9 @@ def readHdf5ToApTables(filepath):
     ----------
     filepath: `str`
         Path to input file
+
+    keys : `list` or `None`
+        Which tables to read
 
     Returns
     -------
@@ -582,6 +596,8 @@ def readHdf5ToApTables(filepath):
     fin = h5py.File(filepath)
     tables = OrderedDict()
     for k in fin.keys():
+        if keys is not None and k not in keys:
+            continue
         tables[k] = apTable.Table.read(filepath, path=k, format="hdf5")
     return tables
 
@@ -689,7 +705,7 @@ def writeDictsToHdf5(odicts, filepath):
         writeDictToHdf5(val, filepath, key)
 
 
-def readHdf5ToDicts(filepath):
+def readHdf5ToDicts(filepath, keys=None):
     """
     Reads `numpy.array` objects from an hdf5 file.
 
@@ -698,13 +714,21 @@ def readHdf5ToDicts(filepath):
     filepath: `str`
         Path to input file
 
+    keys : `list` or `None`
+        Which tables to read
+
     Returns
     -------
     dicts : `OrderedDict`, (`str`, `OrderedDict`, (`str`, `numpy.array`) )
         The data
     """
     fin = h5py.File(filepath)
-    return OrderedDict([(key, readHdf5GroupToDict(val)) for key, val in fin.items()])
+    l_out = []
+    for key, val in fin.items():
+        if keys is not None and key not in keys:
+            continue
+        l_out.append((key, readHdf5GroupToDict(val)))
+    return OrderedDict(l_out)
 
 
 ### II C.  Reading and Writing `pandas.DataFrame` to/from `hdf5`
@@ -729,13 +753,16 @@ def readHdf5ToDataFrame(filepath, key=None):
     return pd.read_hdf(filepath, key)
 
 
-def readH5ToDataFrames(filepath):
+def readH5ToDataFrames(filepath, keys=None):
     """Open an h5 file and and return a dictionary of `pandas.DataFrame`
 
     Parameters
     ----------
     filepath: `str`
         Path to input file
+
+    keys : `list` or `None`
+        Which tables to read
 
     Returns
     -------
@@ -748,7 +775,12 @@ def readH5ToDataFrames(filepath):
     They have a different structure than 'hdf5' files written with `h5py` or `astropy.table`
     """
     fin = h5py.File(filepath)
-    return OrderedDict([(key, readHdf5ToDataFrame(filepath, key=key)) for key in fin.keys()])
+    l_out = []
+    for key in fin.keys():
+        if keys is not None and key not in keys:
+            continue
+        l_out.append((key, readHdf5ToDataFrame(filepath, key=key)))
+    return OrderedDict(l_out)
 
 
 def writeDataFramesToH5(dataFrames, filepath):
@@ -985,15 +1017,15 @@ def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs
     """
     fType = fileType(filepath, fmt)
     if fType == ASTROPY_FITS:
-        return readFitsToApTables(filepath)
+        return readFitsToApTables(filepath, keys=keys)
     if fType == ASTROPY_HDF5:
-        return readHdf5ToApTables(filepath)
+        return readHdf5ToApTables(filepath, keys=keys)
     if fType == NUMPY_HDF5:
-        return readHdf5ToDicts(filepath)
+        return readHdf5ToDicts(filepath, keys=keys)
     if fType == NUMPY_FITS:
-        return readFitsToRecarrays(filepath)
+        return readFitsToRecarrays(filepath, keys=keys)
     if fType == PANDAS_HDF5:
-        return readH5ToDataFrames(filepath)
+        return readH5ToDataFrames(filepath, keys=keys)
     if fType == PANDAS_PARQUET:
         basepath = os.path.splitext(filepath)[0]
         return readPqToDataFrames(basepath, keys, allow_missing_keys, **kwargs)
