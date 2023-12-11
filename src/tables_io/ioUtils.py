@@ -1167,7 +1167,7 @@ def getInputDataLength(filepath, fmt=None, **kwargs):
         return theFunc(filepath, **kwargs)
     except KeyError as msg:
         raise NotImplementedError(
-            f"Unsupported FileType for iterateNative {fType}"
+            f"Unsupported FileType for getInputDataLength {fType}"
         ) from msg  # pragma: no cover
 
 

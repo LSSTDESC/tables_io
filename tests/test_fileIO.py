@@ -45,9 +45,11 @@ def test_get_input_data_length():
     """Test the get_input_data_size function"""
     assert io.getInputDataLength(parquet_data_file) == 10
     assert io.getInputDataLength(no_group_file) == 10
+    with pytest.raises(NotImplementedError):
+        io.getInputDataLength("dummy.fits") 
 
 @pytest.mark.skipif(not check_deps([pq]), reason="Missing parquet")
-def test_get_input_data_length():
+def test_get_input_data_length_pq():
     """Test the get_input_data_size_pq function"""
     assert io.getInputDataLengthPq(parquet_data_file) == 10
 
