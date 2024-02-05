@@ -417,7 +417,9 @@ def iterH5ToDataFrame(filepath, chunk_size=100_000, groupname=None):
     # infp.close()
 
 
-def iterPqToDataFrame(filepath, chunk_size=100_000, columns=None, **kwargs):
+### I B. Parquet partial read/write functions
+
+def iterPqToDataFrame(filepath, chunk_size=100_000, columns=None, rank=0, parallel_size=1, **kwargs):
     """
     iterator for sending chunks of data in parquet
 
@@ -438,15 +440,54 @@ def iterPqToDataFrame(filepath, chunk_size=100_000, columns=None, **kwargs):
     data: `pandas.DataFrame`
         data frame of all data from start:end
     """
-    parquet_file = pq.read_table(filepath, columns=columns, **kwargs)
+    if rank >= parallel_size:
+        raise TypeError(
+            f"MPI rank {rank} larger than the total " f"number of processes {parallel_size}"
+        )  # pragma: no cover
+
+    num_rows = getInputDataLengthPq(filepath, columns=columns)
+    ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
+
+    parquet_file = pq.read_table(filepath, columns=columns)
     start = 0
     end = 0
-    for table_chunk in parquet_file.to_batches(max_chunksize=chunk_size):
+
+    batches = parquet_file.to_batches(max_chunksize=chunk_size)
+
+    for table_chunk in batches:
         data = pa.Table.from_batches([table_chunk]).to_pandas()
         num_rows = len(data)
         end += num_rows
         yield start, end, data
         start += num_rows
+
+def getInputDataLengthPq(filepath, columns=None, **kwargs):
+    """Open a Parquet file and return the size of a group
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    groupname : `str` or `None`
+        The groupname for the data
+
+
+    Returns
+    -------
+    length : `int`
+        The length of the data
+
+    Notes
+    -----
+    For a multi-D array this return the length of the first axis
+    and not the total size of the array.
+
+    Normally that is what you want to be iterating over.
+    """
+    tab = pq.read_table(filepath, columns=columns)
+    nrow = len(tab[tab.column_names[0]])
+    return nrow
 
 
 ### II.   Reading and Writing Files
@@ -1095,6 +1136,38 @@ def iteratorNative(filepath, fmt=None, **kwargs):
     except KeyError as msg:
         raise NotImplementedError(
             f"Unsupported FileType for iterateNative {fType}"
+        ) from msg  # pragma: no cover
+
+
+def getInputDataLength(filepath, fmt=None, **kwargs):
+    """Read a file to the corresponding table type and iterate over the file
+
+    Parameters
+    ----------
+    filepath : `str`
+        File to load
+    fmt : `str` or `None`
+        File format, if `None` it will be taken from the file extension
+
+    Returns
+    -------
+    data : `TableLike`
+        The data
+
+    Notes
+    -----
+    The kwargs are used passed to the specific iterator type
+
+    """
+    fType = fileType(filepath, fmt)
+    funcDict = {NUMPY_HDF5: getInputDataLengthHdf5, PANDAS_HDF5: getInputDataLengthHdf5, PANDAS_PARQUET: getInputDataLengthPq}
+
+    try:
+        theFunc = funcDict[fType]
+        return theFunc(filepath, **kwargs)
+    except KeyError as msg:
+        raise NotImplementedError(
+            f"Unsupported FileType for getInputDataLength {fType}"
         ) from msg  # pragma: no cover
 
 
