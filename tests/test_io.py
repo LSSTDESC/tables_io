@@ -102,8 +102,6 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
 
         basepath_native = "%s_native" % basepath
         filepath_native = write(obj_c, basepath_native)
-        if keys is not None:
-            filepath_native += ".pq"
         self._files.append(filepath_native)
         obj_r_native = read(filepath_native, tType=tType, keys=keys)
         table_r_native = convert(obj_r_native, types.AP_TABLE)
@@ -192,6 +190,8 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
             types.PD_DATAFRAME, "test_out", "pq", ["data", "md"], columns={"md": ["a"], "data": ["scalar"]}
         )
         self._do_loopback_single(types.PD_DATAFRAME, "test_out_single", "pq", [""])
+        self._do_loopback_single(types.PD_DATAFRAME, "test_out_single_v2", "parquet", [""])
+
         self._do_iterator("test_out_single.pq", types.PD_DATAFRAME, chunk_size=50)
         self._do_iterator("test_out_single.pq", types.PD_DATAFRAME, chunk_size=50, columns=["scalar"])
         self._do_open("test_out_single.pq")
