@@ -135,6 +135,39 @@ def test_write_output_file_single():
 
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
+def test_get_group_names():
+    """Create a mock file with some data, ensure that the group names are read correctly."""
+    npdf = 40
+    nbins = 21
+    pz_pdf = np.random.uniform(size=(npdf, nbins))
+    zgrid = np.linspace(0, 4, nbins)
+    zmode = zgrid[np.argmax(pz_pdf, axis=1)]
+
+    data_dict = dict(zmode=zmode, pz_pdf=pz_pdf)
+
+    group, outf = io.initializeHdf5WriteSingle(
+        test_outfile, None, photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4")
+    )
+    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
+
+    group_names = io.readHdf5GroupNames(test_outfile)
+    assert len(group_names) == 3
+    assert "md" in group_names
+    assert "photoz_mode" in group_names
+    assert "photoz_pdf" in group_names
+
+    subgroup_names = io.readHdf5GroupNames(test_outfile, "md")
+    assert "zgrid" in subgroup_names
+
+    with pytest.raises(KeyError) as excinfo:
+        _ = io.readHdf5GroupNames(test_outfile, "dummy")
+        assert "dummy" in str(excinfo.value)
+
+    os.unlink(test_outfile)
+
+
+@pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_parallel_file_single():
     from mpi4py import MPI
 
