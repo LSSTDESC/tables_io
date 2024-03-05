@@ -710,11 +710,13 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
     if groupname is None:  # pragma: no cover
         group = fout
     else:
-        group = fout.create_group(groupname)
+        group = fout.require_group(groupname)
     for key, val in odict.items():
         try:
             if isinstance(val, np.ndarray):
                 group.create_dataset(key, dtype=val.dtype, data=val.data)
+            elif isinstance(val, dict):
+                writeDictToHdf5(val, filepath, f"{group.name}/{key}")
             else:
                 # In the future, it may be better to specifically case for
                 # jaxlib.xla_extension.DeviceArray here. For now, we're
