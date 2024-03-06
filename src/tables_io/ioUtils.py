@@ -689,6 +689,33 @@ def readHdf5GroupToDict(hg, start=None, end=None):
     return OrderedDict([(key, readHdf5DatasetToArray(val, start, end)) for key, val in hg.items()])
 
 
+def readHdf5GroupNames(filepath, parent_groupname=None):
+    """Read and return group from an hdf5 file.
+
+    Parameters
+    ----------
+    filepath : `str`
+        File in question
+    parent_groupname : `str` or `None`
+        For hdf5 files, the parent groupname. All group names under this will be
+        returned. If `None`, return the top level group names.
+
+    Returns
+    -------
+    names : `list` of `str`
+        The names of the groups in the file
+    """
+    infp = h5py.File(filepath, "r")
+    if parent_groupname is None:  # pragma: no cover
+        return list(infp.keys())
+
+    try:
+        subgroups = infp[parent_groupname].keys()
+    except KeyError as msg:
+        raise KeyError(f"Group {parent_groupname} not found in file {filepath}") from msg
+    return list(subgroups)
+
+
 def writeDictToHdf5(odict, filepath, groupname, **kwargs):
     """
     Writes a dictionary of `numpy.array` or `jaxlib.xla_extension.DeviceArray`
@@ -710,11 +737,13 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
     if groupname is None:  # pragma: no cover
         group = fout
     else:
-        group = fout.create_group(groupname)
+        group = fout.require_group(groupname)
     for key, val in odict.items():
         try:
             if isinstance(val, np.ndarray):
                 group.create_dataset(key, dtype=val.dtype, data=val.data)
+            elif isinstance(val, dict):
+                writeDictToHdf5(val, filepath, f"{group.name}/{key}")
             else:
                 # In the future, it may be better to specifically case for
                 # jaxlib.xla_extension.DeviceArray here. For now, we're
