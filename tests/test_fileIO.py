@@ -143,19 +143,16 @@ def test_get_group_names():
     zgrid = np.linspace(0, 4, nbins)
     zmode = zgrid[np.argmax(pz_pdf, axis=1)]
 
-    data_dict = dict(zmode=zmode, pz_pdf=pz_pdf)
+    md_dict = dict(zgrid=zgrid)
+    data_dict = dict(zmode=zmode, pz_pdf=pz_pdf, md=md_dict)
 
-    group, outf = io.initializeHdf5WriteSingle(
-        test_outfile, None, photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4")
-    )
-    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
-    io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
+    io.writeDictToHdf5(data_dict, test_outfile, groupname=None)
 
     group_names = io.readHdf5GroupNames(test_outfile)
     assert len(group_names) == 3
     assert "md" in group_names
-    assert "photoz_mode" in group_names
-    assert "photoz_pdf" in group_names
+    assert "zmode" in group_names
+    assert "pz_pdf" in group_names
 
     subgroup_names = io.readHdf5GroupNames(test_outfile, "md")
     assert "zgrid" in subgroup_names
