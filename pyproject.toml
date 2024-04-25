@@ -48,6 +48,9 @@ dev = [
     "sphinx-autoapi", # Used to automatically generate api documentation
 ]
 
+[project.scripts]
+convert-table = "tables_io.cli:main"
+
 [build-system]
 requires = [
     "setuptools>=62", # Used to build and package the Python project
