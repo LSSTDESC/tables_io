@@ -27,7 +27,8 @@ def paTableToApTable(table):
     tab : `astropy.table.Table`
         The table
     """
-    raise NotImplementedError
+    df = table.to_pandas()
+    return dataFrameToApTable(df)
 
 
 def dataFrameToApTable(df):
@@ -463,6 +464,8 @@ def convertToPaTable(obj):
         odict = recarrayToDict(obj)
         return dictToDataFrame(odict)
     if tType == PD_DATAFRAME:
+        return obj
+    if tType == PA_TABLE:
         return obj
     raise TypeError(f"Unsupported tableType {tType}")  # pragma: no cover
 

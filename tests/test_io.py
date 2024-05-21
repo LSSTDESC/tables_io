@@ -43,6 +43,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         odict_c = convert(self._tables, tType)
         filepath = write(odict_c, basepath, fmt)
         expected_tables = {}
+        self._files.append("%s.%s" % (basepath, fmt))
         for key in keys:
             self._files.append("%s%s.%s" % (basepath, key, fmt))
             expected_tables[key] = self._tables[key]
@@ -195,6 +196,13 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_iterator("test_out_single.pq", types.PD_DATAFRAME, chunk_size=50)
         self._do_iterator("test_out_single.pq", types.PD_DATAFRAME, chunk_size=50, columns=["scalar"])
         self._do_open("test_out_single.pq")
+
+    def testParquetLoopback(self):
+        """Test writing / reading pyarros tables to parquet files"""
+        self._do_loopback_with_keys(types.PA_TABLE, "test_out", "parquet", ["data"])
+        self._do_loopback_single(types.PA_TABLE, "test_out_single", "parquet", [""])
+        #self._do_iterator("test_out_single.parquet", types.PA_TABLE, True, chunk_size=50)
+        self._do_open("test_out_single.parquet")
 
     def testBad(self):  # pylint: disable=no-self-use
         """Test that bad calls to write are dealt with"""

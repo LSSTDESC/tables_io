@@ -5,7 +5,7 @@ import argparse
 import tables_io
 
 
-def get_args():
+def get_args():  #pragma: no cover
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "input",
@@ -20,7 +20,7 @@ def get_args():
     return parser.parse_args()
 
 
-def main():
+def main():  #pragma: no cover
     args = get_args()
 
     input_fname = args.input

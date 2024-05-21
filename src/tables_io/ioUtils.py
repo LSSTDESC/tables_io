@@ -833,7 +833,7 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
                 # jaxlib.xla_extension.DeviceArray here. For now, we're
                 # resorting to duck typing so we don't have to import jax just
                 # to check the type.
-                group.create_dataset(key, dtype=val.dtype, data=val.device_buffer)
+                group.create_dataset(key, dtype=val.dtype, data=val.addressable_data(0))
         except Exception as msg:  # pragma: no cover
             print(f"Warning.  Failed to convert column {str(msg)}")
     fout.close()
@@ -1582,9 +1582,14 @@ def write(obj, filepath, fmt=None):
             nativeTType = NATIVE_TABLE_TYPE[fType]
         except KeyError as msg:  # pragma: no cover
             raise KeyError(f"Native file type not known for {fmt}") from msg
-
+        
         forcedOdict = convert(odict, nativeTType)
-        return writeNative(forcedOdict, filepath)
+        if os.path.splitext(filepath)[1]:
+            fullpath = filepath
+        else:
+            fullpath = f"{filepath}.{fmt}"
+            
+        return writeNative(forcedOdict, fullpath)
 
     if not os.path.splitext(filepath)[1]:
         filepath = filepath + '.' + fmt
