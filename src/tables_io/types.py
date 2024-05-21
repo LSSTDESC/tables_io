@@ -53,6 +53,7 @@ FILE_FORMAT_NAMES = OrderedDict(
         ("pyarrowParquet", PYARROW_PARQUET),
         ("indexFile", INDEX_FILE),
         ("pyarrowParquet", PYARROW_PARQUET),
+        ("indexFile", INDEX_FILE),
     ]
 )
 
