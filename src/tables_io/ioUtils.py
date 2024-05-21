@@ -8,6 +8,7 @@ import yaml
 import pyarrow as pa
 import pyarrow.dataset as ds
 import pyarrow.parquet as pq
+import yaml
 
 from .arrayUtils import getGroupInputDataLength, forceToPandables
 from .convUtils import convert, dataFrameToDict, hdf5GroupToDict
@@ -639,6 +640,36 @@ def getInputDataLengthDs(source, **kwargs):
     nrows = dataset.count_rows()
     return nrows
 
+### II C. Index file partial read/write functions
+
+def iterIndexFile(filepath, chunk_size=100_000, columns=None, rank=0, parallel_size=1, **kwargs):
+
+    if rank >= parallel_size:
+        raise TypeError(
+            f"MPI rank {rank} larger than the total " f"number of processes {parallel_size}"
+        )  # pragma: no cover
+
+    with open(filepath) as fin:
+        file_index = yaml.safe_load(fin)
+
+
+    inputs = file_index['inputs']
+    n_in = len(inputs)
+    start = 0
+    
+    it = split_tasks_by_rank(range(n_in), parallel_size, rank)
+    for i in it:
+        input_ = inputs[i]
+        start = input_['start']
+        end = start +
+    
+
+
+def getInputDataLengthIndex(filepath, columns=None, **kwargs):
+    with open(filepath) as fin:
+        file_index = yaml.safe_load(fin)
+    return file_index['n_total']
+    
 
 ### II.   Reading and Writing Files
 
@@ -1508,6 +1539,7 @@ def iteratorNative(filepath, fmt=None, **kwargs):
         INDEX_FILE: iterIndexFile,
         PYARROW_PARQUET: iterDsToTable,
         PYARROW_HDF5: iterDsToTable,
+        INDEX_FILE: iterIndexFile,
     }
 
     try:
@@ -1547,6 +1579,7 @@ def getInputDataLength(filepath, fmt=None, **kwargs):
         PYARROW_PARQUET: getInputDataLengthDs,
         INDEX_FILE: getInputDataLengthIndex,
         PYARROW_PARQUET: getInputDataLengthDs,
+        INDEX_FILE: getInputDataLengthIndex,
     }
 
     try:
