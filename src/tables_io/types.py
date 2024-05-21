@@ -38,6 +38,7 @@ PANDAS_HDF5 = 4
 PANDAS_PARQUET = 5
 PYARROW_HDF5 = 6
 PYARROW_PARQUET = 7
+INDEX_FILE = 8
 
 
 FILE_FORMAT_NAMES = OrderedDict(
@@ -50,6 +51,7 @@ FILE_FORMAT_NAMES = OrderedDict(
         ("pandasHdf5", PANDAS_HDF5),
         ("pandaParquet", PANDAS_PARQUET),
         ("pyarrowParquet", PYARROW_PARQUET),
+        ("indexFile", INDEX_FILE),
     ]
 )
 
@@ -65,6 +67,7 @@ FILE_FORMAT_SUFFIXS = OrderedDict(
         ("parquet", PYARROW_PARQUET),
         ("parq", PANDAS_PARQUET),
         ("pq", PANDAS_PARQUET),
+        ("idx", INDEX_FILE),
     ]
 )
 
@@ -79,6 +82,7 @@ DEFAULT_TABLE_KEY = OrderedDict(
         ("parquet", ""),
         ("parq", ""),
         ("pq", ""),
+        ("idx", ""),
     ]
 )
 
@@ -102,11 +106,11 @@ NATIVE_TABLE_TYPE = OrderedDict([(val, key) for key, val in NATIVE_FORMAT.items(
 # Allowed formats to write various table types
 ALLOWED_FORMATS = OrderedDict(
     [
-        (AP_TABLE, [ASTROPY_FITS, ASTROPY_HDF5]),
-        (NUMPY_DICT, [NUMPY_HDF5]),
-        (NUMPY_RECARRAY, [ASTROPY_FITS]),
-        (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5]),
-        (PA_TABLE, [PYARROW_PARQUET, PANDAS_PARQUET, PANDAS_HDF5]),
+        (AP_TABLE, [ASTROPY_FITS, ASTROPY_HDF5, INDEX_FILE]),
+        (NUMPY_DICT, [NUMPY_HDF5, INDEX_FILE]),
+        (NUMPY_RECARRAY, [ASTROPY_FITS, INDEX_FILE]),
+        (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5, INDEX_FILE]),
+        (PA_TABLE, [PYARROW_PARQUET, PANDAS_PARQUET, PANDAS_HDF5, INDEX_FILE]),
     ]
 )
 

@@ -4,6 +4,7 @@ import os
 from collections import OrderedDict
 
 import numpy as np
+import yaml
 
 from .arrayUtils import getGroupInputDataLength, forceToPandables
 from .convUtils import convert, dataFrameToDict, hdf5GroupToDict
@@ -15,6 +16,7 @@ from .types import (
     DEFAULT_TABLE_KEY,
     FILE_FORMAT_SUFFIX_MAP,
     FILE_FORMAT_SUFFIXS,
+    INDEX_FILE,
     NATIVE_FORMAT,
     NATIVE_TABLE_TYPE,
     NUMPY_FITS,
@@ -464,6 +466,7 @@ def iterPqToDataFrame(filepath, chunk_size=100_000, columns=None, rank=0, parall
         yield start, end, data
         start += num_rows
 
+
 def getInputDataLengthPq(filepath, columns=None, **kwargs):
     """Open a Parquet file and return the size of a group
 
@@ -547,6 +550,37 @@ def getInputDataLengthDs(source, **kwargs):
     nrows = dataset.count_rows()
     return nrows
 
+
+### II C. Index file partial read/write functions
+
+def iterIndexFile(filepath, chunk_size=100_000, columns=None, rank=0, parallel_size=1, **kwargs):
+
+    if rank >= parallel_size:
+        raise TypeError(
+            f"MPI rank {rank} larger than the total " f"number of processes {parallel_size}"
+        )  # pragma: no cover
+
+    with open(filepath) as fin:
+        file_index = yaml.safe_load(fin)
+
+
+    inputs = file_index['inputs']
+    n_in = len(inputs)
+    start = 0
+    
+    it = split_tasks_by_rank(range(n_in), parallel_size, rank)
+    for i in it:
+        input_ = inputs[i]
+        start = input_['start']
+        end = start +
+    
+
+
+def getInputDataLengthIndex(filepath, columns=None, **kwargs):
+    with open(filepath) as fin:
+        file_index = yaml.safe_load(fin)
+    return file_index['n_total']
+    
 
 ### II.   Reading and Writing Files
 
@@ -1413,6 +1447,7 @@ def iteratorNative(filepath, fmt=None, **kwargs):
         PANDAS_PARQUET: iterPqToDataFrame,
         PYARROW_PARQUET: iterDsToTable,
         PYARROW_HDF5: iterDsToTable,
+        INDEX_FILE: iterIndexFile,
     }
 
     try:
@@ -1450,6 +1485,7 @@ def getInputDataLength(filepath, fmt=None, **kwargs):
         PANDAS_HDF5: getInputDataLengthHdf5,
         PANDAS_PARQUET: getInputDataLengthPq,
         PYARROW_PARQUET: getInputDataLengthDs,
+        INDEX_FILE: getInputDataLengthIndex,
     }
 
     try:
