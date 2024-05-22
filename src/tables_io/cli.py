@@ -1,8 +1,8 @@
 """cli for tables_io.convert"""
 
-import argparse
+import argparse  #pragma: no cover
 
-import tables_io
+import tables_io  #pragma: no cover
 
 
 def get_args():  #pragma: no cover

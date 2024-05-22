@@ -5,7 +5,7 @@ from collections import OrderedDict
 import numpy as np
 
 from .arrayUtils import forceToPandables
-from .lazy_modules import apTable, fits, pd
+from .lazy_modules import apTable, fits, pd, pa
 from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE, istablelike, tableType
 
 ### I. Single `Tablelike` conversions
@@ -279,7 +279,7 @@ def convertToRecarray(obj):
     if tType == PD_DATAFRAME:
         return apTableToRecarray(dataFrameToApTable(obj))
     if tType == PA_TABLE:
-        return paTableToRecarray(paTableToApTable(obj))
+        return apTableToRecarray(paTableToApTable(obj))
     raise TypeError(f"Unsupported TableType {tType}")  # pragma: no cover
 
 
@@ -391,14 +391,13 @@ def apTableToPaTable(tab):
     o_dict = OrderedDict()
     for colname in tab.columns:
         col = tab[colname]
-        o_dict[colname] = col.data
-        # o_dict[colname] = forceToPandables(col.data)
+        o_dict[colname] = forceToPandables(col.data)
 
     table = pa.Table.from_pydict(o_dict)
     # TODO: propagate metadata to schema
     # for k, v in tab.meta.items():
     #     df.attrs[k] = v  # pragma: no cover
-    return df
+    return table
 
 
 def dataFrameToPaTable(df):
@@ -436,8 +435,11 @@ def dictToPaTable(odict, meta=None):
     table :  `pa.Table`
         The table
     """
-    # TODO propagate meta to table schema
-    table = pa.Table.from_pydict(odict)
+    out_dict = {key: forceToPandables(val) for key, val in odict.items()}
+    if meta:  #pragma: no cover
+        raise ValueError(f"Meta data not supported. {meta.keys()}")
+        
+    table = pa.Table.from_pydict(out_dict)
     return table
 
 
@@ -457,14 +459,14 @@ def convertToPaTable(obj):
     """
     tType = tableType(obj)
     if tType == AP_TABLE:
-        return apTableToDataFrame(obj)
+        return apTableToPaTable(obj)
     if tType == NUMPY_DICT:
-        return dictToDataFrame(obj)
+        return dictToPaTable(obj)
     if tType == NUMPY_RECARRAY:
         odict = recarrayToDict(obj)
         return dictToDataFrame(odict)
     if tType == PD_DATAFRAME:
-        return obj
+        return dataFrameToPaTable(obj)
     if tType == PA_TABLE:
         return obj
     raise TypeError(f"Unsupported tableType {tType}")  # pragma: no cover

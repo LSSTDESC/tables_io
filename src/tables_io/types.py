@@ -36,7 +36,8 @@ NUMPY_HDF5 = 2
 NUMPY_FITS = 3
 PANDAS_HDF5 = 4
 PANDAS_PARQUET = 5
-PYARROW_PARQUET = 6
+PYARROW_HDF5 = 6
+PYARROW_PARQUET = 7
 
 FILE_FORMAT_NAMES = OrderedDict(
     [
@@ -44,6 +45,7 @@ FILE_FORMAT_NAMES = OrderedDict(
         ("astropyHdf5", ASTROPY_HDF5),
         ("numpyHdf5", NUMPY_HDF5),
         ("numpyFits", NUMPY_FITS),
+        ("pyarrowHdf5", PYARROW_HDF5),
         ("pandasHdf5", PANDAS_HDF5),
         ("pandaParquet", PANDAS_PARQUET),
         ("pyarrowParquet", PYARROW_PARQUET),
@@ -58,6 +60,7 @@ FILE_FORMAT_SUFFIXS = OrderedDict(
         ("hdf5", NUMPY_HDF5),
         ("fit", NUMPY_FITS),
         ("h5", PANDAS_HDF5),
+        ("hd5", PYARROW_HDF5),
         ("parquet", PYARROW_PARQUET),
         ("parq", PANDAS_PARQUET),
         ("pq", PANDAS_PARQUET),
@@ -69,6 +72,7 @@ DEFAULT_TABLE_KEY = OrderedDict(
         ("fits", ""),
         ("hf5", None),
         ("hdf5", None),
+        ("hd5", None),        
         ("fit", ""),
         ("h5", "data"),
         ("parquet", ""),

@@ -167,6 +167,15 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_open("test_out_single.hdf5")
         self._do_open("test_out.hdf5")
 
+    def testHd5Loopback(self):
+        """Test pyarrow tables to HDF5"""
+        self._do_loopback(types.PA_TABLE, "test_out", "hd5")
+        self._do_loopback_single(types.PA_TABLE, "test_out_single", "hd5")
+        self._do_loopback_with_keys(types.PA_TABLE, "test_out_lookback", "hdf5", ["md"])
+        #self._do_iterator("test_out_single.hdf5", types.NUMPY_DICT, False, chunk_size=50)
+        self._do_open("test_out_single.hd5")
+        self._do_open("test_out.hd5")
+
     def testHdf5LoopbackWithJaxArray(self):
         """Test writing / reading astropy tables to HDF5 with a jax array"""
         self._do_loopback_jax("test_out", "hdf5")
@@ -174,6 +183,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
     def testH5Loopback(self):
         """Test writing / reading pandas dataframes to HDF5"""
         self._do_loopback(types.PD_DATAFRAME, "test_out", "h5")
+        self._do_loopback(types.PA_TABLE, "test_out_pa", "h5")
         self._do_loopback_single(types.PD_DATAFRAME, "test_out_single", "h5")
         self._do_loopback_with_keys(types.PD_DATAFRAME, "test_out_lookback", "h5", ["md"])
         self._do_iterator("test_out_single.h5", types.PD_DATAFRAME, True, chunk_size=50)

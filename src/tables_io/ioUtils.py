@@ -25,6 +25,7 @@ from .types import (
     PA_TABLE,
     PANDAS_HDF5,
     PANDAS_PARQUET,
+    PYARROW_HDF5,
     PYARROW_PARQUET,
     PD_DATAFRAME,
     fileType,
@@ -1128,7 +1129,7 @@ def readHdf5ToDict(filepath, groupname=None):
 ### II G.  Reading and Writing `pandas.DataFrame` to/from `hdf5`
 
 
-def readHdf5ToTable(filepath, key=None):
+def readHd5ToTable(filepath, key=None):
     """
     Reads `pyarrow.Table` objects from an hdf5 file.
 
@@ -1148,7 +1149,7 @@ def readHdf5ToTable(filepath, key=None):
     return pa.Table.from_pandas(df)
 
 
-def readH5ToTables(filepath, keys=None):
+def readHd5ToTables(filepath, keys=None):
     """Open an h5 file and and return a dictionary of `pyarrow.Table`
 
     Parameters
@@ -1164,21 +1165,17 @@ def readH5ToTables(filepath, keys=None):
     tab : `OrderedDict` (`str` : `pyarrow.Table`)
        The data
 
-    Notes
-    -----
-    We are using the file suffix 'h5' to specify 'hdf5' files written from DataFrames using `pandas`
-    They have a different structure than 'hdf5' files written with `h5py` or `astropy.table`
     """
     fin = h5py.File(filepath)
     l_out = []
     for key in fin.keys():
         if keys is not None and key not in keys:
             continue
-        l_out.append((key, readHdf5ToTable(filepath, key=key)))
+        l_out.append((key, readHd5ToTable(filepath, key=key)))
     return OrderedDict(l_out)
 
 
-def writeTablesToH5(tables, filepath):
+def writeTablesToHd5(tables, filepath):
     """
     Writes a dictionary of `pyarrow.Table` to a single hdf5 file
 
@@ -1190,8 +1187,7 @@ def writeTablesToH5(tables, filepath):
     filepath: `str`
         Path to output file
     """
-    for key, val in tables.items():
-        val.to_hdf(filepath, key)
+    writeDictToHdf5(val, filepath, key)
 
 ### II H.  Reading and Writing `pyarrow.Table` to/from `parquet`
 
@@ -1233,7 +1229,7 @@ def writeTablesToPq(tables, filepath, **kwargs):
     basepath, ext = os.path.splitext(filepath)
     if not ext:  # pragma: no cover 
         ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
-    for k, v in dataFrames.items():
+    for k, v in tables.items():
         pq.write_table(v, f"{basepath}{k}{ext}", **kwargs)
 
 
@@ -1276,9 +1272,9 @@ def readPqToTables(filepath, keys=None, allow_missing_keys=False, columns=None, 
     for key in keys:
         try:
             column_list = None
-            if pd.api.types.is_dict_like(columns):
+            if pd.api.types.is_dict_like(columns):  #pragma: no cover
                 column_list = columns[key]
-            elif pd.api.types.is_list_like(columns):
+            elif pd.api.types.is_list_like(columns):  #pragma: no cover
                 column_list = columns
             print("column_list", column_list)
 
@@ -1351,9 +1347,9 @@ def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs
         return readH5ToDataFrames(filepath, keys=keys)
     if fType == PANDAS_PARQUET:
         return readPqToDataFrames(filepath, keys, allow_missing_keys, **kwargs)
+    if fType == PYARROW_HDF5:
+        return readHd5ToTables(filepath, keys, allow_missing_keys, **kwargs)
     if fType == PYARROW_PARQUET:
-        return readPqToTables(filepath, keys, allow_missing_keys, **kwargs)
-    if fType == PYARROW_DATASET:
         return readPqToTables(filepath, keys, allow_missing_keys, **kwargs)
     raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
 
@@ -1601,6 +1597,10 @@ def write(obj, filepath, fmt=None):
         forcedOdict = convert(odict, PD_DATAFRAME)
         writeDataFramesToH5(forcedOdict, filepath)
         return filepath
+    if fType == PYARROW_HDF5:
+        forcedPaTables = convert(odict, PA_TABLE)
+        writeTablesToHd5(forcedPaTables, filepath)
+        return filepath    
     if fType == PYARROW_PARQUET:
         forcedOdict = convert(odict, PA_TABLE)
         writeTablesToH5(forcedOdict, filepath)
