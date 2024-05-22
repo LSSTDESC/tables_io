@@ -72,7 +72,7 @@ DEFAULT_TABLE_KEY = OrderedDict(
         ("fits", ""),
         ("hf5", None),
         ("hdf5", None),
-        ("hd5", None),        
+        ("hd5", "data"),        
         ("fit", ""),
         ("h5", "data"),
         ("parquet", ""),

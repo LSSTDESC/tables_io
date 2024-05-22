@@ -49,7 +49,10 @@ def dataFrameToApTable(df):
     for colname in df.columns:
         col = df[colname]
         if col.dtype.name == "object":
-            o_dict[colname] = np.vstack(col.to_numpy())
+            try:
+                o_dict[colname] = np.vstack(col.to_numpy())
+            except Exception:
+                o_dict[colname] = col.to_numpy()
         else:
             o_dict[colname] = col.to_numpy()
     tab = apTable.Table(o_dict)
@@ -234,8 +237,7 @@ def paTableToRecarray(tab):
     rec : `numpy.recarray`
         The output rec array
     """
-    breakpoint()
-    return None
+    raise NotImplementError()  #pragma: no cover
 
 
 def apTableToRecarray(tab):
@@ -391,7 +393,11 @@ def apTableToPaTable(tab):
     o_dict = OrderedDict()
     for colname in tab.columns:
         col = tab[colname]
-        o_dict[colname] = forceToPandables(col.data)
+        ndim = len(col.data.shape)
+        if ndim == 1:
+            o_dict[colname] = col.data
+        elif ndim > 1:
+            o_dict[colname] = forceToPandables(col.data)
 
     table = pa.Table.from_pydict(o_dict)
     # TODO: propagate metadata to schema

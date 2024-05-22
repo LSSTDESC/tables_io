@@ -36,7 +36,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._files.append(filepath)
         odict_r = read(filepath, tType=tType, fmt=fmt, **kwargs)
         tables_r = convert(odict_r, types.AP_TABLE)
-        assert compare_table_dicts(self._tables, tables_r, **kwargs)
+        return compare_table_dicts(self._tables, tables_r, **kwargs)
 
     def _do_loopback_with_keys(self, tType, basepath, fmt, keys, columns=None, **kwargs):
         """Utility function to do loopback tests in formats that require keyed files"""
@@ -60,9 +60,9 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
                     )
         else:
             if pd.api.types.is_dict_like(tables_r):
-                assert compare_table_dicts(expected_tables, tables_r, columns=columns, **kwargs)
+                return compare_table_dicts(expected_tables, tables_r, columns=columns, **kwargs)
             else:
-                assert compare_tables(list(expected_tables.values())[0], tables_r, columns=columns, **kwargs)
+                return compare_tables(list(expected_tables.values())[0], tables_r, columns=columns, **kwargs)
 
     def _do_loopback_jax(self, basepath, fmt, keys=None, **kwargs):
         """Utility function to do loopback tests writing data as a jax array"""
@@ -172,7 +172,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_loopback(types.PA_TABLE, "test_out", "hd5")
         self._do_loopback_single(types.PA_TABLE, "test_out_single", "hd5")
         self._do_loopback_with_keys(types.PA_TABLE, "test_out_lookback", "hdf5", ["md"])
-        #self._do_iterator("test_out_single.hdf5", types.NUMPY_DICT, False, chunk_size=50)
+        #self._do_iterator("test_out_single.hd5", types.PA_TABLE, False, chunk_size=50)
         self._do_open("test_out_single.hd5")
         self._do_open("test_out.hd5")
 
@@ -211,7 +211,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         """Test writing / reading pyarros tables to parquet files"""
         self._do_loopback_with_keys(types.PA_TABLE, "test_out", "parquet", ["data"])
         self._do_loopback_single(types.PA_TABLE, "test_out_single", "parquet", [""])
-        #self._do_iterator("test_out_single.parquet", types.PA_TABLE, True, chunk_size=50)
+        self._do_iterator("test_out_single.parquet", types.PA_TABLE, True, chunk_size=50)
         self._do_open("test_out_single.parquet")
 
     def testBad(self):  # pylint: disable=no-self-use
