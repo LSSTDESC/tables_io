@@ -165,7 +165,7 @@ def paTableToDict(rec):
     data : `OrderedDict`,  (`str` : `numpy.array`)
         The tabledata
     """
-    return OrderedDict([(colName, rec[colName]) for colName in rec.schema.names])
+    return OrderedDict([(colName, rec[colName].to_numpy()) for colName in rec.schema.names])
 
 
 def hdf5GroupToDict(hg):
