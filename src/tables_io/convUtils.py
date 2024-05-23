@@ -12,7 +12,6 @@ from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE,
 
 ### I A. Converting to `astropy.table.Table`
 
-# TODO
 def paTableToApTable(table):
     """
     Convert a `pyarrow.Table` to an `astropy.table.Table`
@@ -399,10 +398,8 @@ def apTableToPaTable(tab):
         elif ndim > 1:
             o_dict[colname] = forceToPandables(col.data)
 
-    table = pa.Table.from_pydict(o_dict)
-    # TODO: propagate metadata to schema
-    # for k, v in tab.meta.items():
-    #     df.attrs[k] = v  # pragma: no cover
+    metadata = {k: str(v) for k, v in tab.meta.items()}
+    table = pa.Table.from_pydict(o_dict, metadata=metadata)
     return table
 
 
@@ -442,10 +439,12 @@ def dictToPaTable(odict, meta=None):
         The table
     """
     out_dict = {key: forceToPandables(val) for key, val in odict.items()}
-    if meta:  #pragma: no cover
-        raise ValueError(f"Meta data not supported. {meta.keys()}")
-        
-    table = pa.Table.from_pydict(out_dict)
+    if meta is not None:
+        metadata = {k: str(v) for k, v in meta.items()}
+    else:
+        metadata = None
+
+    table = pa.Table.from_pydict(out_dict, metadata=metadata)
     return table
 
 
