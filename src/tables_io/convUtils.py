@@ -48,10 +48,7 @@ def dataFrameToApTable(df):
     for colname in df.columns:
         col = df[colname]
         if col.dtype.name == "object":
-            try:
-                o_dict[colname] = np.vstack(col.to_numpy())
-            except Exception:
-                o_dict[colname] = col.to_numpy()
+            o_dict[colname] = np.vstack(col.to_numpy())
         else:
             o_dict[colname] = col.to_numpy()
     tab = apTable.Table(o_dict)
@@ -439,7 +436,7 @@ def dictToPaTable(odict, meta=None):
         The table
     """
     out_dict = {key: forceToPandables(val) for key, val in odict.items()}
-    if meta is not None:
+    if meta is not None:  # pragma: no cover
         metadata = {k: str(v) for k, v in meta.items()}
     else:
         metadata = None

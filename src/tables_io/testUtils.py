@@ -50,7 +50,7 @@ def compare_tables(t1, t2, columns=None):
     for cname in t1.colnames:
         c1 = t1[cname]
         c2 = t2[cname]
-        if c1.dtype.name == 'object':
+        if c1.dtype.name == 'object':  # pragma: no cover
             c1_data = np.vstack(c1.value)
         else:
             c1_data = np.array(c1)
