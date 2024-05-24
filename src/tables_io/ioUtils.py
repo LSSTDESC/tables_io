@@ -4,10 +4,13 @@ import os
 from collections import OrderedDict
 
 import numpy as np
+import pyarrow as pa
+import pyarrow.dataset as ds
+import pyarrow.parquet as pq
 
-from .arrayUtils import getGroupInputDataLength
+from .arrayUtils import getGroupInputDataLength, forceToPandables
 from .convUtils import convert, dataFrameToDict, hdf5GroupToDict
-from .lazy_modules import apTable, fits, h5py, pa, pd, pq
+from .lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
 from .types import (
     AP_TABLE,
     ASTROPY_FITS,
@@ -19,8 +22,11 @@ from .types import (
     NATIVE_TABLE_TYPE,
     NUMPY_FITS,
     NUMPY_HDF5,
+    PA_TABLE,
     PANDAS_HDF5,
     PANDAS_PARQUET,
+    PYARROW_HDF5,
+    PYARROW_PARQUET,
     PD_DATAFRAME,
     fileType,
     istabledictlike,
@@ -490,6 +496,61 @@ def getInputDataLengthPq(filepath, columns=None, **kwargs):
     return nrow
 
 
+### I C. Parquet dataset partial read/write functions
+
+def iterDsToTable(source, columns=None, **kwargs):
+    """
+    iterator for sending chunks of data in parquet
+
+    Parameters
+    ----------
+    dataset: str
+        input file name
+    **kwargs : additional arguments to pass to the native file reader
+
+    Yields
+    ------
+    start: int
+        start index
+    end: int
+        ending index
+    data: `pyarrow.Table`
+        table of all data from start:end
+    """
+    start = 0
+    end = 0
+    dataset = ds.dataset(source)
+
+    for batch in dataset.to_batches(columns=columns):
+        data = pa.Table.from_pydict(batch.to_pydict())
+        num_rows = len(data)
+        end += num_rows
+        yield start, end, data
+        start += num_rows
+
+
+def getInputDataLengthDs(source, **kwargs):
+    """Open a dataset and return the size of a group
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    Returns
+    -------
+    length : `int`
+        The length of the data
+
+    Notes
+    -----
+    Normally that is what you want to be iterating over.
+    """
+    dataset = ds.dataset(source, **kwargs)
+    nrows = dataset.count_rows()
+    return nrows
+
+
 ### II.   Reading and Writing Files
 
 ### II A.  Reading and Writing `astropy.table.Table` to/from FITS files
@@ -742,6 +803,9 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
         try:
             if isinstance(val, np.ndarray):
                 group.create_dataset(key, dtype=val.dtype, data=val.data)
+            elif isinstance(val, list):
+                arr = np.array(val)
+                group.create_dataset(key, dtype=arr.dtype, data=arr)
             elif isinstance(val, dict):
                 writeDictToHdf5(val, filepath, f"{group.name}/{key}")
             else:
@@ -749,7 +813,7 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
                 # jaxlib.xla_extension.DeviceArray here. For now, we're
                 # resorting to duck typing so we don't have to import jax just
                 # to check the type.
-                group.create_dataset(key, dtype=val.dtype, data=val.device_buffer)
+                group.create_dataset(key, dtype=val.dtype, data=val.addressable_data(0))
         except Exception as msg:  # pragma: no cover
             print(f"Warning.  Failed to convert column {str(msg)}")
     fout.close()
@@ -1041,8 +1105,188 @@ def readHdf5ToDict(filepath, groupname=None):
     infp.close()
     return data
 
+### II G.  Reading and Writing `pandas.DataFrame` to/from `hdf5`
 
-### II G.  Top-level interface functions
+
+def readHd5ToTable(filepath, key=None):
+    """
+    Reads `pyarrow.Table` objects from an hdf5 file.
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+    key : `str` or `None`
+        The key in the hdf5 file
+
+    Returns
+    -------
+    table : `pyarrow.Table`
+        The table
+    """
+    pydict = readHdf5ToDicts(filepath, [key])[key]
+    t_dict = {}
+    for key, val in pydict.items():
+        t_dict[key] = forceToPandables(val)
+    return pa.Table.from_pydict(t_dict)
+
+
+def readHd5ToTables(filepath, keys=None):
+    """Open an h5 file and and return a dictionary of `pyarrow.Table`
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    keys : `list` or `None`
+        Which tables to read
+
+    Returns
+    -------
+    tab : `OrderedDict` (`str` : `pyarrow.Table`)
+       The data
+
+    """
+    fin = h5py.File(filepath)
+    l_out = []
+    for key in fin.keys():
+        if keys is not None and key not in keys:  #pragma: no cover
+            continue
+        l_out.append((key, readHd5ToTable(filepath, key=key)))
+    return OrderedDict(l_out)
+
+
+def writeTableToHd5(table, filepath, key):
+    """
+    Writes a `pyarrow.Table` to a single hdf5 file
+
+    Parameters
+    ----------
+    table : `dict` of `pyarrow.Table`
+        Keys will be passed to 'key' parameter
+
+    filepath: `str`
+        Path to output file
+
+    key: `str`
+        The hdf5 groupname
+    """
+    writeDictToHdf5(table.to_pydict(), filepath, key)
+    
+    
+def writeTablesToHd5(tables, filepath):
+    """
+    Writes a dictionary of `pyarrow.Table` to a single hdf5 file
+
+    Parameters
+    ----------
+    tables : `dict` of `pyarrow.Table`
+        Keys will be passed to 'key' parameter
+
+    filepath: `str`
+        Path to output file
+    """
+    for key, val in tables.items():
+        writeTableToHd5(val, filepath, key)
+
+### II H.  Reading and Writing `pyarrow.Table` to/from `parquet`
+
+
+def readPqToTable(filepath, **kwargs):
+    """
+    Reads a `pyarrow.Table` object from an parquet file.
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    columns : `list` (`str`) or `None`
+        Names of the columns to read, `None` will read all the columns
+    **kwargs : additional arguments to pass to the native file reader
+
+    Returns
+    -------
+    table : `pyarrow.Table`
+        The table
+    """
+    return pq.read_table(filepath, **kwargs)
+
+
+def writeTablesToPq(tables, filepath, **kwargs):
+    """
+    Writes a dictionary of `pyarrow.Table` to a parquet files
+
+    Parameters
+    ----------
+    tables : `dict` of `pyarrow.Table`
+        Keys will be passed to 'path' parameter
+
+    filepath: `str`
+        Path to output file
+
+    """
+    basepath, ext = os.path.splitext(filepath)
+    if not ext:  # pragma: no cover 
+        ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
+    for k, v in tables.items():
+        pq.write_table(v, f"{basepath}{k}{ext}", **kwargs)
+
+
+def readPqToTables(filepath, keys=None, allow_missing_keys=False, columns=None, **kwargs):
+    """
+    Reads `pyarrow.Table` objects from an parquet file.
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    keys : `list`
+        Keys for the input objects.  Used to complete filepaths
+
+    allow_missing_keys: `bool`
+        If False will raise FileNotFoundError if a key is missing
+
+    columns : `dict` of `list (str)`, `list` (`str`), or `None`
+        Names of the columns to read.
+            - if a dictionary, keys are the `keys`, and values are a list of string column names.
+                for each keyed table, only the columns in the value list will be loaded.
+                if the key is not found, all columns will be loaded.
+            - if a list, only the columns in the list will be loaded.
+            - `None` will read all the columns
+
+    **kwargs : additional arguments to pass to the native file reader
+
+    Returns
+    -------
+    tables : `OrderedDict` of `pyarrow.Table`
+        Keys will be taken from keys
+    """
+    if keys is None:  # pragma: no cover
+        keys = [""]
+    tables = OrderedDict()
+    basepath, ext = os.path.splitext(filepath)
+    if not ext:  # pragma: no cover 
+        ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
+    for key in keys:
+        try:
+            column_list = None
+            if pd.api.types.is_dict_like(columns):  #pragma: no cover
+                column_list = columns[key]
+            elif pd.api.types.is_list_like(columns):  #pragma: no cover
+                column_list = columns
+            print("column_list", column_list)
+
+            tables[key] = readPqToTable(f"{basepath}{key}{ext}", columns=column_list, **kwargs)
+        except FileNotFoundError as msg:  # pragma: no cover
+            if allow_missing_keys:
+                continue
+            raise msg
+    return tables
+
+### II I.  Top-level interface functions
 
 
 def io_open(filepath, fmt=None, **kwargs):
@@ -1062,9 +1306,9 @@ def io_open(filepath, fmt=None, **kwargs):
     fType = fileType(filepath, fmt)
     if fType in [ASTROPY_FITS, NUMPY_FITS]:
         return fits.open(filepath, **kwargs)
-    if fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5]:
+    if fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PYARROW_HDF5]:
         return h5py.File(filepath, **kwargs)
-    if fType in [PANDAS_PARQUET]:
+    if fType in [PYARROW_PARQUET, PANDAS_PARQUET]:
         # basepath = os.path.splitext(filepath)[0]
         return pq.ParquetFile(filepath, **kwargs)
     raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
@@ -1104,6 +1348,10 @@ def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs
         return readH5ToDataFrames(filepath, keys=keys)
     if fType == PANDAS_PARQUET:
         return readPqToDataFrames(filepath, keys, allow_missing_keys, **kwargs)
+    if fType == PYARROW_HDF5:
+        return readHd5ToTables(filepath, keys)
+    if fType == PYARROW_PARQUET:
+        return readPqToTables(filepath, keys, allow_missing_keys, **kwargs)
     raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
 
 
@@ -1162,7 +1410,13 @@ def iteratorNative(filepath, fmt=None, **kwargs):
 
     """
     fType = fileType(filepath, fmt)
-    funcDict = {NUMPY_HDF5: iterHdf5ToDict, PANDAS_HDF5: iterH5ToDataFrame, PANDAS_PARQUET: iterPqToDataFrame}
+    funcDict = {
+        NUMPY_HDF5: iterHdf5ToDict,
+        PANDAS_HDF5: iterH5ToDataFrame,
+        PANDAS_PARQUET: iterPqToDataFrame,
+        PYARROW_PARQUET: iterDsToTable,
+        PYARROW_HDF5: iterDsToTable,
+    }
 
     try:
         theFunc = funcDict[fType]
@@ -1194,7 +1448,12 @@ def getInputDataLength(filepath, fmt=None, **kwargs):
 
     """
     fType = fileType(filepath, fmt)
-    funcDict = {NUMPY_HDF5: getInputDataLengthHdf5, PANDAS_HDF5: getInputDataLengthHdf5, PANDAS_PARQUET: getInputDataLengthPq}
+    funcDict = {
+        NUMPY_HDF5: getInputDataLengthHdf5,
+        PANDAS_HDF5: getInputDataLengthHdf5,
+        PANDAS_PARQUET: getInputDataLengthPq,
+        PYARROW_PARQUET: getInputDataLengthDs,
+    }
 
     try:
         theFunc = funcDict[fType]
@@ -1278,6 +1537,9 @@ def writeNative(odict, filepath):
     if fType == PANDAS_PARQUET:
         writeDataFramesToPq(odict, filepath)
         return filepath
+    if fType == PYARROW_PARQUET:
+        writeTablesToPq(odict, filepath)
+        return filepath
     raise TypeError(f"Unsupported Native file type {fType}")  # pragma: no cover
 
 
@@ -1313,14 +1575,19 @@ def write(obj, filepath, fmt=None):
     else:
         raise TypeError(f"Can not write object of type {type(obj)}")
 
-    if fType in [ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_PARQUET]:
+    if fType in [ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_PARQUET, PYARROW_PARQUET]:
         try:
             nativeTType = NATIVE_TABLE_TYPE[fType]
         except KeyError as msg:  # pragma: no cover
             raise KeyError(f"Native file type not known for {fmt}") from msg
-
+        
         forcedOdict = convert(odict, nativeTType)
-        return writeNative(forcedOdict, filepath)
+        if os.path.splitext(filepath)[1]:
+            fullpath = filepath
+        else:
+            fullpath = f"{filepath}.{fmt}"
+            
+        return writeNative(forcedOdict, fullpath)
 
     if not os.path.splitext(filepath)[1]:
         filepath = filepath + '.' + fmt
@@ -1332,5 +1599,9 @@ def write(obj, filepath, fmt=None):
         forcedOdict = convert(odict, PD_DATAFRAME)
         writeDataFramesToH5(forcedOdict, filepath)
         return filepath
+    if fType == PYARROW_HDF5:
+        forcedPaTables = convert(odict, PA_TABLE)
+        writeTablesToHd5(forcedPaTables, filepath)
+        return filepath    
 
     raise TypeError(f"Unsupported File type {fType}")  # pragma: no cover

@@ -5,6 +5,7 @@ from collections import OrderedDict
 from collections.abc import Iterable, Mapping
 
 import numpy as np
+import pyarrow as pa
 
 from .arrayUtils import arrayLength
 
@@ -13,6 +14,7 @@ AP_TABLE = 0
 NUMPY_DICT = 1
 NUMPY_RECARRAY = 2
 PD_DATAFRAME = 3
+PA_TABLE = 4
 
 TABULAR_FORMAT_NAMES = OrderedDict(
     [
@@ -20,6 +22,7 @@ TABULAR_FORMAT_NAMES = OrderedDict(
         ("numpyDict", NUMPY_DICT),
         ("numpyRecarray", NUMPY_RECARRAY),
         ("pandasDataFrame", PD_DATAFRAME),
+        ("pyarrowTable", PA_TABLE),
     ]
 )
 
@@ -33,6 +36,8 @@ NUMPY_HDF5 = 2
 NUMPY_FITS = 3
 PANDAS_HDF5 = 4
 PANDAS_PARQUET = 5
+PYARROW_HDF5 = 6
+PYARROW_PARQUET = 7
 
 FILE_FORMAT_NAMES = OrderedDict(
     [
@@ -40,8 +45,10 @@ FILE_FORMAT_NAMES = OrderedDict(
         ("astropyHdf5", ASTROPY_HDF5),
         ("numpyHdf5", NUMPY_HDF5),
         ("numpyFits", NUMPY_FITS),
+        ("pyarrowHdf5", PYARROW_HDF5),
         ("pandasHdf5", PANDAS_HDF5),
         ("pandaParquet", PANDAS_PARQUET),
+        ("pyarrowParquet", PYARROW_PARQUET),
     ]
 )
 
@@ -53,7 +60,8 @@ FILE_FORMAT_SUFFIXS = OrderedDict(
         ("hdf5", NUMPY_HDF5),
         ("fit", NUMPY_FITS),
         ("h5", PANDAS_HDF5),
-        ("parquet", PANDAS_PARQUET),
+        ("hd5", PYARROW_HDF5),
+        ("parquet", PYARROW_PARQUET),
         ("parq", PANDAS_PARQUET),
         ("pq", PANDAS_PARQUET),
     ]
@@ -64,6 +72,7 @@ DEFAULT_TABLE_KEY = OrderedDict(
         ("fits", ""),
         ("hf5", None),
         ("hdf5", None),
+        ("hd5", "data"),        
         ("fit", ""),
         ("h5", "data"),
         ("parquet", ""),
@@ -83,6 +92,7 @@ NATIVE_FORMAT = OrderedDict(
         (NUMPY_DICT, NUMPY_HDF5),
         (NUMPY_RECARRAY, NUMPY_FITS),
         (PD_DATAFRAME, PANDAS_PARQUET),
+        (PA_TABLE, PYARROW_PARQUET),
     ]
 )
 
@@ -95,6 +105,7 @@ ALLOWED_FORMATS = OrderedDict(
         (NUMPY_DICT, [NUMPY_HDF5]),
         (NUMPY_RECARRAY, [ASTROPY_FITS]),
         (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5]),
+        (PA_TABLE, [PYARROW_PARQUET, PANDAS_PARQUET, PANDAS_HDF5]),
     ]
 )
 
@@ -137,6 +148,8 @@ def tableType(obj):
         return PD_DATAFRAME
     if isApTable(obj):
         return AP_TABLE
+    if isinstance(obj, pa.Table):
+        return PA_TABLE
     if isinstance(obj, np.recarray):
         return NUMPY_RECARRAY
     if not isinstance(obj, Mapping):
