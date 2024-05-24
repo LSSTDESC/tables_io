@@ -5,6 +5,9 @@ from collections import OrderedDict
 
 import numpy as np
 import yaml
+import pyarrow as pa
+import pyarrow.dataset as ds
+import pyarrow.parquet as pq
 
 from .arrayUtils import getGroupInputDataLength, forceToPandables
 from .convUtils import convert, dataFrameToDict, hdf5GroupToDict
@@ -581,6 +584,61 @@ def getInputDataLengthIndex(filepath, columns=None, **kwargs):
         file_index = yaml.safe_load(fin)
     return file_index['n_total']
     
+
+### I C. Parquet dataset partial read/write functions
+
+def iterDsToTable(source, columns=None, **kwargs):
+    """
+    iterator for sending chunks of data in parquet
+
+    Parameters
+    ----------
+    dataset: str
+        input file name
+    **kwargs : additional arguments to pass to the native file reader
+
+    Yields
+    ------
+    start: int
+        start index
+    end: int
+        ending index
+    data: `pyarrow.Table`
+        table of all data from start:end
+    """
+    start = 0
+    end = 0
+    dataset = ds.dataset(source)
+
+    for batch in dataset.to_batches(columns=columns):
+        data = pa.Table.from_pydict(batch.to_pydict())
+        num_rows = len(data)
+        end += num_rows
+        yield start, end, data
+        start += num_rows
+
+
+def getInputDataLengthDs(source, **kwargs):
+    """Open a dataset and return the size of a group
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    Returns
+    -------
+    length : `int`
+        The length of the data
+
+    Notes
+    -----
+    Normally that is what you want to be iterating over.
+    """
+    dataset = ds.dataset(source, **kwargs)
+    nrows = dataset.count_rows()
+    return nrows
+
 
 ### II.   Reading and Writing Files
 
@@ -1448,6 +1506,8 @@ def iteratorNative(filepath, fmt=None, **kwargs):
         PYARROW_PARQUET: iterDsToTable,
         PYARROW_HDF5: iterDsToTable,
         INDEX_FILE: iterIndexFile,
+        PYARROW_PARQUET: iterDsToTable,
+        PYARROW_HDF5: iterDsToTable,
     }
 
     try:
@@ -1486,6 +1546,7 @@ def getInputDataLength(filepath, fmt=None, **kwargs):
         PANDAS_PARQUET: getInputDataLengthPq,
         PYARROW_PARQUET: getInputDataLengthDs,
         INDEX_FILE: getInputDataLengthIndex,
+        PYARROW_PARQUET: getInputDataLengthDs,
     }
 
     try:
