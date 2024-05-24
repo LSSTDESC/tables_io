@@ -656,12 +656,19 @@ def iterIndexFile(filepath, chunk_size=100_000, columns=None, rank=0, parallel_s
     inputs = file_index['inputs']
     n_in = len(inputs)
     start = 0
+
+    dirname = os.path.dirname(filepath)
     
     it = split_tasks_by_rank(range(n_in), parallel_size, rank)
     for i in it:
         input_ = inputs[i]
+        path = input_['path']
         start = input_['start']
-        end = start +
+        end = start + input_['n']
+        fullpath = os.path.join(dirname, path)
+        data = read(fullpath)
+        yield start, end, data
+        
     
 
 
@@ -1734,8 +1741,6 @@ def write(obj, filepath, fmt=None):
     raise TypeError(f"Unsupported File type {fType}")  # pragma: no cover
 
     
-
-    
 def check_columns(filepath, columns_to_check, fmt=None, parent_groupname=None, **kwargs):
     """Read the file column names and check it against input list
 
@@ -1778,3 +1783,34 @@ def check_columns(filepath, columns_to_check, fmt=None, parent_groupname=None, *
         diff = set(columns_to_check) - intersection
         raise KeyError("The following columns are not found: ", diff)
 
+
+def createIndexFile(filepath, fileList):
+    """Create and write and index file for set of files
+
+    Parameters
+    ----------
+    filepath : `str`
+        File name for the file to write. If there's no suffix, it will be applied based on the object type.
+
+    fileList : `list`
+        The files to add to the index file
+    """
+    inputs=[]
+    n_total=0,
+    idx = 0
+    for filepath_ in fileList:
+        n = getInputDataLength(filepath_)
+        fdict = dict(
+            path=filepath_,
+            n=n,
+            start=idx
+        )
+        idx += n
+        inputs.append(fdict)
+    
+    out_dict = dict(
+        inputs=inputs,
+        n_total=idx,
+    )
+    with open(filepath, 'w') as fout:
+        yaml.dump(out_dict, fout)
