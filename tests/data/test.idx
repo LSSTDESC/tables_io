@@ -1,8 +1,8 @@
 n_total: 20
 inputs: 
-  - path: data/no_groupname_test.hdf5
+  - path: no_groupname_test.hdf5
     n: 10
     start: 0
-  - path: data/parquet_test.parquet
+  - path: parquet_test.parquet
     n: 10
     start: 10

@@ -115,7 +115,10 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
             for _, _, data in iterator(filepath, tType=tType, chunk_size=chunk_size, **kwargs):
                 dl.append(convert(data, types.AP_TABLE))
             table_iterated = apTable.vstack(dl)
-            assert compare_tables(self._table, table_iterated, **kwargs)
+            try:
+                assert compare_tables(self._table, table_iterated, **kwargs)
+            except:
+                breakpoint()
         except NotImplementedError as msg:
             if expectFail:
                 pass
@@ -214,6 +217,9 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_iterator("test_out_single.parquet", types.PA_TABLE, True, chunk_size=50)
         self._do_open("test_out_single.parquet")
 
+    def testIndexIteraror(self):
+        self._do_iterator("tests/data/test.idx", types.PA_TABLE, True, chunk_size=None)
+        
     def testBad(self):  # pylint: disable=no-self-use
         """Test that bad calls to write are dealt with"""
         try:

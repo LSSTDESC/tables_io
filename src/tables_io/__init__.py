@@ -43,3 +43,5 @@ concat = concatUtils.concat
 sliceObj = sliceUtils.sliceObj
 
 sliceObjs = sliceUtils.sliceObjs
+
+createIndexFile = io.createIndexFile
