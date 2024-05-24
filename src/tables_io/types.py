@@ -39,6 +39,7 @@ PANDAS_PARQUET = 5
 PYARROW_HDF5 = 6
 PYARROW_PARQUET = 7
 
+
 FILE_FORMAT_NAMES = OrderedDict(
     [
         ("astropyFits", ASTROPY_FITS),
