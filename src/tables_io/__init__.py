@@ -45,3 +45,5 @@ sliceObj = sliceUtils.sliceObj
 sliceObjs = sliceUtils.sliceObjs
 
 check_columns = io.check_columns
+
+createIndexFile = io.createIndexFile
