@@ -115,10 +115,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
             for _, _, data in iterator(filepath, tType=tType, chunk_size=chunk_size, **kwargs):
                 dl.append(convert(data, types.AP_TABLE))
             table_iterated = apTable.vstack(dl)
-            try:
-                assert compare_tables(self._table, table_iterated, **kwargs)
-            except:
-                breakpoint()
+            assert compare_tables(self._table, table_iterated, **kwargs)
         except NotImplementedError as msg:
             if expectFail:
                 pass

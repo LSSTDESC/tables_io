@@ -17,6 +17,7 @@ from . import concatUtils
 
 from . import sliceUtils
 
+from .tableDict import TableDict
 
 convertObj = conv.convertObj
 
@@ -47,3 +48,11 @@ sliceObjs = sliceUtils.sliceObjs
 check_columns = io.check_columns
 
 createIndexFile = io.createIndexFile
+
+concatObjs = concatUtils.concatObjs
+
+concat = concatUtils.concat
+
+sliceObj = sliceUtils.sliceObj
+
+sliceObjs = sliceUtils.sliceObjs
