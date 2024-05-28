@@ -5,7 +5,6 @@ Unit tests for concatanation tools
 import pytest
 from tables_io import types, convert, concat, sliceObj, sliceObjs
 from tables_io.testUtils import compare_tables, check_deps
-from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
 
 @pytest.mark.skipif(not check_deps([apTable, pd]), reason="Missing panda or astropy.table")
