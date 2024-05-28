@@ -49,7 +49,7 @@ dev = [
 ]
 
 [project.scripts]
-convert-table = "tables_io.cli:main"
+tables-io = "tables_io.cli:cli"
 
 [build-system]
 requires = [
