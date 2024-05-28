@@ -576,8 +576,11 @@ def iterIndexFile(filepath, chunk_size=100_000, columns=None, rank=0, parallel_s
     for i in it:
         input_ = inputs[i]
         start = input_['start']
-        end = start +
-    
+        path = input_['path']
+        n = input_['n']
+        end = start + n
+        data = read(path)
+        yield start, end, data
 
 
 def getInputDataLengthIndex(filepath, columns=None, **kwargs):
