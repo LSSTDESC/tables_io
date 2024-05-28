@@ -4,9 +4,6 @@ import os
 from collections import OrderedDict
 
 import numpy as np
-import pyarrow as pa
-import pyarrow.dataset as ds
-import pyarrow.parquet as pq
 
 from .arrayUtils import getGroupInputDataLength, forceToPandables
 from .convUtils import convert, dataFrameToDict, hdf5GroupToDict
@@ -452,7 +449,7 @@ def iterPqToDataFrame(filepath, chunk_size=100_000, columns=None, rank=0, parall
         )  # pragma: no cover
 
     num_rows = getInputDataLengthPq(filepath, columns=columns)
-    ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
+    _ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
 
     parquet_file = pq.read_table(filepath, columns=columns)
     start = 0

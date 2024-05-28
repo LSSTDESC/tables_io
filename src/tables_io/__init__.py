@@ -7,15 +7,16 @@ except:  # pylint: disable=bare-except   #pragma: no cover
 
 from .lazy_modules import *
 
-from . import types
-
-from . import arrayUtils
+from .tableDict import TableDict
 
 from . import convUtils as conv
 
 from . import ioUtils as io
 
-from .tableDict import TableDict
+from . import concatUtils
+
+from . import sliceUtils
+
 
 convertObj = conv.convertObj
 
@@ -34,3 +35,11 @@ io_open = io.io_open
 iteratorNative = io.iteratorNative
 
 iterator = io.iterator
+
+concatObjs = concatUtils.concatObjs
+
+concat = concatUtils.concat
+
+sliceObj = sliceUtils.sliceObj
+
+sliceObjs = sliceUtils.sliceObjs

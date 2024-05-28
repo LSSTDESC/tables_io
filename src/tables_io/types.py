@@ -39,6 +39,7 @@ PANDAS_PARQUET = 5
 PYARROW_HDF5 = 6
 PYARROW_PARQUET = 7
 
+
 FILE_FORMAT_NAMES = OrderedDict(
     [
         ("astropyFits", ASTROPY_FITS),
@@ -150,7 +151,7 @@ def tableType(obj):
         return AP_TABLE
     if isinstance(obj, pa.Table):
         return PA_TABLE
-    if isinstance(obj, np.recarray):
+    if isinstance(obj, (np.recarray, np.ma.core.MaskedArray)):
         return NUMPY_RECARRAY
     if not isinstance(obj, Mapping):
         raise TypeError(
