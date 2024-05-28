@@ -17,6 +17,7 @@ from . import concatUtils
 
 from . import sliceUtils
 
+from .tableDict import TableDict
 
 convertObj = conv.convertObj
 
