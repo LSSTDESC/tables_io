@@ -1,10 +1,9 @@
 """cli for tables_io.convert"""
 
-=======
-from functools import partial  #pragma: no cover
-from typing import Any, Type, TypeVar  #pragma: no cover
+from functools import partial
+from typing import Any
 
-import click  #pragma: no cover
+import click
 
 from . import types
 import tables_io
@@ -18,7 +17,7 @@ class PartialOption:
             click.option, *param_decls, cls=partial(click.Option), **kwargs
         )
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:  # pragma: no cover
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return self._partial(*args, **kwargs)
 
 
@@ -30,7 +29,7 @@ class PartialArgument:
             click.argument, *param_decls, cls=partial(click.Argument), **kwargs
         )
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:  # pragma: no cover
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return self._partial(*args, **kwargs)
 
 
@@ -79,15 +78,4 @@ def convert(input, output):
 
     print("Done converting file")
 
-    return 0
-
-
-@cli.command()
-@output()
-@input_args()
-def make_index(output, input_args):
-    """Make an index file from a list of files"""
-
-    tables_io.createIndexFile(output, input_args)
-    
     return 0
