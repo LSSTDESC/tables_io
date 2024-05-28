@@ -157,11 +157,7 @@ def tableType(obj):
         return AP_TABLE
     if isinstance(obj, pa.Table):
         return PA_TABLE
-<<<<<<< HEAD
     if isinstance(obj, (np.recarray, np.ma.core.MaskedArray)):
-=======
-    if isinstance(obj, np.recarray):
->>>>>>> a8407f7 (Initial commit for pyarrow support (#93))
         return NUMPY_RECARRAY
     if not isinstance(obj, Mapping):
         raise TypeError(
