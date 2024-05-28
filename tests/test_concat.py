@@ -1,5 +1,5 @@
 """
-Unit tests for io_layer module
+Unit tests for concatanation tools
 """
 
 import pytest

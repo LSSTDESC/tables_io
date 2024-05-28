@@ -7,7 +7,7 @@ except:  # pylint: disable=bare-except   #pragma: no cover
 
 from .lazy_modules import *
 
-
+from .tableDict import TableDict
 
 from . import convUtils as conv
 

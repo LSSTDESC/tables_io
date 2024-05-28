@@ -51,15 +51,15 @@ input_args = PartialArgument(
 )
 
 
-@click.group()
-@click.version_option(tables_io._version)
+@click.group()  # pragma: no cover
+@click.version_option(tables_io._version)  # pragma: no cover
 def cli() -> None:
     """tables_io utility scripts"""
 
 
-@cli.command()
-@input()
-@output()
+@cli.command()  # pragma: no cover
+@input()  # pragma: no cover
+@output()  # pragma: no cover
 def convert(input, output):
     """Convet a file with tabular data from one format to another"""
 
