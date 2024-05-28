@@ -15,6 +15,10 @@ from . import convUtils as conv
 
 from . import ioUtils as io
 
+from . import concatUtils
+
+from . import sliceUtils
+
 from .tableDict import TableDict
 
 convertObj = conv.convertObj
@@ -34,3 +38,11 @@ io_open = io.io_open
 iteratorNative = io.iteratorNative
 
 iterator = io.iterator
+
+concatObjs = concatUtils.concatObjs
+
+concat = concatUtils.concat
+
+sliceObj = sliceUtils.sliceObj
+
+sliceObjs = sliceUtils.sliceObjs
