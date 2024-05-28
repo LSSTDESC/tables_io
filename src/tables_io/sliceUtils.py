@@ -2,11 +2,9 @@
 
 from collections import OrderedDict
 
-import numpy as np
 
 from .arrayUtils import sliceDict
-from .lazy_modules import apTable, fits, pd, pa
-from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE, istablelike, tableType
+from .types import NUMPY_DICT, tableType
 
 
 

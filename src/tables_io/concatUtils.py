@@ -4,9 +4,9 @@ from collections import OrderedDict
 
 import numpy as np
 
-from .arrayUtils import forceToPandables, concatenateDicts
-from .lazy_modules import apTable, fits, pd, pa
-from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE, istablelike, tableType
+from .arrayUtils import concatenateDicts
+from .lazy_modules import apTable, pd, pa
+from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE
 
 
 ### I. concatanating list of table-like objects
@@ -131,9 +131,9 @@ def concatObjs(tableList, tType):
     try:
         theFunc = funcDict[tType]
         return theFunc(tableList)
-    except KeyError as msg:
+    except KeyError as msg:  # pragma: no cover
         raise NotImplementedError(
-            f"Unsupported FileType for concatObjs {fType}"
+            f"Unsupported FileType for concatObjs {tType}"
         ) from msg  # pragma: no cover
 
 

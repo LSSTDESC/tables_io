@@ -233,7 +233,7 @@ def paTableToRecarray(tab):
     rec : `numpy.recarray`
         The output rec array
     """
-    raise NotImplementError()  #pragma: no cover
+    raise NotImplementedError()  #pragma: no cover
 
 
 def apTableToRecarray(tab):

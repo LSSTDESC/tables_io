@@ -7,9 +7,7 @@ except:  # pylint: disable=bare-except   #pragma: no cover
 
 from .lazy_modules import *
 
-from . import types
 
-from . import arrayUtils
 
 from . import convUtils as conv
 
@@ -19,7 +17,6 @@ from . import concatUtils
 
 from . import sliceUtils
 
-from .tableDict import TableDict
 
 convertObj = conv.convertObj
 

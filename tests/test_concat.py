@@ -3,7 +3,7 @@ Unit tests for io_layer module
 """
 
 import pytest
-from tables_io import types, convert, concat, sliceObj
+from tables_io import types, convert, concat, sliceObj, sliceObjs
 from tables_io.testUtils import compare_tables, check_deps
 from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
@@ -23,6 +23,8 @@ def test_concat(data_tables, tType):
     check_data_2 = sliceObj(concat_data, slice(1000, 1050))
     t_dict_1 = convert(check_data_1, types.AP_TABLE)
     t_dict_2 = convert(check_data_2, types.AP_TABLE)    
-    test_dict = sliceObj(data_tables['data'], slice(0, 50)) 
+    test_dict = sliceObj(data_tables['data'], slice(0, 50))
+    test_dict2 = sliceObjs(data_tables, slice(0, 10))
     assert compare_tables(test_dict, t_dict_1)
     assert compare_tables(test_dict, t_dict_2)
+    assert compare_tables(test_dict2['data'], data_tables['data'][0:10])

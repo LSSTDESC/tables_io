@@ -4,10 +4,6 @@ import os
 from collections import OrderedDict
 
 import numpy as np
-import yaml
-import pyarrow as pa
-import pyarrow.dataset as ds
-import pyarrow.parquet as pq
 
 from .arrayUtils import getGroupInputDataLength, forceToPandables
 from .convUtils import convert, dataFrameToDict, hdf5GroupToDict
@@ -453,7 +449,7 @@ def iterPqToDataFrame(filepath, chunk_size=100_000, columns=None, rank=0, parall
         )  # pragma: no cover
 
     num_rows = getInputDataLengthPq(filepath, columns=columns)
-    ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
+    _ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
 
     parquet_file = pq.read_table(filepath, columns=columns)
     start = 0
@@ -495,61 +491,6 @@ def getInputDataLengthPq(filepath, columns=None, **kwargs):
     tab = pq.read_table(filepath, columns=columns)
     nrow = len(tab[tab.column_names[0]])
     return nrow
-
-
-### I C. Parquet dataset partial read/write functions
-
-def iterDsToTable(source, columns=None, **kwargs):
-    """
-    iterator for sending chunks of data in parquet
-
-    Parameters
-    ----------
-    dataset: str
-        input file name
-    **kwargs : additional arguments to pass to the native file reader
-
-    Yields
-    ------
-    start: int
-        start index
-    end: int
-        ending index
-    data: `pyarrow.Table`
-        table of all data from start:end
-    """
-    start = 0
-    end = 0
-    dataset = ds.dataset(source)
-
-    for batch in dataset.to_batches(columns=columns):
-        data = pa.Table.from_pydict(batch.to_pydict())
-        num_rows = len(data)
-        end += num_rows
-        yield start, end, data
-        start += num_rows
-
-
-def getInputDataLengthDs(source, **kwargs):
-    """Open a dataset and return the size of a group
-
-    Parameters
-    ----------
-    filepath: `str`
-        Path to input file
-
-    Returns
-    -------
-    length : `int`
-        The length of the data
-
-    Notes
-    -----
-    Normally that is what you want to be iterating over.
-    """
-    dataset = ds.dataset(source, **kwargs)
-    nrows = dataset.count_rows()
-    return nrows
 
 
 ### I C. Parquet dataset partial read/write functions
