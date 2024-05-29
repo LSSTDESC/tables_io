@@ -882,7 +882,7 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
             elif isinstance(val, list):
                 arr = np.array(val)
                 group.create_dataset(key, dtype=arr.dtype, data=arr)
-            elif isinstance(val, dict):
+            elif isinstance(val, (dict, OrderedDict)):
                 writeDictToHdf5(val, filepath, f"{group.name}/{key}")
             else:
                 # In the future, it may be better to specifically case for
