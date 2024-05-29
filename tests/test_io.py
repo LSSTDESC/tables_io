@@ -230,14 +230,18 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_open("test_out_single.parquet")
         self._do_check_columns("test_out_single.parquet")
 
-    def testIndexIteraror(self):
+    def testIndexFiles(self):
         concat_data = read('tests/data/concat.hdf5', types.AP_TABLE)
         self._do_iterator(concat_data, "tests/data/test.idx", types.PA_TABLE, True, chunk_size=None)
         createIndexFile('dummy.idx', ['tests/data/no_groupname_test.hdf5', 'tests/data/no_groupname_test.hdf5'])
         self._files.append('dummy.idx')
         self._do_iterator(concat_data, "dummy.idx", types.PA_TABLE, True, chunk_size=None)
-        n = getInputDataLengthIndex('dummy.idx')
+        n = getInputDataLengthIndex('dummy.idx')        
         assert n == 20
+        data_read = read("tests/data/test.idx")
+        data_conv = convert(data_read, types.AP_TABLE)
+        assert compare_tables(concat_data, data_conv)
+        
         
     def testBad(self):  # pylint: disable=no-self-use
         """Test that bad calls to write are dealt with"""

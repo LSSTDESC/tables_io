@@ -6,7 +6,7 @@ import numpy as np
 
 from .arrayUtils import concatenateDicts
 from .lazy_modules import apTable, pd, pa
-from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE, istablelike, istabledictlike
+from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE, tableType, istablelike, istabledictlike
 
 
 ### I. concatanating list of table-like objects
@@ -120,6 +120,9 @@ def concatObjs(tableList, tType):
     tab : `dict`
         The table
     """
+    if not tableList:  # pragma: no cover
+        return OrderedDict()
+
     funcDict = {
         AP_TABLE:concatApTables,
         NUMPY_DICT:concatNumpyDicts,
@@ -127,7 +130,15 @@ def concatObjs(tableList, tType):
         PD_DATAFRAME:concatDataframes,
         PA_TABLE:concatPATables,
     }
-    
+        
+    if tType is None:
+        firstOdict = tableList[0]
+        try:
+            tType = tableType(firstOdict)
+        except TypeError:  # pragma: no cover
+            firstTable = list(firstOdict.values())[0]
+            tType = tableType(firstTable)
+        
     try:
         theFunc = funcDict[tType]
     except KeyError as msg:  # pragma: no cover
