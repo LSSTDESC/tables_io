@@ -95,7 +95,7 @@ def make_index(input_args, output):  # pragma: no cover
 @input_args()
 @output()
 def concat(input_args, output):  # pragma: no cover
-    """Make an index file from a list of input files"""
+    """Make a single file from a list of input files"""
     suffix = os.path.splitext(output)[1][1:]
     fType = types.FILE_FORMAT_SUFFIXS[suffix]
     tType = types.NATIVE_TABLE_TYPE[fType]
