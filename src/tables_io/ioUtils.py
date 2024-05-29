@@ -4,9 +4,15 @@ import os
 from collections import OrderedDict
 
 import numpy as np
+import yaml
+import pyarrow as pa
+import pyarrow.dataset as ds
+import pyarrow.parquet as pq
+import yaml
 
 from .arrayUtils import getGroupInputDataLength, forceToPandables
 from .convUtils import convert, dataFrameToDict, hdf5GroupToDict
+from .concatUtils import concat
 from .lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
 from .types import (
     AP_TABLE,
@@ -15,6 +21,7 @@ from .types import (
     DEFAULT_TABLE_KEY,
     FILE_FORMAT_SUFFIX_MAP,
     FILE_FORMAT_SUFFIXS,
+    INDEX_FILE,
     NATIVE_FORMAT,
     NATIVE_TABLE_TYPE,
     NUMPY_FITS,
@@ -464,6 +471,7 @@ def iterPqToDataFrame(filepath, chunk_size=100_000, columns=None, rank=0, parall
         yield start, end, data
         start += num_rows
 
+
 def getInputDataLengthPq(filepath, columns=None, **kwargs):
     """Open a Parquet file and return the size of a group
 
@@ -546,6 +554,77 @@ def getInputDataLengthDs(source, **kwargs):
     dataset = ds.dataset(source, **kwargs)
     nrows = dataset.count_rows()
     return nrows
+
+
+### II C. Index file partial read/write functions
+
+def iterIndexFile(filepath, chunk_size=100_000, columns=None, rank=0, parallel_size=1, **kwargs):
+
+    dirname = os.path.abspath(os.path.dirname(filepath))
+    
+    if rank >= parallel_size:
+        raise TypeError(
+            f"MPI rank {rank} larger than the total " f"number of processes {parallel_size}"
+        )  # pragma: no cover
+
+    with open(filepath) as fin:
+        file_index = yaml.safe_load(fin)
+
+
+    inputs = file_index['inputs']
+    n_in = len(inputs)
+    start = 0
+    
+    it = split_tasks_by_rank(range(n_in), parallel_size, rank)
+    for i in it:
+        input_ = inputs[i]
+        start = input_['start']
+        path = input_['path']
+        n = input_['n']
+        end = start + n
+        fullpath = os.path.join(dirname, path)
+        data = read(fullpath)
+        yield start, end, data
+
+
+def readIndexFile(filepath, keys=None):
+    """Open an index file and and return a dictionary of `table-like` objects
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    keys : `list` or `None`
+        Which tables to read
+
+    Returns
+    -------
+    tab : `OrderedDict` (`str` : `table-like`)
+       The data
+    """
+    dirname = os.path.abspath(os.path.dirname(filepath))
+
+    with open(filepath) as fin:
+        file_index = yaml.safe_load(fin)
+
+    inputs = file_index['inputs']
+    n_in = len(inputs)
+    start = 0
+    all_data = []
+    for input_ in inputs:
+        path = input_['path']
+        fullpath = os.path.join(dirname, path)
+        data = read(fullpath, keys)
+        all_data.append(data)
+    return concat(all_data, None)
+
+
+def getInputDataLengthIndex(filepath, columns=None, **kwargs):
+    with open(filepath) as fin:
+        file_index = yaml.safe_load(fin)
+    return file_index['n_total']
+
 
 
 ### II.   Reading and Writing Files
@@ -803,7 +882,7 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
             elif isinstance(val, list):
                 arr = np.array(val)
                 group.create_dataset(key, dtype=arr.dtype, data=arr)
-            elif isinstance(val, dict):
+            elif isinstance(val, (dict, OrderedDict)):
                 writeDictToHdf5(val, filepath, f"{group.name}/{key}")
             else:
                 # In the future, it may be better to specifically case for
@@ -1349,6 +1428,8 @@ def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs
         return readHd5ToTables(filepath, keys)
     if fType == PYARROW_PARQUET:
         return readPqToTables(filepath, keys, allow_missing_keys, **kwargs)
+    if fType == INDEX_FILE:
+        return readIndexFile(filepath, keys)
     raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
 
 
@@ -1413,6 +1494,7 @@ def iteratorNative(filepath, fmt=None, **kwargs):
         PANDAS_PARQUET: iterPqToDataFrame,
         PYARROW_PARQUET: iterDsToTable,
         PYARROW_HDF5: iterDsToTable,
+        INDEX_FILE: iterIndexFile,
     }
 
     try:
@@ -1450,6 +1532,7 @@ def getInputDataLength(filepath, fmt=None, **kwargs):
         PANDAS_HDF5: getInputDataLengthHdf5,
         PANDAS_PARQUET: getInputDataLengthPq,
         PYARROW_PARQUET: getInputDataLengthDs,
+        INDEX_FILE: getInputDataLengthIndex,
     }
 
     try:
@@ -1602,3 +1685,38 @@ def write(obj, filepath, fmt=None):
         return filepath    
 
     raise TypeError(f"Unsupported File type {fType}")  # pragma: no cover
+
+
+def createIndexFile(filepath, fileList):
+    """Create and write and index file for set of files
+
+    Parameters
+    ----------
+    filepath : `str`
+        File name for the file to write. If there's no suffix, it will be applied based on the object type.
+
+    fileList : `list`
+        The files to add to the index file
+    """
+    inputs=[]
+    n_total=0,
+    idx = 0
+    main_path = (filepath + '/').replace('//', '/')
+    for filepath_ in fileList:
+        n = getInputDataLength(filepath_)
+        fdict = dict(
+            path=filepath_.replace(main_path, ''),
+            n=n,
+            start=idx
+        )
+        idx += n
+        inputs.append(fdict)
+    
+    out_dict = dict(
+        inputs=inputs,
+        n_total=idx,
+    )
+    with open(filepath, 'w') as fout:
+        yaml.dump(out_dict, fout)
+    
+    
