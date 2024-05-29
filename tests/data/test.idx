@@ -3,6 +3,6 @@ inputs:
   - path: no_groupname_test.hdf5
     n: 10
     start: 0
-  - path: parquet_test.parquet
+  - path: no_groupname_test.hdf5
     n: 10
     start: 10

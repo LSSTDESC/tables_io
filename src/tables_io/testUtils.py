@@ -89,22 +89,3 @@ def compare_table_dicts(d1, d2, strict=False, columns=None):
         else:  # pragma: no cover
             identical &= compare_tables(v, vv, columns=columns)
     return identical
-
-
-def make_test_data():
-    """Make and return some test data"""
-    nrow = 1000
-    vect_size = 20
-    mat_size = 5
-    scalar = np.random.uniform(size=nrow)
-    vect = np.random.uniform(size=nrow * vect_size).reshape(nrow, vect_size)
-    matrix = np.random.uniform(size=nrow * mat_size * mat_size).reshape(nrow, mat_size, mat_size)
-    data = dict(scalar=scalar, vect=vect, matrix=matrix)
-    table = apTable.Table(data)
-    table.meta["a"] = 1
-    table.meta["b"] = None
-    table.meta["c"] = [3, 4, 5]
-    small_table = apTable.Table(dict(a=np.ones(21), b=np.zeros(21)))
-    small_table.meta["small"] = True
-    out_tables = dict(data=table, md=small_table)
-    return out_tables
