@@ -12,6 +12,7 @@ import yaml
 
 from .arrayUtils import getGroupInputDataLength, forceToPandables
 from .convUtils import convert, dataFrameToDict, hdf5GroupToDict
+from .concatUtils import concat
 from .lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
 from .types import (
     AP_TABLE,
@@ -584,6 +585,39 @@ def iterIndexFile(filepath, chunk_size=100_000, columns=None, rank=0, parallel_s
         fullpath = os.path.join(dirname, path)
         data = read(fullpath)
         yield start, end, data
+
+
+def readIndexFile(filepath, keys=None):
+    """Open an index file and and return a dictionary of `table-like` objects
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    keys : `list` or `None`
+        Which tables to read
+
+    Returns
+    -------
+    tab : `OrderedDict` (`str` : `table-like`)
+       The data
+    """
+    dirname = os.path.abspath(os.path.dirname(filepath))
+
+    with open(filepath) as fin:
+        file_index = yaml.safe_load(fin)
+
+    inputs = file_index['inputs']
+    n_in = len(inputs)
+    start = 0
+    all_data = []
+    for input_ in inputs:
+        path = input_['path']
+        fullpath = os.path.join(dirname, path)
+        data = read(fullpath, keys)
+        all_data.append(data)
+    return concat(all_data, None)
 
 
 def getInputDataLengthIndex(filepath, columns=None, **kwargs):
@@ -1394,6 +1428,8 @@ def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs
         return readHd5ToTables(filepath, keys)
     if fType == PYARROW_PARQUET:
         return readPqToTables(filepath, keys, allow_missing_keys, **kwargs)
+    if fType == INDEX_FILE:
+        return readIndexFile(filepath, keys)
     raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
 
 
