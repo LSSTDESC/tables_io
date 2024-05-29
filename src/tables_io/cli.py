@@ -84,7 +84,7 @@ def convert(input, output):  # pragma: no cover
 
 @cli.command()
 @input_args()
-@output()
+@output(help="output filename; suffix should be 'idx'")
 def make_index(input_args, output):  # pragma: no cover
     """Make an index file from a list of input files"""
     tables_io.createIndexFile(output, input_args)
