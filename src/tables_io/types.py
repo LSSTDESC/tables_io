@@ -5,9 +5,9 @@ from collections import OrderedDict
 from collections.abc import Iterable, Mapping
 
 import numpy as np
-import pyarrow as pa
 
 from .arrayUtils import arrayLength
+from .lazy_modules import pa
 
 # Tabular data formats
 AP_TABLE = 0
