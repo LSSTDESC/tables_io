@@ -6,7 +6,7 @@ import os
 import pytest
 
 import unittest
-from tables_io import types, convert, io_open, read, write, iterator, check_columns. createIndexFile
+from tables_io import types, convert, io_open, read, write, iterator, check_columns, createIndexFile
 from tables_io.ioUtils import getInputDataLengthIndex
 from tables_io.testUtils import compare_table_dicts, compare_tables, make_test_data, check_deps
 from tables_io.lazy_modules import apTable, jnp, h5py, pd, pq
