@@ -43,3 +43,5 @@ concat = concatUtils.concat
 sliceObj = sliceUtils.sliceObj
 
 sliceObjs = sliceUtils.sliceObjs
+
+check_columns = io.check_columns

@@ -1602,3 +1602,49 @@ def write(obj, filepath, fmt=None):
         return filepath    
 
     raise TypeError(f"Unsupported File type {fType}")  # pragma: no cover
+
+    
+
+    
+def check_columns(filepath, columns_to_check, fmt=None, **kwargs):
+    """Read the file column names and check it against input list
+
+    Parameters
+    ----------
+    filepath : `str`
+        File name for the file to read. If there's no suffix, it will be applied based on the object type.
+    columns_to_check: `list`
+        A list of columns to be compared with the data
+    fmt : `str` or `None`
+        The output file format, If `None` this will use `writeNative`
+    parent_groupname: `str` or `None`
+        For hdf5 files, the groupname for the data
+    """
+    
+    fType = fileType(filepath, fmt)
+    
+    # Read the file below:
+    file = io_open(filepath, fmt=None, **kwargs)
+    
+    if fType in [ASTROPY_FITS, NUMPY_FITS]:
+        col_list=[]
+        for hdu in file[1:]:
+            columns = hdu.columns
+            for col in columns:
+                if col.name not in col_list:
+                    col_list.append(col.name)
+
+    elif fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PYARROW_HDF5]:
+        col_list = readHdf5GroupNames(filepath, **kwargs)
+
+    elif fType in [PYARROW_PARQUET, PANDAS_PARQUET]:
+        col_list = file.schema.names
+    else:
+        raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
+
+    # check columns
+    intersection = set(columns_to_check).intersection(col_list)
+    if len(intersection)<len(columns_to_check):
+        diff = set(columns_to_check) - intersection
+        raise KeyError("The following columns are not found: ", diff)
+
