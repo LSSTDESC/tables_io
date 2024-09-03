@@ -1606,7 +1606,7 @@ def write(obj, filepath, fmt=None):
     
 
     
-def check_columns(filepath, columns_to_check, fmt=None):
+def check_columns(filepath, columns_to_check, fmt=None, **kwargs):
     """Read the file column names and check it against input list
 
     Parameters
@@ -1617,23 +1617,34 @@ def check_columns(filepath, columns_to_check, fmt=None):
         A list of columns to be compared with the data
     fmt : `str` or `None`
         The output file format, If `None` this will use `writeNative`
+    parent_groupname: `str` or `None`
+        For hdf5 files, the groupname for the data
     """
     
-    if fmt is None:
-        splitpath = os.path.splitext(filepath)
-        if not splitpath[1]:
-            return writeNative(obj, filepath)
-        fmt = splitpath[1][1:]
+    fType = fileType(filepath, fmt)
+    
+    # Read the file below:
+    file = io_open(filepath, fmt=None, **kwargs)
+    
+    if fType in [ASTROPY_FITS, NUMPY_FITS]:
+        col_list=[]
+        for hdu in file[1:]:
+            columns = hdu.colums
+            for col in columns:
+                if col.name not in col_list:
+                    col_list.append(col.name)
 
-    try:
-        fType = FILE_FORMAT_SUFFIXS[fmt]
-    except KeyError as msg:  # pragma: no cover
-        raise KeyError(f"Unknown file format {fmt} from {filepath}, options are {list(FILE_FORMAT_SUFFIXS.keys())}") from msg
-        
-    # now we need to consider each case separately below:
-    
-    # for each case, only need to read the header / groupname / column name rather than full dataset:
-    
-    
-    
-    return 
+    if fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PYARROW_HDF5]:
+        col_list = readHdf5GroupNames(filepath, **kwargs)
+
+    if fType in [PYARROW_PARQUET, PANDAS_PARQUET]:
+        col_list = file.schema.names
+    else:
+        raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
+
+    # check columns
+    intersection = set(columns_to_check).intersection(col_list)
+    if len(intersection)<columns_to_check:
+        diff = set(columns_to_check) - intersection
+        raise KeyError("The following columns are not found: ", diff)
+
