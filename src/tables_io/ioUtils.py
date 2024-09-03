@@ -1634,10 +1634,10 @@ def check_columns(filepath, columns_to_check, fmt=None, **kwargs):
                 if col.name not in col_list:
                     col_list.append(col.name)
 
-    if fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PYARROW_HDF5]:
+    elif fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PYARROW_HDF5]:
         col_list = readHdf5GroupNames(filepath, **kwargs)
 
-    if fType in [PYARROW_PARQUET, PANDAS_PARQUET]:
+    elif fType in [PYARROW_PARQUET, PANDAS_PARQUET]:
         col_list = file.schema.names
     else:
         raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
