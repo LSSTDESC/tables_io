@@ -1,0 +1,8 @@
+n_total: 20
+inputs: 
+  - path: no_groupname_test.hdf5
+    n: 10
+    start: 0
+  - path: no_groupname_test.hdf5
+    n: 10
+    start: 10
