@@ -202,7 +202,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_iterator("test_out_single.h5", types.PD_DATAFRAME, True, chunk_size=50)
         self._do_open("test_out_single.h5")
         self._do_open("test_out.h5")
-        self._do_check_columns("test_out.hd5")
+        self._do_check_columns("test_out.h5")
 
     def testPQLoopback(self):
         """Test writing / reading pandas dataframes to parquet"""
