@@ -6,7 +6,7 @@ import os
 import pytest
 
 import unittest
-from tables_io import types, convert, io_open, read, write, iterator
+from tables_io import types, convert, io_open, read, write, iterator, check_columns
 from tables_io.testUtils import compare_table_dicts, compare_tables, make_test_data, check_deps
 from tables_io.lazy_modules import apTable, jnp, h5py, pd, pq
 
@@ -131,6 +131,14 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         with io_open(filepath) as f:
             assert f
 
+    def _do_check_columns(self, filepath):
+        columns_to_check=['imaginary_column']
+        try:
+            check_columns(filepath, columns_to_check)
+        except KeyError:
+            pass
+
+
     def testFitsLoopback(self):
         """Test writing / reading to FITS"""
         self._do_loopback(types.AP_TABLE, "test_out", "fits")
@@ -139,6 +147,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_iterator("test_out_single.fits", types.AP_TABLE, True)
         self._do_open("test_out_single.fits")
         self._do_open("test_out.fits")
+        self._do_check_columns("test_out.fits")
 
     def testRecarrayLoopback(self):
         """Test writing / reading to FITS"""
@@ -148,6 +157,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_iterator("test_out_single.fit", types.NUMPY_RECARRAY, True)
         self._do_open("test_out_single.fit")
         self._do_open("test_out.fit")
+        self._do_check_columns("test_out.fit")
 
     def testHf5Loopback(self):
         """Test writing / reading astropy tables to HDF5"""
@@ -157,6 +167,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_iterator("test_out_single.hf5", types.AP_TABLE, True, chunk_size=50)
         self._do_open("test_out_single.hf5")
         self._do_open("test_out.hf5")
+        self._do_check_columns("test_out.hf5")
 
     def testHdf5Loopback(self):
         """Test writing / reading numpy arrays to HDF5"""
@@ -166,6 +177,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_iterator("test_out_single.hdf5", types.NUMPY_DICT, False, chunk_size=50)
         self._do_open("test_out_single.hdf5")
         self._do_open("test_out.hdf5")
+        self._do_check_columns("test_out.hdf5")
 
     def testHd5Loopback(self):
         """Test pyarrow tables to HDF5"""
@@ -175,6 +187,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         #self._do_iterator("test_out_single.hd5", types.PA_TABLE, False, chunk_size=50)
         self._do_open("test_out_single.hd5")
         self._do_open("test_out.hd5")
+        self._do_check_columns("test_out.hd5")
 
     def testHdf5LoopbackWithJaxArray(self):
         """Test writing / reading astropy tables to HDF5 with a jax array"""
@@ -189,6 +202,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_iterator("test_out_single.h5", types.PD_DATAFRAME, True, chunk_size=50)
         self._do_open("test_out_single.h5")
         self._do_open("test_out.h5")
+        self._do_check_columns("test_out.hd5")
 
     def testPQLoopback(self):
         """Test writing / reading pandas dataframes to parquet"""
@@ -206,6 +220,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_iterator("test_out_single.pq", types.PD_DATAFRAME, chunk_size=50)
         self._do_iterator("test_out_single.pq", types.PD_DATAFRAME, chunk_size=50, columns=["scalar"])
         self._do_open("test_out_single.pq")
+        self._do_check_columns("test_out_single.pq")
 
     def testParquetLoopback(self):
         """Test writing / reading pyarros tables to parquet files"""
@@ -213,6 +228,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_loopback_single(types.PA_TABLE, "test_out_single", "parquet", [""])
         self._do_iterator("test_out_single.parquet", types.PA_TABLE, True, chunk_size=50)
         self._do_open("test_out_single.parquet")
+        self._do_check_columns("test_out_single.parquet")
 
     def testBad(self):  # pylint: disable=no-self-use
         """Test that bad calls to write are dealt with"""
@@ -223,6 +239,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         else:
             raise TypeError("Failed to catch unwritable type")
         assert write(False, "null", "fits") is None
+
 
 
 if __name__ == "__main__":
