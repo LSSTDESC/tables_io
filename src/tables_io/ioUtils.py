@@ -1629,7 +1629,7 @@ def check_columns(filepath, columns_to_check, fmt=None, **kwargs):
     if fType in [ASTROPY_FITS, NUMPY_FITS]:
         col_list=[]
         for hdu in file[1:]:
-            columns = hdu.colums
+            columns = hdu.columns
             for col in columns:
                 if col.name not in col_list:
                     col_list.append(col.name)
