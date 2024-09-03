@@ -1644,7 +1644,7 @@ def check_columns(filepath, columns_to_check, fmt=None, **kwargs):
 
     # check columns
     intersection = set(columns_to_check).intersection(col_list)
-    if len(intersection)<columns_to_check:
+    if len(intersection)<len(columns_to_check):
         diff = set(columns_to_check) - intersection
         raise KeyError("The following columns are not found: ", diff)
 
