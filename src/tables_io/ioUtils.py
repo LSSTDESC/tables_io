@@ -1602,3 +1602,38 @@ def write(obj, filepath, fmt=None):
         return filepath    
 
     raise TypeError(f"Unsupported File type {fType}")  # pragma: no cover
+
+    
+
+    
+def check_columns(filepath, columns_to_check, fmt=None):
+    """Read the file column names and check it against input list
+
+    Parameters
+    ----------
+    filepath : `str`
+        File name for the file to read. If there's no suffix, it will be applied based on the object type.
+    columns_to_check: `list`
+        A list of columns to be compared with the data
+    fmt : `str` or `None`
+        The output file format, If `None` this will use `writeNative`
+    """
+    
+    if fmt is None:
+        splitpath = os.path.splitext(filepath)
+        if not splitpath[1]:
+            return writeNative(obj, filepath)
+        fmt = splitpath[1][1:]
+
+    try:
+        fType = FILE_FORMAT_SUFFIXS[fmt]
+    except KeyError as msg:  # pragma: no cover
+        raise KeyError(f"Unknown file format {fmt} from {filepath}, options are {list(FILE_FORMAT_SUFFIXS.keys())}") from msg
+        
+    # now we need to consider each case separately below:
+    
+    # for each case, only need to read the header / groupname / column name rather than full dataset:
+    
+    
+    
+    return 
