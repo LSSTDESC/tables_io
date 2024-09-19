@@ -1606,7 +1606,7 @@ def write(obj, filepath, fmt=None):
     
 
     
-def check_columns(filepath, columns_to_check, fmt=None, **kwargs):
+def check_columns(filepath, columns_to_check, fmt=None, parent_groupname=None, **kwargs):
     """Read the file column names and check it against input list
 
     Parameters
@@ -1635,7 +1635,7 @@ def check_columns(filepath, columns_to_check, fmt=None, **kwargs):
                     col_list.append(col.name)
 
     elif fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PYARROW_HDF5]:
-        col_list = readHdf5GroupNames(filepath, **kwargs)
+        col_list = readHdf5GroupNames(filepath, parent_groupname=parent_groupname)
 
     elif fType in [PYARROW_PARQUET, PANDAS_PARQUET]:
         col_list = file.schema.names
