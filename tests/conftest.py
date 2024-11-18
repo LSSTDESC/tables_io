@@ -3,9 +3,7 @@ import numpy as np
 from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
 
-@pytest.fixture(scope="session", name="data_tables")
-def data_tables():
-    """Make and return some test data"""
+def _make_data_tables():
     nrow = 1000
     vect_size = 20
     mat_size = 5
@@ -22,6 +20,11 @@ def data_tables():
     out_tables = dict(data=table, md=small_table)
     return out_tables
 
+@pytest.fixture(scope="session", name="data_tables")
+def data_tables():
+    """Make and return some test data"""
+    return _make_data_tables()
+
 
 @pytest.fixture
 def data_keys(data_tables):
@@ -33,3 +36,10 @@ def data_keys(data_tables):
 def data_table(data_tables):
     """Make and return some test data"""
     return data_tables["data"]
+
+
+@pytest.fixture(scope="class")
+def data_tables_class(request):
+
+    # set a class attribute on the invoking test context
+    request.cls._tables = _make_data_tables()

@@ -7,7 +7,6 @@ from .arrayUtils import sliceDict
 from .types import NUMPY_DICT, tableType
 
 
-
 # I F. Generic `slice`
 def sliceObj(obj, the_slice):
     """
