@@ -5,13 +5,14 @@ from collections import OrderedDict
 import numpy as np
 
 from .arrayUtils import concatenateDicts
-from .lazy_modules import apTable, pd, pa
-from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE
+from ..lazy_modules import apTable, pd, pa
+from ..types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE
 
 
 ### I. concatanating list of table-like objects
 
 ### I A. Concatanating `astropy.table.Table`
+
 
 def concatApTables(tablelist):
     """
@@ -29,7 +30,7 @@ def concatApTables(tablelist):
     """
     return apTable.vstack(tablelist)
 
-    
+
 ### I B. Concatanating dicts of numpy arrays
 def concatNumpyDicts(tablelist):
     """
@@ -64,7 +65,7 @@ def concatNumpyRecarrays(tablelist):
         The table
     """
     return np.lib.recfunctions.stack_arrays(tablelist)
-    
+
 
 ### I D. Concatanating pandas dataframes
 def concatDataframes(tablelist):
@@ -112,7 +113,7 @@ def concatObjs(tableList, tType):
     tablelist :  `list`
         The tables
 
-    tType: 
+    tType:
         What type of tables we expect the objects to be
 
     Returns
@@ -121,13 +122,13 @@ def concatObjs(tableList, tType):
         The table
     """
     funcDict = {
-        AP_TABLE:concatApTables,
-        NUMPY_DICT:concatNumpyDicts,
-        NUMPY_RECARRAY:concatNumpyRecarrays,
-        PD_DATAFRAME:concatDataframes,
-        PA_TABLE:concatPATables,
+        AP_TABLE: concatApTables,
+        NUMPY_DICT: concatNumpyDicts,
+        NUMPY_RECARRAY: concatNumpyRecarrays,
+        PD_DATAFRAME: concatDataframes,
+        PA_TABLE: concatPATables,
     }
-    
+
     try:
         theFunc = funcDict[tType]
         return theFunc(tableList)
@@ -137,8 +138,8 @@ def concatObjs(tableList, tType):
         ) from msg  # pragma: no cover
 
 
-
 ### II.  Multi-table concatanating
+
 
 def concat(odictlist, tType):
     """
@@ -163,6 +164,5 @@ def concat(odictlist, tType):
             else:
                 odict_in[key].append(val)
         first = False
-    
-    return OrderedDict([(k, concatObjs(v, tType)) for k, v in odict_in.items()])
 
+    return OrderedDict([(k, concatObjs(v, tType)) for k, v in odict_in.items()])

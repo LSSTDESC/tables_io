@@ -6,13 +6,14 @@ import unittest
 import numpy as np
 import pytest
 
-from tables_io import arrayUtils, types
+from tables_io import types
+from tables_io.utils import arrayUtils
 from tables_io.lazy_modules import apTable, lazyImport, pd
 from tables_io.testUtils import check_deps
 
 
 def test_check_deps():
-    bad_module = lazyImport('this_does_not_exist')
+    bad_module = lazyImport("this_does_not_exist")
     assert not check_deps([bad_module])
 
 
@@ -34,7 +35,9 @@ def test_force_to_pandasable():
     except ValueError:
         pass
     else:
-        raise ValueError("Failed to catch array length mismatch in arrayUtils.forceToPandables")
+        raise ValueError(
+            "Failed to catch array length mismatch in arrayUtils.forceToPandables"
+        )
     rv2d = rv.reshape(10, 10)
     rv2d_check = np.vstack(arrayUtils.forceToPandables(rv2d))
     assert np.allclose(rv2d, rv2d_check)
