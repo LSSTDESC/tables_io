@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from tables_io import io
-from tables_io.testUtils import check_deps
+from tests.testUtils import check_deps
 from tables_io.lazy_modules import apTable, fits, pd, h5py, pq, pq
 
 
@@ -40,18 +40,21 @@ def test_get_input_data_length_hdf5():
     else:
         raise ValueError("Failed to catch ValueError for mismatched column lengths")
 
+
 @pytest.mark.skipif(not check_deps([h5py, pq]), reason="Missing HDF5 or parquet")
 def test_get_input_data_length():
     """Test the get_input_data_size function"""
     assert io.getInputDataLength(parquet_data_file) == 10
     assert io.getInputDataLength(no_group_file) == 10
     with pytest.raises(NotImplementedError):
-        io.getInputDataLength("dummy.fits") 
+        io.getInputDataLength("dummy.fits")
+
 
 @pytest.mark.skipif(not check_deps([pq]), reason="Missing parquet")
 def test_get_input_data_length_pq():
     """Test the get_input_data_size_pq function"""
     assert io.getInputDataLengthPq(parquet_data_file) == 10
+
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_iter_chunk_hdf5_data():
@@ -77,9 +80,12 @@ def test_write_output_file():
     data_dict = {"data": dict(zmode=zmode, pz_pdf=pz_pdf)}
 
     groups, outf = io.initializeHdf5Write(
-        test_outfile, data=dict(photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4"))
+        test_outfile,
+        data=dict(photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4")),
     )
-    io.writeDictToHdf5Chunk(groups, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.writeDictToHdf5Chunk(
+        groups, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf"
+    )
     io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
     os.unlink(test_outfile)
 
@@ -99,9 +105,13 @@ def test_write_output_parallel_file():
     data_dict = {"data": dict(zmode=zmode, pz_pdf=pz_pdf)}
 
     groups, outf = io.initializeHdf5Write(
-        test_outfile, data=dict(photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4")), comm=comm
+        test_outfile,
+        data=dict(photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4")),
+        comm=comm,
     )
-    io.writeDictToHdf5Chunk(groups, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.writeDictToHdf5Chunk(
+        groups, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf"
+    )
     io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
     os.unlink(test_outfile)
 
@@ -118,17 +128,27 @@ def test_write_output_file_single():
     data_dict = dict(zmode=zmode, pz_pdf=pz_pdf)
 
     group, outf = io.initializeHdf5WriteSingle(
-        test_outfile, "data", photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4")
+        test_outfile,
+        "data",
+        photoz_mode=((npdf,), "f4"),
+        photoz_pdf=((npdf, nbins), "f4"),
     )
-    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.writeDictToHdf5ChunkSingle(
+        group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf"
+    )
     io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
 
     os.unlink(test_outfile)
 
     group, outf = io.initializeHdf5WriteSingle(
-        test_outfile, None, photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4")
+        test_outfile,
+        None,
+        photoz_mode=((npdf,), "f4"),
+        photoz_pdf=((npdf, nbins), "f4"),
     )
-    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.writeDictToHdf5ChunkSingle(
+        group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf"
+    )
     io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
 
     os.unlink(test_outfile)
@@ -179,17 +199,29 @@ def test_write_output_parallel_file_single():
     data_dict = dict(zmode=zmode, pz_pdf=pz_pdf)
 
     group, outf = io.initializeHdf5WriteSingle(
-        test_outfile, "data", photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4"), comm=comm
+        test_outfile,
+        "data",
+        photoz_mode=((npdf,), "f4"),
+        photoz_pdf=((npdf, nbins), "f4"),
+        comm=comm,
     )
-    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.writeDictToHdf5ChunkSingle(
+        group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf"
+    )
     io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
 
     os.unlink(test_outfile)
 
     group, outf = io.initializeHdf5WriteSingle(
-        test_outfile, None, photoz_mode=((npdf,), "f4"), photoz_pdf=((npdf, nbins), "f4"), comm=comm
+        test_outfile,
+        None,
+        photoz_mode=((npdf,), "f4"),
+        photoz_pdf=((npdf, nbins), "f4"),
+        comm=comm,
     )
-    io.writeDictToHdf5ChunkSingle(group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf")
+    io.writeDictToHdf5ChunkSingle(
+        group, data_dict, 0, npdf, zmode="photoz_mode", pz_pdf="photoz_pdf"
+    )
     io.finalizeHdf5Write(outf, "md", zgrid=zgrid)
 
     os.unlink(test_outfile)

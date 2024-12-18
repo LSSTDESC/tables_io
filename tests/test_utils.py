@@ -9,7 +9,7 @@ import pytest
 from tables_io import types
 from tables_io.utils import arrayUtils
 from tables_io.lazy_modules import apTable, lazyImport, pd
-from tables_io.testUtils import check_deps
+from tests.testUtils import check_deps
 
 
 def test_check_deps():

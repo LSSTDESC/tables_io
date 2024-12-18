@@ -1366,7 +1366,6 @@ def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs
 
     """
     fType = fileType(filepath, fmt)
-    breakpoint()
     if fType == ASTROPY_FITS:
         return readFitsToApTables(filepath, keys=keys)
     if fType == ASTROPY_HDF5:
@@ -1409,7 +1408,6 @@ def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False, **
         The data
 
     """
-    breakpoint()
     odict = readNative(filepath, fmt, keys, allow_missing_keys, **kwargs)
     if len(odict) == 1:
         # For special keys, use the table alone without an enclosing dictionary.

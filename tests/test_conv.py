@@ -4,7 +4,7 @@ Unit tests for io_layer module
 
 import pytest
 from tables_io import types, convert, convertObj
-from tables_io.testUtils import compare_table_dicts, check_deps
+from tests.testUtils import compare_table_dicts, check_deps
 from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
 
@@ -26,14 +26,28 @@ def test_bad_deps():
     assert not check_deps([dummy])
 
 
-@pytest.mark.skipif(not check_deps([apTable, pd]), reason="Missing panda or astropy.table")
+@pytest.mark.skipif(
+    not check_deps([apTable, pd]), reason="Missing panda or astropy.table"
+)
 @pytest.mark.parametrize(
     "tType1",
-    [types.AP_TABLE, types.NUMPY_DICT, types.NUMPY_RECARRAY, types.PA_TABLE, types.PD_DATAFRAME],
+    [
+        types.AP_TABLE,
+        types.NUMPY_DICT,
+        types.NUMPY_RECARRAY,
+        types.PA_TABLE,
+        types.PD_DATAFRAME,
+    ],
 )
 @pytest.mark.parametrize(
     "tType2",
-    [types.AP_TABLE, types.NUMPY_DICT, types.NUMPY_RECARRAY, types.PA_TABLE, types.PD_DATAFRAME],
+    [
+        types.AP_TABLE,
+        types.NUMPY_DICT,
+        types.NUMPY_RECARRAY,
+        types.PA_TABLE,
+        types.PD_DATAFRAME,
+    ],
 )
 def test_type_conversion(data_tables, data_table, tType1, tType2):
     """Perform type conversion on the cross-product of all types."""
