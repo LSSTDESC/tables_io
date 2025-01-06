@@ -40,6 +40,7 @@
 | astropy_fits | .fits |
 
 * table that associates those file formats with in memory formats that are available 
+* bolded write formats are the default format to write that type of table in memory as 
 
 | Format in memory | File format read | File format write | 
 |------------------|------------------|-------------------|

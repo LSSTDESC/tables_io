@@ -43,4 +43,5 @@ tables_io: Tabular data read/write interface
     quickstart
     cookbook
     API Reference <autoapi/index>
+    devdocs
     
