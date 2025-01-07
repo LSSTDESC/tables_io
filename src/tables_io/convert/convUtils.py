@@ -4,13 +4,22 @@ from collections import OrderedDict
 
 import numpy as np
 
-from .arrayUtils import forceToPandables
-from .lazy_modules import apTable, fits, pd, pa
-from .types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE, istablelike, tableType
+from ..utils.arrayUtils import forceToPandables
+from ..lazy_modules import apTable, fits, pd, pa
+from ..types import (
+    AP_TABLE,
+    NUMPY_DICT,
+    NUMPY_RECARRAY,
+    PD_DATAFRAME,
+    PA_TABLE,
+    istablelike,
+    tableType,
+)
 
 ### I. Single `Tablelike` conversions
 
 ### I A. Converting to `astropy.table.Table`
+
 
 def paTableToApTable(table):
     """
@@ -164,7 +173,9 @@ def paTableToDict(rec):
     data : `OrderedDict`,  (`str` : `numpy.array`)
         The tabledata
     """
-    return OrderedDict([(colName, rec[colName].to_numpy()) for colName in rec.schema.names])
+    return OrderedDict(
+        [(colName, rec[colName].to_numpy()) for colName in rec.schema.names]
+    )
 
 
 def hdf5GroupToDict(hg):
@@ -233,7 +244,7 @@ def paTableToRecarray(tab):
     rec : `numpy.recarray`
         The output rec array
     """
-    raise NotImplementedError()  #pragma: no cover
+    raise NotImplementedError()  # pragma: no cover
 
 
 def apTableToRecarray(tab):

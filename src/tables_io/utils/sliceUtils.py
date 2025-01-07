@@ -4,8 +4,7 @@ from collections import OrderedDict
 
 
 from .arrayUtils import sliceDict
-from .types import NUMPY_DICT, tableType
-
+from ..types import NUMPY_DICT, tableType
 
 
 # I F. Generic `slice`
@@ -18,7 +17,7 @@ def sliceObj(obj, the_slice):
     obj :  `table_like`
         Table like object to slice
 
-    the_slice: `slice` 
+    the_slice: `slice`
         Slice to make
 
     Returns
@@ -40,7 +39,7 @@ def sliceObjs(odict, the_slice):
     odict :  `table_like`
        Objects to slice
 
-    the_slice: `slice` 
+    the_slice: `slice`
         Slice to make
 
 
@@ -50,4 +49,3 @@ def sliceObjs(odict, the_slice):
         The sliced tables
     """
     return OrderedDict([(k, sliceObj(v, the_slice)) for k, v in odict.items()])
-

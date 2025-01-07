@@ -6,7 +6,7 @@ from collections.abc import Iterable, Mapping
 
 import numpy as np
 
-from .arrayUtils import arrayLength
+from .utils.arrayUtils import arrayLength
 from .lazy_modules import pa
 
 # Tabular data formats
@@ -73,7 +73,7 @@ DEFAULT_TABLE_KEY = OrderedDict(
         ("fits", ""),
         ("hf5", None),
         ("hdf5", None),
-        ("hd5", "data"),        
+        ("hd5", "data"),
         ("fit", ""),
         ("h5", "data"),
         ("parquet", ""),
@@ -84,7 +84,9 @@ DEFAULT_TABLE_KEY = OrderedDict(
 
 FILE_FORMATS = OrderedDict([(val, key) for key, val in FILE_FORMAT_NAMES.items()])
 
-FILE_FORMAT_SUFFIX_MAP = OrderedDict([(val, key) for key, val in FILE_FORMAT_SUFFIXS.items()])
+FILE_FORMAT_SUFFIX_MAP = OrderedDict(
+    [(val, key) for key, val in FILE_FORMAT_SUFFIXS.items()]
+)
 
 # Default format to write various table types
 NATIVE_FORMAT = OrderedDict(
@@ -243,5 +245,6 @@ def fileType(filepath, fmt=None):
         return FILE_FORMAT_SUFFIXS[fmt]
     except KeyError as msg:
         raise KeyError(
-            f"Unknown file format {fmt}, supported types are" f"{list(FILE_FORMAT_SUFFIXS.keys())}"
+            f"Unknown file format {fmt}, supported types are"
+            f"{list(FILE_FORMAT_SUFFIXS.keys())}"
         ) from msg
