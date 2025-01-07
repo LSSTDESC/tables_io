@@ -32,11 +32,15 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx_design",
     "myst_nb",
+    "sphinx_copybutton",
 ]
 
 myst_enable_extensions = ["colon_fence"]
 myst_heading_anchors = 3
+copybutton_exclude = ".linenos, .gp"
 
+
+# autoapi set up
 extensions.append("autoapi.extension")
 
 templates_path = []

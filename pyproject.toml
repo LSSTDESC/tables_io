@@ -48,7 +48,8 @@ dev = [
     "sphinx_rtd_theme", # Used to render documentation
     "sphinx-autoapi", # Used to automatically generate api documentation
     "sphinx_design", 
-    "myst-nb"
+    "myst-nb",
+    "sphinx-copybutton"
 ]
 
 [project.scripts]

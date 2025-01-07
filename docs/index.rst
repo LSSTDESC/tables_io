@@ -2,7 +2,10 @@
 tables_io: Tabular data read/write interface
 ============================================
 
-* quick description of tables_io
+* quick intro to tables_io
+* code intended to allow for the reading and writing of multiple different file formats using a single package 
+* something about how all these file formats currently supported are not csv formats - not sure if there's a good way to describe them other than as currently used in astronomy 
+* allows easy conversions between file formats 
 
 .. _cards-clickable: 
 
