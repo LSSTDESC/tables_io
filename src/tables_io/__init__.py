@@ -9,13 +9,13 @@ from .lazy_modules import *
 
 from .tableDict import TableDict
 
-from . import convUtils as conv
+from .convert import convUtils as conv
 
-from . import ioUtils as io
+from .io import ioUtils as io
 
-from . import concatUtils
+from .utils import concatUtils
 
-from . import sliceUtils
+from .utils import sliceUtils
 
 
 convertObj = conv.convertObj

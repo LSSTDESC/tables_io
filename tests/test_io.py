@@ -7,11 +7,18 @@ import pytest
 
 import unittest
 from tables_io import types, convert, io_open, read, write, iterator, check_columns
-from tables_io.testUtils import compare_table_dicts, compare_tables, make_test_data, check_deps
+from tests.testUtils import (
+    compare_table_dicts,
+    compare_tables,
+    make_test_data,
+    check_deps,
+)
 from tables_io.lazy_modules import apTable, jnp, h5py, pd, pq
 
 
-@pytest.mark.skipif(not check_deps([apTable, h5py, pq, jnp]), reason="Missing an IO package")
+@pytest.mark.skipif(
+    not check_deps([apTable, h5py, pq, jnp]), reason="Missing an IO package"
+)
 class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attributes
     """Test the utility functions"""
 
@@ -38,7 +45,9 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         tables_r = convert(odict_r, types.AP_TABLE)
         return compare_table_dicts(self._tables, tables_r, **kwargs)
 
-    def _do_loopback_with_keys(self, tType, basepath, fmt, keys, columns=None, **kwargs):
+    def _do_loopback_with_keys(
+        self, tType, basepath, fmt, keys, columns=None, **kwargs
+    ):
         """Utility function to do loopback tests in formats that require keyed files"""
         odict_c = convert(self._tables, tType)
         filepath = write(odict_c, basepath, fmt)
@@ -47,22 +56,39 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         for key in keys:
             self._files.append("%s%s.%s" % (basepath, key, fmt))
             expected_tables[key] = self._tables[key]
-        odict_r = read(filepath, tType=tType, fmt=fmt, keys=keys, columns=columns, **kwargs)
+        odict_r = read(
+            filepath, tType=tType, fmt=fmt, keys=keys, columns=columns, **kwargs
+        )
         tables_r = convert(odict_r, types.AP_TABLE)
         column_list = None
         if pd.api.types.is_dict_like(columns):
             for key in columns.keys():
                 if pd.api.types.is_dict_like(tables_r):
-                    assert compare_tables(expected_tables[key], tables_r[key], columns=columns[key], **kwargs)
+                    assert compare_tables(
+                        expected_tables[key],
+                        tables_r[key],
+                        columns=columns[key],
+                        **kwargs,
+                    )
                 else:
                     assert compare_tables(
-                        list(expected_tables.values())[0], tables_r, columns=columns[key], **kwargs
+                        list(expected_tables.values())[0],
+                        tables_r,
+                        columns=columns[key],
+                        **kwargs,
                     )
         else:
             if pd.api.types.is_dict_like(tables_r):
-                return compare_table_dicts(expected_tables, tables_r, columns=columns, **kwargs)
+                return compare_table_dicts(
+                    expected_tables, tables_r, columns=columns, **kwargs
+                )
             else:
-                return compare_tables(list(expected_tables.values())[0], tables_r, columns=columns, **kwargs)
+                return compare_tables(
+                    list(expected_tables.values())[0],
+                    tables_r,
+                    columns=columns,
+                    **kwargs,
+                )
 
     def _do_loopback_jax(self, basepath, fmt, keys=None, **kwargs):
         """Utility function to do loopback tests writing data as a jax array"""
@@ -112,7 +138,9 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         """Test the chunk iterator"""
         dl = []
         try:
-            for _, _, data in iterator(filepath, tType=tType, chunk_size=chunk_size, **kwargs):
+            for _, _, data in iterator(
+                filepath, tType=tType, chunk_size=chunk_size, **kwargs
+            ):
                 dl.append(convert(data, types.AP_TABLE))
             table_iterated = apTable.vstack(dl)
             assert compare_tables(self._table, table_iterated, **kwargs)
@@ -132,12 +160,11 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
             assert f
 
     def _do_check_columns(self, filepath):
-        columns_to_check=['imaginary_column']
+        columns_to_check = ["imaginary_column"]
         try:
             check_columns(filepath, columns_to_check)
         except KeyError:
             pass
-
 
     def testFitsLoopback(self):
         """Test writing / reading to FITS"""
@@ -153,7 +180,9 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         """Test writing / reading to FITS"""
         self._do_loopback(types.NUMPY_RECARRAY, "test_out", "fit")
         self._do_loopback_single(types.NUMPY_RECARRAY, "test_out_single", "fit")
-        self._do_loopback_with_keys(types.NUMPY_RECARRAY, "test_out_lookback", "fit", ["md"])
+        self._do_loopback_with_keys(
+            types.NUMPY_RECARRAY, "test_out_lookback", "fit", ["md"]
+        )
         self._do_iterator("test_out_single.fit", types.NUMPY_RECARRAY, True)
         self._do_open("test_out_single.fit")
         self._do_open("test_out.fit")
@@ -173,8 +202,12 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         """Test writing / reading numpy arrays to HDF5"""
         self._do_loopback(types.NUMPY_DICT, "test_out", "hdf5")
         self._do_loopback_single(types.NUMPY_DICT, "test_out_single", "hdf5")
-        self._do_loopback_with_keys(types.NUMPY_DICT, "test_out_lookback", "hdf5", ["md"])
-        self._do_iterator("test_out_single.hdf5", types.NUMPY_DICT, False, chunk_size=50)
+        self._do_loopback_with_keys(
+            types.NUMPY_DICT, "test_out_lookback", "hdf5", ["md"]
+        )
+        self._do_iterator(
+            "test_out_single.hdf5", types.NUMPY_DICT, False, chunk_size=50
+        )
         self._do_open("test_out_single.hdf5")
         self._do_open("test_out.hdf5")
         self._do_check_columns("test_out.hdf5")
@@ -184,7 +217,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_loopback(types.PA_TABLE, "test_out", "hd5")
         self._do_loopback_single(types.PA_TABLE, "test_out_single", "hd5")
         self._do_loopback_with_keys(types.PA_TABLE, "test_out_lookback", "hdf5", ["md"])
-        #self._do_iterator("test_out_single.hd5", types.PA_TABLE, False, chunk_size=50)
+        # self._do_iterator("test_out_single.hd5", types.PA_TABLE, False, chunk_size=50)
         self._do_open("test_out_single.hd5")
         self._do_open("test_out.hd5")
         self._do_check_columns("test_out.hd5")
@@ -198,7 +231,9 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_loopback(types.PD_DATAFRAME, "test_out", "h5")
         self._do_loopback(types.PA_TABLE, "test_out_pa", "h5")
         self._do_loopback_single(types.PD_DATAFRAME, "test_out_single", "h5")
-        self._do_loopback_with_keys(types.PD_DATAFRAME, "test_out_lookback", "h5", ["md"])
+        self._do_loopback_with_keys(
+            types.PD_DATAFRAME, "test_out_lookback", "h5", ["md"]
+        )
         self._do_iterator("test_out_single.h5", types.PD_DATAFRAME, True, chunk_size=50)
         self._do_open("test_out_single.h5")
         self._do_open("test_out.h5")
@@ -206,19 +241,33 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
 
     def testPQLoopback(self):
         """Test writing / reading pandas dataframes to parquet"""
-        self._do_loopback_with_keys(types.PD_DATAFRAME, "test_out", "pq", list(self._tables.keys()))
+        self._do_loopback_with_keys(
+            types.PD_DATAFRAME, "test_out", "pq", list(self._tables.keys())
+        )
         self._do_loopback_with_keys(types.PD_DATAFRAME, "test_out", "pq", ["data"])
         self._do_loopback_with_keys(types.PD_DATAFRAME, "test_out", "pq", ["md"])
-        self._do_loopback_with_keys(types.PD_DATAFRAME, "test_out", "pq", ["data"], columns=["scalar"])
-        self._do_loopback_with_keys(types.PD_DATAFRAME, "test_out", "pq", ["md"], columns=["a"])
         self._do_loopback_with_keys(
-            types.PD_DATAFRAME, "test_out", "pq", ["data", "md"], columns={"md": ["a"], "data": ["scalar"]}
+            types.PD_DATAFRAME, "test_out", "pq", ["data"], columns=["scalar"]
+        )
+        self._do_loopback_with_keys(
+            types.PD_DATAFRAME, "test_out", "pq", ["md"], columns=["a"]
+        )
+        self._do_loopback_with_keys(
+            types.PD_DATAFRAME,
+            "test_out",
+            "pq",
+            ["data", "md"],
+            columns={"md": ["a"], "data": ["scalar"]},
         )
         self._do_loopback_single(types.PD_DATAFRAME, "test_out_single", "pq", [""])
-        self._do_loopback_single(types.PD_DATAFRAME, "test_out_single_v2", "parquet", [""])
+        self._do_loopback_single(
+            types.PD_DATAFRAME, "test_out_single_v2", "parquet", [""]
+        )
 
         self._do_iterator("test_out_single.pq", types.PD_DATAFRAME, chunk_size=50)
-        self._do_iterator("test_out_single.pq", types.PD_DATAFRAME, chunk_size=50, columns=["scalar"])
+        self._do_iterator(
+            "test_out_single.pq", types.PD_DATAFRAME, chunk_size=50, columns=["scalar"]
+        )
         self._do_open("test_out_single.pq")
         self._do_check_columns("test_out_single.pq")
 
@@ -226,7 +275,9 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         """Test writing / reading pyarros tables to parquet files"""
         self._do_loopback_with_keys(types.PA_TABLE, "test_out", "parquet", ["data"])
         self._do_loopback_single(types.PA_TABLE, "test_out_single", "parquet", [""])
-        self._do_iterator("test_out_single.parquet", types.PA_TABLE, True, chunk_size=50)
+        self._do_iterator(
+            "test_out_single.parquet", types.PA_TABLE, True, chunk_size=50
+        )
         self._do_open("test_out_single.parquet")
         self._do_check_columns("test_out_single.parquet")
 
@@ -239,7 +290,6 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         else:
             raise TypeError("Failed to catch unwritable type")
         assert write(False, "null", "fits") is None
-
 
 
 if __name__ == "__main__":
