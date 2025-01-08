@@ -7,13 +7,16 @@
 ## Write out a file to a specific file format 
 
 
+## Converting tables to different format in memory
+
+
 ## Chunked read of an hdf5 file 
 
 
 ## Writing an hdf5 file with MPI
 
 
-## table operations
+## slicing tables
 
 
-### concatenate tables
+## concatenate tables

@@ -20,7 +20,8 @@
 * how to write:
     * I think single write function works 
     * can provide output format again to make sure you get the file type you want 
-    * keep in mind this could result in more memory usage due to conversions 
+    * keep in mind this could result in more memory usage due to conversions
+        * to minimize this, check the list of file types that can be written to for each table memory format below  
 
 
 
