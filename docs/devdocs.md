@@ -1,12 +1,16 @@
 # Developer Documentation
 
-
-## Installation and Set Up
+## Installation and set up
 
 * dev install
 * setting up parallel hdf5
 * running tests
 * making documentation
+
+## Understanding the code 
+
+* diagram of how the code works 
+* short description of how code is organized, etc 
 
 ## Expectations  
 

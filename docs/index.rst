@@ -4,8 +4,12 @@ tables_io: Tabular data read/write interface
 
 * quick intro to tables_io
 * code intended to allow for the reading and writing of multiple different file formats using a single package 
-* something about how all these file formats currently supported are not csv formats - not sure if there's a good way to describe them other than as currently used in astronomy 
-* allows easy conversions between file formats 
+* most file formats are those that are meant for large datasets, widely used in astronomy
+* allows easy conversions between file formats and in memory table formats
+
+* used in these codes (with links):
+    * RAIL
+    * qp 
 
 .. _cards-clickable: 
 
@@ -47,4 +51,19 @@ tables_io: Tabular data read/write interface
     cookbook
     API Reference <autoapi/index>
     devdocs
+
+.. toctree:: 
+    :hidden:
+    :maxdepth: 4
+    :caption: Demo Notebooks
+
+    notebooks/index.rst
+
+.. toctree::
+    :hidden:
+    :maxdepth: 3
+    :caption: More
+
+    license
+    acknowledgements 
     
