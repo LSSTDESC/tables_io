@@ -9,9 +9,10 @@ from .lazy_modules import *
 
 from .tableDict import TableDict
 
-from .convert import convUtils as conv
+from . import convert as conv
 
-from .io import ioUtils as io
+# from .io import ioUtils as io
+from . import ioUtils as io
 
 from .utils import concatUtils
 
