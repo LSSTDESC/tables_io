@@ -1,3 +1,3 @@
-from .read import *
-from .iterator import *
-from .write import *
+from . import read
+from . import iterator
+from . import write

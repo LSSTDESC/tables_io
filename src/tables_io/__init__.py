@@ -19,36 +19,50 @@ from .utils import sliceUtils
 
 # Exposing the primary functions and interfaces for tables_io
 
+convert_table = conv.convertObj
+
 convertObj = conv.convertObj
+"""This function is being deprecated, please see `convert_table` instead"""
 
 convert = conv.convert
 
-writeNative = io_utils.write_native
+writeNative = io_utils.write.write_native
 """This function is being deprecated, please see `write_native` instead"""
 
-write_native = io_utils.write_native
+write_native = io_utils.write.write_native
 
-write = io_utils.write
+write = io_utils.write.write
 
-readNative = io_utils.read_native
+readNative = io_utils.read.read_native
 """This function is being deprecated, please see `read_native` instead"""
 
-read_native = io_utils.read_native
+read_native = io_utils.read.read_native
 
-read = io_utils.read
+read = io_utils.read.read
 
-io_open = io_utils.io_open
+io_open = io_utils.read.io_open
 
-iteratorNative = io_utils.iteratorNative
+iterator_native = io_utils.iterator.iteratorNative
 
-iterator = io_utils.iterator
+iteratorNative = io_utils.iterator.iteratorNative
+"""This function is being deprecated, please see `iterator_native` instead"""
+
+iterator = io_utils.iterator.iterator
+
+concat_table = concatUtils.concatObjs
 
 concatObjs = concatUtils.concatObjs
+"""This function is being deprecated, please see `concat_table` instead"""
 
 concat = concatUtils.concat
+# TODO: Does this work on only single table or a table_dict?
+
+slice_table = sliceUtils.sliceObj
 
 sliceObj = sliceUtils.sliceObj
+"""This function is being deprecated, please see `slice_table` instead"""
 
 sliceObjs = sliceUtils.sliceObjs
+# TODO: Should this even exist?
 
-check_columns = io_utils.check_columns
+check_columns = io_utils.read.check_columns
