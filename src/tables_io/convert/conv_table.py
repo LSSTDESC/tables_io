@@ -134,7 +134,7 @@ def convertToApTable(obj):
     if tType == PD_DATAFRAME:
         # try this: apTable.from_pandas(obj)
         return dataFrameToApTable(obj)
-    raise TypeError(f"Unsupported TableType {tType}")  # pragma: no cover
+    raise TypeError(f"Unsupported Table Type {tType}")  # pragma: no cover
 
 
 ### I C. Converting to `OrderedDict`, (`str`, `numpy.array`)

@@ -24,7 +24,9 @@ class LazyModule:
         try:
             self._module = importlib.import_module(self.name)
         except ImportError as err:
-            raise ImportError(f"Cannot use selected data format, {self.name} not available") from err
+            raise ImportError(
+                f"Cannot use selected data format, {self.name} not available"
+            ) from err
 
         return self._module
 

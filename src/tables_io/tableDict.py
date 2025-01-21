@@ -1,8 +1,11 @@
 """Functions to store analysis results as astropy data tables  """
 
+# TODO: Deprecate this
+
 from collections import OrderedDict
 
-from .io_utils import write, read, convert  # TODO: fix this import statement
+from .io_utils import write, read  # TODO: fix this import statement
+from .convert.conv_tabledict import convert
 from .types import tableType
 
 

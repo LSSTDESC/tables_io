@@ -19,12 +19,12 @@ from .utils import sliceUtils
 
 # Exposing the primary functions and interfaces for tables_io
 
-convert_table = conv.convertObj
+convert_table = conv.conv_table.convertObj
 
-convertObj = conv.convertObj
+convertObj = conv.conv_table.convertObj
 """This function is being deprecated, please see `convert_table` instead"""
 
-convert = conv.convert
+convert = conv.conv_tabledict.convert
 
 writeNative = io_utils.write.write_native
 """This function is being deprecated, please see `write_native` instead"""

@@ -3,8 +3,9 @@
 from collections import OrderedDict
 
 import numpy as np
+from typing import Mapping
 
-from .convSingle import (
+from .conv_table import (
     convertObj,
     convertToApTable,
     convertToDataFrame,
@@ -26,6 +27,7 @@ from ..types import (
 
 
 ### II.  Multi-table conversion utilities
+# TODO: Make tType also accept strings or ints
 def convert(obj, tType):
     """
     Convert several `objects` to a specific type
@@ -60,7 +62,7 @@ def convert(obj, tType):
     return theFunc(obj)
 
 
-def convertToApTables(odict):
+def convertToApTables(odict: Mapping):
     """
     Convert several `objects` to `astropy.table.Table`
 
@@ -77,7 +79,7 @@ def convertToApTables(odict):
     return OrderedDict([(k, convertToApTable(v)) for k, v in odict.items()])
 
 
-def convertToDicts(odict):
+def convertToDicts(odict: Mapping):
     """
     Convert several `objects` to `OrderedDict`, (`str`, `numpy.array`)
 
@@ -94,7 +96,7 @@ def convertToDicts(odict):
     return OrderedDict([(k, convertToDict(v)) for k, v in odict.items()])
 
 
-def convertToRecarrays(odict):
+def convertToRecarrays(odict: Mapping):
     """
     Convert several `objects` to `np.recarray`
 
@@ -111,7 +113,7 @@ def convertToRecarrays(odict):
     return OrderedDict([(k, convertToRecarray(v)) for k, v in odict.items()])
 
 
-def convertToPaTables(odict):
+def convertToPaTables(odict: Mapping):
     """
     Convert several `objects` to `pa.Table`
 
@@ -128,7 +130,7 @@ def convertToPaTables(odict):
     return OrderedDict([(k, convertToPaTable(v)) for k, v in odict.items()])
 
 
-def convertToDataFrames(odict):
+def convertToDataFrames(odict: Mapping):
     """
     Convert several `objects` to `pandas.DataFrame`
 

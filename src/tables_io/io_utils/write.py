@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 import numpy as np
 
-from ..convert.convMulti import convert
+from ..convert.conv_tabledict import convert
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
 from ..types import (
     AP_TABLE,

@@ -1,2 +1,2 @@
-from .convSingle import *
-from .convMulti import *
+from . import conv_table
+from . import conv_tabledict

@@ -54,6 +54,10 @@ This is how you do that!
 
 - PR procedure
 
+### Typing Recommendations:
+
+When referring to a generic `TableDict` or `TableDict-like` object, use the `Mapping` type hint.
+
 ## Version Release and Deployment Procedures
 
 ### Creating a Pull Release for a Release Candidate
