@@ -135,7 +135,7 @@ def getInputDataLength(filepath, fmt=None, **kwargs):
         ) from msg  # pragma: no cover
 
 
-# II. Iteration aub functions
+# II. Iteration sub functions
 
 # II A. HDF5 partial read functions
 
@@ -379,7 +379,6 @@ def getInputDataLengthDs(source, **kwargs):
     return nrows
 
 
-# TODO: move these to utils folder?
 # II D. Iteration utility functions
 
 

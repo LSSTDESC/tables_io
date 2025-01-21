@@ -2,7 +2,7 @@
 
 from collections import OrderedDict
 
-from .ioUtils import write, read, convert  # TODO: fix this import statement
+from .io_utils import write, read, convert  # TODO: fix this import statement
 from .types import tableType
 
 
@@ -30,7 +30,7 @@ class TableDict(OrderedDict):
         basepath : `str`
             base path for output files.  Suffix will be added based on type
         fmt : `str` or `None`
-            The output file format, If `None` this will use `writeNative`
+            The output file format, If `None` this will use `write_native`
         """
         return write(self, basepath, fmt)
 

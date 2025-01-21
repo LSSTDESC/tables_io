@@ -1,3 +1,3 @@
 from .read import *
-from .readIterator import *
+from .iterator import *
 from .write import *

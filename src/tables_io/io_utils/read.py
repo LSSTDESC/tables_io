@@ -71,7 +71,7 @@ def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False, **
         The data
 
     """
-    odict = readNative(
+    odict = read_native(
         filepath, fmt, keys, allow_missing_keys, **kwargs
     )  # TODO: put a try except here or in each of the individual read functions
     if len(odict) == 1:
@@ -84,7 +84,7 @@ def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False, **
     return convert(odict, tType)
 
 
-def readNative(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs):
+def read_native(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs):
     """Read a file to the corresponding table type
 
     Parameters
@@ -162,7 +162,7 @@ def check_columns(
     columns_to_check: `list`
         A list of columns to be compared with the data
     fmt : `str` or `None`
-        The output file format, If `None` this will use `writeNative`
+        The output file format, If `None` this will use `write_native`
     parent_groupname: `str` or `None`
         For hdf5 files, the groupname for the data
     """

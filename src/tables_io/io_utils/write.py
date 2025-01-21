@@ -43,12 +43,12 @@ def write(obj, filepath, fmt=None):
     filepath : `str`
         File name for the file to write. If there's no suffix, it will be applied based on the object type.
     fmt : `str` or `None`
-        The output file format, If `None` this will use `writeNative`
+        The output file format, If `None` this will use `write_native`
     """
     if fmt is None:
         splitpath = os.path.splitext(filepath)
         if not splitpath[1]:
-            return writeNative(obj, filepath)
+            return write_native(obj, filepath)
         fmt = splitpath[1][1:]
 
     try:
@@ -79,7 +79,7 @@ def write(obj, filepath, fmt=None):
         else:
             fullpath = f"{filepath}.{fmt}"
 
-        return writeNative(forcedOdict, fullpath)
+        return write_native(forcedOdict, fullpath)
 
     if not os.path.splitext(filepath)[1]:
         filepath = filepath + "." + fmt
@@ -99,7 +99,7 @@ def write(obj, filepath, fmt=None):
     raise TypeError(f"Unsupported File type {fType}")  # pragma: no cover
 
 
-def writeNative(odict, filepath):
+def write_native(odict, filepath):
     """Write a file or files with tables
 
     Parameters

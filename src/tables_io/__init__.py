@@ -11,31 +11,37 @@ from .tableDict import TableDict
 
 from . import convert as conv
 
-# from .io import ioUtils as io
-from . import ioUtils as io
+from . import io_utils
 
 from .utils import concatUtils
 
 from .utils import sliceUtils
 
+# Exposing the primary functions and interfaces for tables_io
 
 convertObj = conv.convertObj
 
 convert = conv.convert
 
-writeNative = io.writeNative
+writeNative = io_utils.write_native
+"""This function is being deprecated, please see `write_native` instead"""
 
-write = io.write
+write_native = io_utils.write_native
 
-readNative = io.readNative
+write = io_utils.write
 
-read = io.read
+readNative = io_utils.read_native
+"""This function is being deprecated, please see `read_native` instead"""
 
-io_open = io.io_open
+read_native = io_utils.read_native
 
-iteratorNative = io.iteratorNative
+read = io_utils.read
 
-iterator = io.iterator
+io_open = io_utils.io_open
+
+iteratorNative = io_utils.iteratorNative
+
+iterator = io_utils.iterator
 
 concatObjs = concatUtils.concatObjs
 
@@ -45,4 +51,4 @@ sliceObj = sliceUtils.sliceObj
 
 sliceObjs = sliceUtils.sliceObjs
 
-check_columns = io.check_columns
+check_columns = io_utils.check_columns
