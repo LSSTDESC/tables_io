@@ -36,6 +36,18 @@ from ..types import (
 # I. Top-level interface functions
 
 
+def readSingle():
+    # reads in a single table
+    # gives an error if there are multiple tables?
+    pass
+
+
+def readMulti():
+    # reads in multiple tables to an ordered dict
+    # if there's only one table, reads it into an ordered dict
+    pass
+
+
 def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False, **kwargs):
     """Read a file to the corresponding table type
 

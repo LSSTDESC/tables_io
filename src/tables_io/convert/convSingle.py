@@ -12,6 +12,7 @@ from ..types import (
     NUMPY_RECARRAY,
     PD_DATAFRAME,
     PA_TABLE,
+    TABULAR_FORMAT_NAMES,
     istablelike,
     tableType,
 )
@@ -19,6 +20,15 @@ from ..types import (
 ### I. Single `Tablelike` conversions
 
 # I A. Generic `convert`
+
+
+def newconvertObj(obj, tType):
+
+    if isinstance(tType, str):
+        if TABULAR_FORMAT_NAMES[tType] == AP_TABLE:
+            return convertToApTable(obj)
+    elif isinstance(tType, int):
+        pass
 
 
 def convertObj(obj, tType):

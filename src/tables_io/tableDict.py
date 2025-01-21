@@ -2,7 +2,7 @@
 
 from collections import OrderedDict
 
-from .ioUtils import write, read, convert
+from .ioUtils import write, read, convert  # TODO: fix this import statement
 from .types import tableType
 
 
