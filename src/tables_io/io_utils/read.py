@@ -153,7 +153,15 @@ def io_open(filepath, fmt=None, **kwargs):
 def check_columns(
     filepath, columns_to_check, fmt=None, parent_groupname=None, **kwargs
 ):
-    """Read the file column names and check it against input list
+    """Read the file column names from file and ensure that it contains at least
+    the columns specified in a provided list. If not, an error will be raised.
+
+    * For FITS files, columns across all extensions will be checked at one time.
+    * For HDF files, columns only within a single level of the specified parent_groupname
+    will be checked.
+
+    Note: If more columns are available in the file than specified in the list,
+    the file will still pass the check.
 
     Parameters
     ----------
@@ -162,10 +170,12 @@ def check_columns(
     columns_to_check: `list`
         A list of columns to be compared with the data
     fmt : `str` or `None`
-        The output file format, If `None` this will use `write_native`
+        The input file format, If `None` this will use `io_open`
     parent_groupname: `str` or `None`
         For hdf5 files, the groupname for the data
     """
+
+    # TODO: Figure out if this function is working the way it's expected to
 
     fType = file_type(filepath, fmt)
 
