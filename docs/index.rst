@@ -50,7 +50,15 @@ tables_io: Tabular data read/write interface
     quickstart
     cookbook
     API Reference <autoapi/index>
-    devdocs
+
+.. toctree:: 
+    :hidden:
+    :maxdepth: 4
+    :caption: Developer Documentation
+
+    devinstall
+    devstyle
+    devtechdebt
 
 .. toctree:: 
     :hidden:
