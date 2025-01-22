@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 from .io_utils import write, read  # TODO: fix this import statement
 from .convert.conv_tabledict import convert
-from .types import tableType
+from .types import table_type
 
 
 class TableDict(OrderedDict):
@@ -19,7 +19,7 @@ class TableDict(OrderedDict):
 
     def __setitem__(self, key, value):
         try:
-            _ = tableType(value)
+            _ = table_type(value)
         except TypeError as msg:
             raise TypeError(f"item {value} was not recognized as a table.") from msg
 

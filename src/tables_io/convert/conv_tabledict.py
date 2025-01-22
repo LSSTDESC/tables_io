@@ -6,14 +6,14 @@ import numpy as np
 from typing import Mapping
 
 from .conv_table import (
-    convertObj,
-    convertToApTable,
-    convertToDataFrame,
-    convertToDict,
-    convertToPaTable,
-    convertToRecarray,
+    convert_obj,
+    convert_to_ap_table,
+    convert_to_dataframe,
+    convert_to_dict,
+    convert_to_pa_table,
+    convert_to_recarray,
 )
-from ..utils.array_utils import forceToPandables
+from ..utils.array_utils import force_to_pandables
 from ..lazy_modules import apTable, fits, pd, pa
 from ..types import (
     AP_TABLE,
@@ -21,8 +21,8 @@ from ..types import (
     NUMPY_RECARRAY,
     PD_DATAFRAME,
     PA_TABLE,
-    istablelike,
-    tableType,
+    is_table_like,
+    table_type,
 )
 
 
@@ -45,15 +45,15 @@ def convert(obj, tType):
     out :  `Tablelike` or `TableDictlike`
         The converted data
     """
-    if istablelike(obj):
-        return convertObj(obj, tType)
+    if is_table_like(obj):
+        return convert_obj(obj, tType)
 
     funcMap = {
-        AP_TABLE: convertToApTables,
-        NUMPY_DICT: convertToDicts,
-        NUMPY_RECARRAY: convertToRecarrays,
-        PA_TABLE: convertToPaTables,
-        PD_DATAFRAME: convertToDataFrames,
+        AP_TABLE: convert_to_ap_tables,
+        NUMPY_DICT: convert_to_dicts,
+        NUMPY_RECARRAY: convert_to_recarrays,
+        PA_TABLE: convert_to_pa_tables,
+        PD_DATAFRAME: convert_to_dataframes,
     }
     try:
         theFunc = funcMap[tType]
@@ -62,7 +62,7 @@ def convert(obj, tType):
     return theFunc(obj)
 
 
-def convertToApTables(odict: Mapping):
+def convert_to_ap_tables(odict: Mapping):
     """
     Convert several `objects` to `astropy.table.Table`
 
@@ -76,10 +76,10 @@ def convertToApTables(odict: Mapping):
     tabs : `OrderedDict` of `astropy.table.Table`
         The tables
     """
-    return OrderedDict([(k, convertToApTable(v)) for k, v in odict.items()])
+    return OrderedDict([(k, convert_to_ap_table(v)) for k, v in odict.items()])
 
 
-def convertToDicts(odict: Mapping):
+def convert_to_dicts(odict: Mapping):
     """
     Convert several `objects` to `OrderedDict`, (`str`, `numpy.array`)
 
@@ -93,10 +93,10 @@ def convertToDicts(odict: Mapping):
     tabs : `OrderedDict` of `OrderedDict`, (`str`, `numpy.array`)
         The tables
     """
-    return OrderedDict([(k, convertToDict(v)) for k, v in odict.items()])
+    return OrderedDict([(k, convert_to_dict(v)) for k, v in odict.items()])
 
 
-def convertToRecarrays(odict: Mapping):
+def convert_to_recarrays(odict: Mapping):
     """
     Convert several `objects` to `np.recarray`
 
@@ -110,10 +110,10 @@ def convertToRecarrays(odict: Mapping):
     tabs : `OrderedDict` of `np.recarray`
         The tables
     """
-    return OrderedDict([(k, convertToRecarray(v)) for k, v in odict.items()])
+    return OrderedDict([(k, convert_to_recarray(v)) for k, v in odict.items()])
 
 
-def convertToPaTables(odict: Mapping):
+def convert_to_pa_tables(odict: Mapping):
     """
     Convert several `objects` to `pa.Table`
 
@@ -127,10 +127,10 @@ def convertToPaTables(odict: Mapping):
     tabs : `OrderedDict` of `np.recarray`
         The tables
     """
-    return OrderedDict([(k, convertToPaTable(v)) for k, v in odict.items()])
+    return OrderedDict([(k, convert_to_pa_table(v)) for k, v in odict.items()])
 
 
-def convertToDataFrames(odict: Mapping):
+def convert_to_dataframes(odict: Mapping):
     """
     Convert several `objects` to `pandas.DataFrame`
 
@@ -144,4 +144,4 @@ def convertToDataFrames(odict: Mapping):
     df :  `OrderedDict` of `pandas.DataFrame`
         The dataframes
     """
-    return OrderedDict([(k, convertToDataFrame(v)) for k, v in odict.items()])
+    return OrderedDict([(k, convert_to_dataframe(v)) for k, v in odict.items()])

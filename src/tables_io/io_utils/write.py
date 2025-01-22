@@ -24,10 +24,10 @@ from ..types import (
     PYARROW_HDF5,
     PYARROW_PARQUET,
     PD_DATAFRAME,
-    fileType,
-    istabledictlike,
-    istablelike,
-    tableType,
+    file_type,
+    is_tabledict_like,
+    is_table_like,
+    table_type,
 )
 
 # I. Top-level interface functions
@@ -58,9 +58,9 @@ def write(obj, filepath, fmt=None):
             f"Unknown file format {fmt} from {filepath}, options are {list(FILE_FORMAT_SUFFIXS.keys())}"
         ) from msg
 
-    if istablelike(obj):
+    if is_table_like(obj):
         odict = OrderedDict([(DEFAULT_TABLE_KEY[fmt], obj)])
-    elif istabledictlike(obj):
+    elif is_tabledict_like(obj):
         odict = obj
     elif not obj:
         return None
@@ -85,15 +85,15 @@ def write(obj, filepath, fmt=None):
         filepath = filepath + "." + fmt
     if fType == ASTROPY_FITS:
         forcedOdict = convert(odict, AP_TABLE)
-        writeApTablesToFits(forcedOdict, filepath)
+        write_ap_tables_to_fits(forcedOdict, filepath)
         return filepath
     if fType == PANDAS_HDF5:
         forcedOdict = convert(odict, PD_DATAFRAME)
-        writeDataFramesToH5(forcedOdict, filepath)
+        write_dataframes_to_HDF5(forcedOdict, filepath)
         return filepath
     if fType == PYARROW_HDF5:
         forcedPaTables = convert(odict, PA_TABLE)
-        writeTablesToHd5(forcedPaTables, filepath)
+        write_tables_to_HDF5(forcedPaTables, filepath)
         return filepath
 
     raise TypeError(f"Unsupported File type {fType}")  # pragma: no cover
@@ -110,11 +110,11 @@ def write_native(odict, filepath):
         File name for the file to write. If there's no suffix, it will be applied based on the object type.
     """
     istable = False
-    if istablelike(odict):
+    if is_table_like(odict):
         istable = True
-        tType = tableType(odict)
-    elif istabledictlike(odict):
-        tType = tableType(list(odict.values())[0])
+        tType = table_type(odict)
+    elif is_tabledict_like(odict):
+        tType = table_type(list(odict.values())[0])
     elif not odict:  # pragma: no cover
         return None
     else:  # pragma: no cover
@@ -137,19 +137,19 @@ def write_native(odict, filepath):
         pass
 
     if fType == ASTROPY_HDF5:
-        writeApTablesToHdf5(odict, filepath)
+        write_ap_tables_to_HDF5(odict, filepath)
         return filepath
     if fType == NUMPY_HDF5:
-        writeDictsToHdf5(odict, filepath)
+        write_dicts_to_HDF5(odict, filepath)
         return filepath
     if fType == NUMPY_FITS:
-        writeRecarraysToFits(odict, filepath)
+        write_recarrays_to_fits(odict, filepath)
         return filepath
     if fType == PANDAS_PARQUET:
-        writeDataFramesToPq(odict, filepath)
+        write_dataframes_to_pq(odict, filepath)
         return filepath
     if fType == PYARROW_PARQUET:
-        writeTablesToPq(odict, filepath)
+        write_tables_to_pq(odict, filepath)
         return filepath
     raise TypeError(f"Unsupported Native file type {fType}")  # pragma: no cover
 
@@ -159,7 +159,7 @@ def write_native(odict, filepath):
 # II A. Writing HDF5 files
 
 
-def initializeHdf5WriteSingle(filepath, groupname=None, comm=None, **kwds):
+def initialize_HDF5_write_single(filepath, groupname=None, comm=None, **kwds):
     """Prepares an hdf5 file for output
 
     Parameters
@@ -211,7 +211,7 @@ def initializeHdf5WriteSingle(filepath, groupname=None, comm=None, **kwds):
     return group, outf
 
 
-def initializeHdf5Write(filepath, comm=None, **kwds):
+def initialize_HDF5_write(filepath, comm=None, **kwds):
     """Prepares an hdf5 file for output
 
     Parameters
@@ -268,7 +268,7 @@ def initializeHdf5Write(filepath, comm=None, **kwds):
     return groups, outf
 
 
-def writeDictToHdf5ChunkSingle(fout, odict, start, end, **kwds):
+def write_dict_to_HDF5_chunk_single(fout, odict, start, end, **kwds):
     """Writes a data chunk to an hdf5 file
 
     Parameters
@@ -304,7 +304,7 @@ def writeDictToHdf5ChunkSingle(fout, odict, start, end, **kwds):
         fout[k_out][start:end] = val
 
 
-def writeDictToHdf5Chunk(groups, odict, start, end, **kwds):
+def write_dict_to_HDF5_chunk(groups, odict, start, end, **kwds):
     """Writes a data chunk to an hdf5 file
 
     Parameters
@@ -341,7 +341,7 @@ def writeDictToHdf5Chunk(groups, odict, start, end, **kwds):
             group[k_out][start:end] = val
 
 
-def finalizeHdf5Write(fout, groupname=None, **kwds):
+def finalize_HDF5_write(fout, groupname=None, **kwds):
     """Write any last data and closes an hdf5 file
 
     Parameters
@@ -365,7 +365,7 @@ def finalizeHdf5Write(fout, groupname=None, **kwds):
 # II B. Writing `astropy.table.Table`
 
 
-def writeApTablesToFits(tables, filepath, **kwargs):
+def write_ap_tables_to_fits(tables, filepath, **kwargs):
     """
     Writes a dictionary of `astropy.table.Table` to a single FITS file
 
@@ -387,7 +387,7 @@ def writeApTablesToFits(tables, filepath, **kwargs):
     hdu_list.writeto(filepath, **kwargs)
 
 
-def writeApTablesToHdf5(tables, filepath, **kwargs):
+def write_ap_tables_to_HDF5(tables, filepath, **kwargs):
     """
     Writes a dictionary of `astropy.table.Table` to a single hdf5 file
 
@@ -408,7 +408,7 @@ def writeApTablesToHdf5(tables, filepath, **kwargs):
 # II C. Writing `numpy.recarray`
 
 
-def writeRecarraysToFits(recarrays, filepath, **kwargs):
+def write_recarrays_to_fits(recarrays, filepath, **kwargs):
     """
     Writes a dictionary of `np.recarray` to a single FITS file
 
@@ -434,7 +434,7 @@ def writeRecarraysToFits(recarrays, filepath, **kwargs):
 # II D. Writing `OrderedDict`, (`str`, `numpy.array`) to `hdf5`
 
 
-def writeDictToHdf5(odict, filepath, groupname, **kwargs):
+def write_dict_to_HDF5(odict, filepath, groupname, **kwargs):
     """
     Writes a dictionary of `numpy.array` or `jaxlib.xla_extension.DeviceArray`
     to a single hdf5 file
@@ -464,7 +464,7 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
                 arr = np.array(val)
                 group.create_dataset(key, dtype=arr.dtype, data=arr)
             elif isinstance(val, dict):
-                writeDictToHdf5(val, filepath, f"{group.name}/{key}")
+                write_dict_to_HDF5(val, filepath, f"{group.name}/{key}")
             else:
                 # In the future, it may be better to specifically case for
                 # jaxlib.xla_extension.DeviceArray here. For now, we're
@@ -476,7 +476,7 @@ def writeDictToHdf5(odict, filepath, groupname, **kwargs):
     fout.close()
 
 
-def writeDictsToHdf5(odicts, filepath):
+def write_dicts_to_HDF5(odicts, filepath):
     """
     Writes a dictionary of `numpy.array` to a single hdf5 file
 
@@ -493,13 +493,13 @@ def writeDictsToHdf5(odicts, filepath):
     except FileNotFoundError:
         pass
     for key, val in odicts.items():
-        writeDictToHdf5(val, filepath, key)
+        write_dict_to_HDF5(val, filepath, key)
 
 
 # II E. Writing `pandas.DataFrame`
 
 
-def writeDataFramesToH5(dataFrames, filepath):
+def write_dataframes_to_HDF5(dataFrames, filepath):
     """
     Writes a dictionary of `pandas.DataFrame` to a single hdf5 file
 
@@ -515,7 +515,7 @@ def writeDataFramesToH5(dataFrames, filepath):
         val.to_hdf(filepath, key)
 
 
-def writeDataFramesToPq(dataFrames, filepath, **kwargs):
+def write_dataframes_to_pq(dataFrames, filepath, **kwargs):
     """
     Writes a dictionary of `pandas.DataFrame` to a parquet files
 
@@ -538,7 +538,7 @@ def writeDataFramesToPq(dataFrames, filepath, **kwargs):
 # II F. Writing pyarrow table(s)
 
 
-def writeTableToHd5(table, filepath, key):
+def write_table_to_HDF5(table, filepath, key):
     """
     Writes a `pyarrow.Table` to a single hdf5 file
 
@@ -553,10 +553,10 @@ def writeTableToHd5(table, filepath, key):
     key: `str`
         The hdf5 groupname
     """
-    writeDictToHdf5(table.to_pydict(), filepath, key)
+    write_dict_to_HDF5(table.to_pydict(), filepath, key)
 
 
-def writeTablesToHd5(tables, filepath):
+def write_tables_to_HDF5(tables, filepath):
     """
     Writes a dictionary of `pyarrow.Table` to a single hdf5 file
 
@@ -569,10 +569,10 @@ def writeTablesToHd5(tables, filepath):
         Path to output file
     """
     for key, val in tables.items():
-        writeTableToHd5(val, filepath, key)
+        write_table_to_HDF5(val, filepath, key)
 
 
-def writeTablesToPq(tables, filepath, **kwargs):
+def write_tables_to_pq(tables, filepath, **kwargs):
     """
     Writes a dictionary of `pyarrow.Table` to a parquet files
 

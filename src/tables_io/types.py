@@ -6,7 +6,7 @@ from collections.abc import Iterable, Mapping
 
 import numpy as np
 
-from .utils.array_utils import arrayLength
+from .utils.array_utils import array_length
 from .lazy_modules import pa
 
 # Tabular data formats
@@ -113,21 +113,21 @@ ALLOWED_FORMATS = OrderedDict(
 )
 
 
-def isDataFrame(obj):
+def is_dataframe(obj):
     for c in obj.__class__.__mro__:
         if c.__name__ == "DataFrame" and c.__module__ == "pandas.core.frame":
             return True
     return False
 
 
-def isApTable(obj):
+def is_ap_table(obj):
     for c in obj.__class__.__mro__:
         if c.__name__ == "Table" and c.__module__ == "astropy.table.table":
             return True
     return False
 
 
-def tableType(obj):
+def table_type(obj):
     """Identify the type of table we have
 
     Parameters
@@ -147,9 +147,9 @@ def tableType(obj):
     IndexError
         One of the columns in a Mapping is the wrong length
     """
-    if isDataFrame(obj):
+    if is_dataframe(obj):
         return PD_DATAFRAME
-    if isApTable(obj):
+    if is_ap_table(obj):
         return AP_TABLE
     if isinstance(obj, pa.Table):
         return PA_TABLE
@@ -163,21 +163,21 @@ def tableType(obj):
 
     nRow = None
     for key, val in obj.items():
-        if istablelike(val):
+        if is_table_like(val):
             raise TypeError(f"Column {key} is a table of type {type(val)}")
         if not isinstance(val, Iterable):  # pragma: no cover
             raise TypeError(f"Column {key} of type {type(val)} is not iterable")
         if nRow is None:
-            nRow = arrayLength(val)
+            nRow = array_length(val)
         else:
-            if arrayLength(val) != nRow:
+            if array_length(val) != nRow:
                 raise IndexError(
-                    f"Column {key} length {arrayLength(val)} != {nRow}"
+                    f"Column {key} length {array_length(val)} != {nRow}"
                 )  # pylint: disable=bad-string-format-type
     return NUMPY_DICT
 
 
-def istablelike(obj):
+def is_table_like(obj):
     """Test to see if an object is one of the supported table types
 
     Parameters
@@ -191,13 +191,13 @@ def istablelike(obj):
         True is the object is `Tablelike`, False otherwise
     """
     try:
-        _ = tableType(obj)
+        _ = table_type(obj)
     except (TypeError, IndexError):
         return False
     return True
 
 
-def istabledictlike(obj):
+def is_tabledict_like(obj):
     """Test to see if an object is a `Mapping`, (`str`, `Tablelike`)
 
     Parameters
@@ -213,12 +213,12 @@ def istabledictlike(obj):
     if not isinstance(obj, Mapping):
         return False
     for val in obj.values():
-        if not istablelike(val):
+        if not is_table_like(val):
             return False
     return True
 
 
-def fileType(filepath, fmt=None):
+def file_type(filepath, fmt=None):
     """Identify the type of file we have
 
     Parameters

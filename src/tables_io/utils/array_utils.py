@@ -5,7 +5,7 @@ from collections import OrderedDict
 import numpy as np
 
 
-def arrayLength(arr):
+def array_length(arr):
     """Get the length of an array
 
     The works on scalars and arrays, so it is safe to use
@@ -29,7 +29,7 @@ def arrayLength(arr):
     return shape[0]
 
 
-def forceToPandables(arr, check_nrow=None):
+def force_to_pandables(arr, check_nrow=None):
     """
     Forces a  `numpy.array` into a format that pandas can handle
 
@@ -62,7 +62,7 @@ def forceToPandables(arr, check_nrow=None):
     return list(arr.reshape(nrow, ncol))
 
 
-def getGroupInputDataLength(hg):
+def get_group_input_data_length(hg):
     """Return the length of a HDF5 group
 
     Parameters
@@ -98,7 +98,7 @@ def getGroupInputDataLength(hg):
     return nrows
 
 
-def getInitializationForODict(in_dict, nRow_out=None):
+def get_initialization_for_ODict(in_dict, nRow_out=None):
     """shape of arrays and dtypes in a dictionary.
     This is useful for initialize hdf5 files
 
@@ -122,7 +122,7 @@ def getInitializationForODict(in_dict, nRow_out=None):
     return out_dict
 
 
-def printDictShape(in_dict):
+def print_dict_shape(in_dict):
     """Print the shape of arrays in a dictionary.
     This is useful for debugging `astropy.Table` creation.
 
@@ -135,7 +135,7 @@ def printDictShape(in_dict):
         print(key, np.shape(val))
 
 
-def sliceDict(in_dict, subslice):
+def slice_dict(in_dict, subslice):
     """Create a new `dict` by taking a slice of of every array in a `dict`
 
     Parameters
@@ -160,7 +160,7 @@ def sliceDict(in_dict, subslice):
     return out_dict
 
 
-def checkKeys(in_dicts):
+def check_keys(in_dicts):
     """Check that the keys in all the in_dicts match
 
     Parameters
@@ -178,10 +178,12 @@ def checkKeys(in_dicts):
     master_keys = in_dicts[0].keys()
     for in_dict in in_dicts[1:]:
         if in_dict.keys() != master_keys:  # pragma: no cover
-            raise ValueError(f"Keys do not match: {list(in_dict.keys())} != {list(master_keys)}")
+            raise ValueError(
+                f"Keys do not match: {list(in_dict.keys())} != {list(master_keys)}"
+            )
 
 
-def concatenateDicts(in_dicts):
+def concatenate_dicts(in_dicts):
     """Create a new `dict` by concatenating each array in `in_dicts`
 
     Parameters
@@ -196,7 +198,7 @@ def concatenateDicts(in_dicts):
     """
     if not in_dicts:  # pragma: no cover
         return OrderedDict()
-    checkKeys(in_dicts)
+    check_keys(in_dicts)
     out_dict = OrderedDict([(key, None) for key in in_dicts[0].keys()])
     for key in out_dict.keys():
         out_dict[key] = np.concatenate([in_dict[key] for in_dict in in_dicts])

@@ -3,12 +3,12 @@
 from collections import OrderedDict
 
 
-from .array_utils import sliceDict
-from ..types import NUMPY_DICT, tableType
+from .array_utils import slice_dict
+from ..types import NUMPY_DICT, table_type
 
 
 # I F. Generic `slice`
-def sliceObj(obj, the_slice):
+def slice_obj(obj, the_slice):
     """
     Slice a `table-like` objects
 
@@ -25,13 +25,13 @@ def sliceObj(obj, the_slice):
     tab : `table-like`
         The slice of the table
     """
-    tType = tableType(obj)
+    tType = table_type(obj)
     if tType is NUMPY_DICT:
-        return sliceDict(obj, the_slice)
+        return slice_dict(obj, the_slice)
     return obj[the_slice]
 
 
-def sliceObjs(odict, the_slice):
+def slice_objs(odict, the_slice):
     """Slice many `table-like` objects
 
     Parameters
@@ -48,4 +48,4 @@ def sliceObjs(odict, the_slice):
     odict : tableDict-like
         The sliced tables
     """
-    return OrderedDict([(k, sliceObj(v, the_slice)) for k, v in odict.items()])
+    return OrderedDict([(k, slice_obj(v, the_slice)) for k, v in odict.items()])

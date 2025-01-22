@@ -4,107 +4,16 @@ from collections import OrderedDict
 
 import numpy as np
 
-from .array_utils import concatenateDicts
+from .array_utils import concatenate_dicts
 from ..lazy_modules import apTable, pd, pa
 from ..types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE
 
 
 ### I. concatanating list of table-like objects
 
-### I A. Concatanating `astropy.table.Table`
 
-
-def concatApTables(tablelist):
-    """
-    Concatanate a list of `astropy.table.Table`
-
-    Parameters
-    ----------
-    tablelist :  `list`
-        The tables
-
-    Returns
-    -------
-    tab : `astropy.table.Table`
-        The table
-    """
-    return apTable.vstack(tablelist)
-
-
-### I B. Concatanating dicts of numpy arrays
-def concatNumpyDicts(tablelist):
-    """
-    Concatanate a list of `dicts` of `np.array`
-
-    Parameters
-    ----------
-    tablelist :  `list`
-        The tables
-
-    Returns
-    -------
-    tab : `dict`
-        The table
-    """
-    return concatenateDicts(tablelist)
-
-
-### I C. Concatanating numpy recarrays
-def concatNumpyRecarrays(tablelist):
-    """
-    Concatanate a list of `dicts` of `np.recarray`
-
-    Parameters
-    ----------
-    tablelist :  `list`
-        The tables
-
-    Returns
-    -------
-    tab : `dict`
-        The table
-    """
-    return np.lib.recfunctions.stack_arrays(tablelist)
-
-
-### I D. Concatanating pandas dataframes
-def concatDataframes(tablelist):
-    """
-    Concatanate a list of `pandas.DataFrame`
-
-    Parameters
-    ----------
-    tablelist :  `list`
-        The tables
-
-    Returns
-    -------
-    tab : `dict`
-        The table
-    """
-    return pd.concat(tablelist)
-
-
-### I E. Concatanating pyarrow tables
-def concatPATables(tablelist):
-    """
-    Concatanate a list of `pyarrow.Table`
-
-    Parameters
-    ----------
-    tablelist :  `list`
-        The tables
-
-    Returns
-    -------
-    tab : `dict`
-        The table
-    """
-    return pa.concat_tables(tablelist)
-
-
-# I F. Generic `concat`
-def concatObjs(tableList, tType):
+# I A. Generic `concat`
+def concat_objs(tableList, tType):
     """
     Concatanate a list of `table-like` objects
 
@@ -122,11 +31,11 @@ def concatObjs(tableList, tType):
         The table
     """
     funcDict = {
-        AP_TABLE: concatApTables,
-        NUMPY_DICT: concatNumpyDicts,
-        NUMPY_RECARRAY: concatNumpyRecarrays,
-        PD_DATAFRAME: concatDataframes,
-        PA_TABLE: concatPATables,
+        AP_TABLE: concat_ap_tables,
+        NUMPY_DICT: concat_numpy_dicts,
+        NUMPY_RECARRAY: concat_numpy_recarrays,
+        PD_DATAFRAME: concat_dataframes,
+        PA_TABLE: concat_pa_tables,
     }
 
     try:
@@ -138,7 +47,7 @@ def concatObjs(tableList, tType):
         ) from msg  # pragma: no cover
 
 
-### II.  Multi-table concatanating
+### I B.  Multi-table concatanating
 
 
 def concat(odictlist, tType):
@@ -165,4 +74,97 @@ def concat(odictlist, tType):
                 odict_in[key].append(val)
         first = False
 
-    return OrderedDict([(k, concatObjs(v, tType)) for k, v in odict_in.items()])
+    return OrderedDict([(k, concat_objs(v, tType)) for k, v in odict_in.items()])
+
+
+### II. Concatenating specific data tables
+### II A. Concatanating `astropy.table.Table`
+
+
+def concat_ap_tables(tablelist):
+    """
+    Concatanate a list of `astropy.table.Table`
+
+    Parameters
+    ----------
+    tablelist :  `list`
+        The tables
+
+    Returns
+    -------
+    tab : `astropy.table.Table`
+        The table
+    """
+    return apTable.vstack(tablelist)
+
+
+### II B. Concatanating dicts of numpy arrays
+def concat_numpy_dicts(tablelist):
+    """
+    Concatanate a list of `dicts` of `np.array`
+
+    Parameters
+    ----------
+    tablelist :  `list`
+        The tables
+
+    Returns
+    -------
+    tab : `dict`
+        The table
+    """
+    return concatenate_dicts(tablelist)
+
+
+### II C. Concatanating numpy recarrays
+def concat_numpy_recarrays(tablelist):
+    """
+    Concatanate a list of `dicts` of `np.recarray`
+
+    Parameters
+    ----------
+    tablelist :  `list`
+        The tables
+
+    Returns
+    -------
+    tab : `dict`
+        The table
+    """
+    return np.lib.recfunctions.stack_arrays(tablelist)
+
+
+### II D. Concatanating pandas dataframes
+def concat_dataframes(tablelist):
+    """
+    Concatanate a list of `pandas.DataFrame`
+
+    Parameters
+    ----------
+    tablelist :  `list`
+        The tables
+
+    Returns
+    -------
+    tab : `dict`
+        The table
+    """
+    return pd.concat(tablelist)
+
+
+### II E. Concatanating pyarrow tables
+def concat_pa_tables(tablelist):
+    """
+    Concatanate a list of `pyarrow.Table`
+
+    Parameters
+    ----------
+    tablelist :  `list`
+        The tables
+
+    Returns
+    -------
+    tab : `dict`
+        The table
+    """
+    return pa.concat_tables(tablelist)

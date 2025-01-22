@@ -5,9 +5,9 @@ from collections import OrderedDict
 
 import numpy as np
 
-from ..utils.array_utils import forceToPandables
+from ..utils.array_utils import force_to_pandables
 from ..convert.conv_tabledict import convert
-from ..convert.conv_table import dataFrameToDict, hdf5GroupToDict
+from ..convert.conv_table import dataframe_to_dict, hdf5_group_to_dict
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
 from ..types import (
     AP_TABLE,
@@ -26,10 +26,10 @@ from ..types import (
     PYARROW_HDF5,
     PYARROW_PARQUET,
     PD_DATAFRAME,
-    fileType,
-    istabledictlike,
-    istablelike,
-    tableType,
+    file_type,
+    is_tabledict_like,
+    is_table_like,
+    table_type,
 )
 
 
@@ -105,7 +105,7 @@ def read_native(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwarg
         The data
 
     """
-    fType = fileType(filepath, fmt)
+    fType = file_type(filepath, fmt)
     if fType == ASTROPY_FITS:
         return readFitsToApTables(filepath, keys=keys)
     if fType == ASTROPY_HDF5:
@@ -139,7 +139,7 @@ def io_open(filepath, fmt=None, **kwargs):
     -------
     file
     """
-    fType = fileType(filepath, fmt)
+    fType = file_type(filepath, fmt)
     if fType in [ASTROPY_FITS, NUMPY_FITS]:
         return fits.open(filepath, **kwargs)
     if fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PYARROW_HDF5]:
@@ -167,7 +167,7 @@ def check_columns(
         For hdf5 files, the groupname for the data
     """
 
-    fType = fileType(filepath, fmt)
+    fType = file_type(filepath, fmt)
 
     # Read the file below:
     file = io_open(filepath, fmt=None, **kwargs)
@@ -597,7 +597,7 @@ def readH5ToDict(filepath, groupname=None):
     They have a different structure than 'hdf5' files written with `h5py` or `astropy.table`
     """
     df = readHdf5ToDataFrame(filepath, groupname)
-    return dataFrameToDict(df)
+    return dataframe_to_dict(df)
 
 
 def readHdf5ToDict(filepath, groupname=None):
@@ -622,7 +622,7 @@ def readHdf5ToDict(filepath, groupname=None):
     They have a different structure than 'h5' files written `panda`
     """
     hg, infp = readHdf5Group(filepath, groupname)
-    data = hdf5GroupToDict(hg)
+    data = hdf5_group_to_dict(hg)
     infp.close()
     return data
 
@@ -649,7 +649,7 @@ def readHd5ToTable(filepath, key=None):
     pydict = readHdf5ToDicts(filepath, [key])[key]
     t_dict = {}
     for key, val in pydict.items():
-        t_dict[key] = forceToPandables(
+        t_dict[key] = force_to_pandables(
             val
         )  # TODO: add a try except around this to raise a more understandable error?
     return pa.Table.from_pydict(t_dict)

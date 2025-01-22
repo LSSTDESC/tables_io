@@ -19,19 +19,19 @@ def test_check_deps():
 
 def test_array_length():
     """Test the pandas reading"""
-    assert array_utils.arrayLength(4) == 0
-    assert array_utils.arrayLength(np.ones(5)) == 5
-    assert array_utils.arrayLength(np.ones((5, 5, 5))) == 5
-    assert array_utils.arrayLength([3, 4, 4]) == 3
+    assert array_utils.array_length(4) == 0
+    assert array_utils.array_length(np.ones(5)) == 5
+    assert array_utils.array_length(np.ones((5, 5, 5))) == 5
+    assert array_utils.array_length([3, 4, 4]) == 3
 
 
 def test_force_to_pandasable():
     """Test the force_to_pandasable function"""
     rv = np.random.uniform(size=100)
-    assert array_utils.forceToPandables(4) == 4
-    assert np.allclose(array_utils.forceToPandables(rv), rv)
+    assert array_utils.force_to_pandables(4) == 4
+    assert np.allclose(array_utils.force_to_pandables(rv), rv)
     try:
-        array_utils.forceToPandables(rv, 95)
+        array_utils.force_to_pandables(rv, 95)
     except ValueError:
         pass
     else:
@@ -39,11 +39,11 @@ def test_force_to_pandasable():
             "Failed to catch array length mismatch in arrayUtils.forceToPandables"
         )
     rv2d = rv.reshape(10, 10)
-    rv2d_check = np.vstack(array_utils.forceToPandables(rv2d))
+    rv2d_check = np.vstack(array_utils.force_to_pandables(rv2d))
     assert np.allclose(rv2d, rv2d_check)
 
     rv3d = rv.reshape(10, 2, 5)
-    rv3d_check = np.vstack(array_utils.forceToPandables(rv3d)).reshape(rv3d.shape)
+    rv3d_check = np.vstack(array_utils.force_to_pandables(rv3d)).reshape(rv3d.shape)
     assert np.allclose(rv3d, rv3d_check)
 
 
@@ -54,7 +54,7 @@ def test_slice_dict():
         vector=np.random.uniform(size=100).reshape(10, 10),
         mat=np.random.uniform(size=1000).reshape(10, 10, 10),
     )
-    sliced = array_utils.sliceDict(test_data, 1)
+    sliced = array_utils.slice_dict(test_data, 1)
     assert np.allclose(sliced["scalar"], test_data["scalar"][1])
     assert np.allclose(sliced["vector"], test_data["vector"][1])
     assert np.allclose(sliced["mat"], test_data["mat"][1])
@@ -62,7 +62,7 @@ def test_slice_dict():
     mask = np.zeros((10), bool)
     mask[1] = True
     mask[4] = True
-    sliced = array_utils.sliceDict(test_data, mask)
+    sliced = array_utils.slice_dict(test_data, mask)
     assert np.allclose(sliced["scalar"], test_data["scalar"][mask])
     assert np.allclose(sliced["vector"], test_data["vector"][mask])
     assert np.allclose(sliced["mat"], test_data["mat"][mask])
@@ -75,7 +75,7 @@ def test_print_dict_shape():
         vector=np.random.uniform(size=100).reshape(10, 10),
         mat=np.random.uniform(size=1000).reshape(10, 10, 10),
     )
-    array_utils.printDictShape(test_data)
+    array_utils.print_dict_shape(test_data)
 
 
 def test_concatenateDicts():
@@ -85,7 +85,7 @@ def test_concatenateDicts():
         vector=np.random.uniform(size=100).reshape(10, 10),
         mat=np.random.uniform(size=1000).reshape(10, 10, 10),
     )
-    od = array_utils.concatenateDicts([test_data, test_data])
+    od = array_utils.concatenate_dicts([test_data, test_data])
     assert np.allclose(od["scalar"][0:10], test_data["scalar"])
     assert np.allclose(od["vector"][0:10], test_data["vector"])
     assert np.allclose(od["mat"][0:10], test_data["mat"])
@@ -101,11 +101,11 @@ def test_getInit():
         mat=np.random.uniform(size=1000).reshape(10, 10, 10),
     )
 
-    dd = array_utils.getInitializationForODict(test_data)
+    dd = array_utils.get_initialization_for_ODict(test_data)
     assert dd["scalar"][0] == (10,)
     assert dd["vector"][0] == (10, 10)
     assert dd["mat"][0] == (10, 10, 10)
-    dd = array_utils.getInitializationForODict(test_data, 12)
+    dd = array_utils.get_initialization_for_ODict(test_data, 12)
     assert dd["scalar"][0] == (12,)
     assert dd["vector"][0] == (12, 10)
     assert dd["mat"][0] == (12, 10, 10)
@@ -113,14 +113,14 @@ def test_getInit():
 
 def test_types():
     """Test the typing functions"""
-    assert not types.istablelike(4)
-    assert types.istablelike(dict(a=np.ones(4)))
-    assert not types.istablelike(dict(a=np.ones(4), b=np.ones(5)))
-    assert not types.istabledictlike(4)
-    assert not types.istabledictlike(dict(a=np.ones(4)))
-    assert types.istabledictlike(dict(data=dict(a=np.ones(4))))
+    assert not types.is_table_like(4)
+    assert types.is_table_like(dict(a=np.ones(4)))
+    assert not types.is_table_like(dict(a=np.ones(4), b=np.ones(5)))
+    assert not types.is_tabledict_like(4)
+    assert not types.is_tabledict_like(dict(a=np.ones(4)))
+    assert types.is_tabledict_like(dict(data=dict(a=np.ones(4))))
     try:
-        types.fileType("xx.out")
+        types.file_type("xx.out")
     except KeyError:
         pass
     else:
@@ -144,19 +144,19 @@ def test_type_finders():
     t1 = Table()
     t2 = TableSub()
 
-    assert types.isDataFrame(d1)
-    assert types.isDataFrame(d2)
-    assert not types.isDataFrame(t1)
-    assert not types.isDataFrame(t2)
-    assert not types.isDataFrame({})
-    assert not types.isDataFrame(77)
+    assert types.is_dataframe(d1)
+    assert types.is_dataframe(d2)
+    assert not types.is_dataframe(t1)
+    assert not types.is_dataframe(t2)
+    assert not types.is_dataframe({})
+    assert not types.is_dataframe(77)
 
-    assert not types.isApTable(d1)
-    assert not types.isApTable(d2)
-    assert types.isApTable(t1)
-    assert types.isApTable(t2)
-    assert not types.isApTable({})
-    assert not types.isApTable(77)
+    assert not types.is_ap_table(d1)
+    assert not types.is_ap_table(d2)
+    assert types.is_ap_table(t1)
+    assert types.is_ap_table(t2)
+    assert not types.is_ap_table({})
+    assert not types.is_ap_table(77)
 
 
 def test_lazy_load():

@@ -6,7 +6,7 @@ from collections import OrderedDict
 import numpy as np
 
 from .read import readHdf5Group, readHdf5DatasetToArray
-from ..utils.array_utils import getGroupInputDataLength, forceToPandables
+from ..utils.array_utils import get_group_input_data_length, force_to_pandables
 from ..convert.conv_tabledict import convert
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
 from ..types import (
@@ -26,10 +26,10 @@ from ..types import (
     PYARROW_HDF5,
     PYARROW_PARQUET,
     PD_DATAFRAME,
-    fileType,
-    istabledictlike,
-    istablelike,
-    tableType,
+    file_type,
+    is_tabledict_like,
+    is_table_like,
+    table_type,
 )
 
 
@@ -56,11 +56,11 @@ def iterator(filepath, tType=None, fmt=None, **kwargs):
         The data
 
     """
-    for start, stop, data in iteratorNative(filepath, fmt, **kwargs):
+    for start, stop, data in iterator_native(filepath, fmt, **kwargs):
         yield start, stop, convert(data, tType)
 
 
-def iteratorNative(filepath, fmt=None, **kwargs):
+def iterator_native(filepath, fmt=None, **kwargs):
     """Read a file to the corresponding table type and iterate over the file
 
     Parameters
@@ -80,13 +80,13 @@ def iteratorNative(filepath, fmt=None, **kwargs):
     The kwargs are used passed to the specific iterator type
 
     """
-    fType = fileType(filepath, fmt)
+    fType = file_type(filepath, fmt)
     funcDict = {
-        NUMPY_HDF5: iterHdf5ToDict,
-        PANDAS_HDF5: iterH5ToDataFrame,
-        PANDAS_PARQUET: iterPqToDataFrame,
-        PYARROW_PARQUET: iterDsToTable,
-        PYARROW_HDF5: iterDsToTable,
+        NUMPY_HDF5: iter_HDF5_to_dict,
+        PANDAS_HDF5: iter_HDF5_to_dataframe,
+        PANDAS_PARQUET: iter_pq_to_dataframe,
+        PYARROW_PARQUET: iter_ds_to_table,
+        PYARROW_HDF5: iter_ds_to_table,
     }
 
     try:
@@ -98,7 +98,7 @@ def iteratorNative(filepath, fmt=None, **kwargs):
         ) from msg  # pragma: no cover
 
 
-def getInputDataLength(filepath, fmt=None, **kwargs):
+def get_input_data_length(filepath, fmt=None, **kwargs):
     """Read a file to the corresponding table type and iterate over the file
 
     Parameters
@@ -118,12 +118,12 @@ def getInputDataLength(filepath, fmt=None, **kwargs):
     The kwargs are used passed to the specific iterator type
 
     """
-    fType = fileType(filepath, fmt)
+    fType = file_type(filepath, fmt)
     funcDict = {
-        NUMPY_HDF5: getInputDataLengthHdf5,
-        PANDAS_HDF5: getInputDataLengthHdf5,
-        PANDAS_PARQUET: getInputDataLengthPq,
-        PYARROW_PARQUET: getInputDataLengthDs,
+        NUMPY_HDF5: get_input_data_length_HDF5,
+        PANDAS_HDF5: get_input_data_length_HDF5,
+        PANDAS_PARQUET: get_input_data_length_pq,
+        PYARROW_PARQUET: get_input_data_length_ds,
     }
 
     try:
@@ -140,7 +140,7 @@ def getInputDataLength(filepath, fmt=None, **kwargs):
 # II A. HDF5 partial read functions
 
 
-def getInputDataLengthHdf5(filepath, groupname=None):
+def get_input_data_length_HDF5(filepath, groupname=None):
     """Open an HDF5 file and return the size of a group
 
     Parameters
@@ -165,12 +165,12 @@ def getInputDataLengthHdf5(filepath, groupname=None):
     Normally that is what you want to be iterating over.
     """
     hg, infp = readHdf5Group(filepath, groupname)
-    nrow = getGroupInputDataLength(hg)
+    nrow = get_group_input_data_length(hg)
     infp.close()
     return nrow
 
 
-def iterHdf5ToDict(
+def iter_HDF5_to_dict(
     filepath, chunk_size=100_000, groupname=None, rank=0, parallel_size=1
 ):
     """
@@ -204,7 +204,7 @@ def iterHdf5ToDict(
             f"number of processes {parallel_size}"
         )  # pragma: no cover
     f, infp = readHdf5Group(filepath, groupname)
-    num_rows = getGroupInputDataLength(f)
+    num_rows = get_group_input_data_length(f)
     ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
     data = OrderedDict()
     for start, end in ranges:
@@ -214,7 +214,7 @@ def iterHdf5ToDict(
     infp.close()
 
 
-def iterH5ToDataFrame(filepath, chunk_size=100_000, groupname=None):
+def iter_HDF5_to_dataframe(filepath, chunk_size=100_000, groupname=None):
     """
     iterator for sending chunks of data in hdf5.
 
@@ -248,7 +248,7 @@ def iterH5ToDataFrame(filepath, chunk_size=100_000, groupname=None):
 # II B. Parquet partial read functions
 
 
-def iterPqToDataFrame(
+def iter_pq_to_dataframe(
     filepath, chunk_size=100_000, columns=None, rank=0, parallel_size=1, **kwargs
 ):
     """
@@ -277,7 +277,7 @@ def iterPqToDataFrame(
             f"number of processes {parallel_size}"
         )  # pragma: no cover
 
-    num_rows = getInputDataLengthPq(filepath, columns=columns)
+    num_rows = get_input_data_length_pq(filepath, columns=columns)
     _ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
 
     parquet_file = pq.read_table(filepath, columns=columns)
@@ -294,7 +294,7 @@ def iterPqToDataFrame(
         start += num_rows
 
 
-def getInputDataLengthPq(filepath, columns=None, **kwargs):
+def get_input_data_length_pq(filepath, columns=None, **kwargs):
     """Open a Parquet file and return the size of a group
 
     Parameters
@@ -326,7 +326,7 @@ def getInputDataLengthPq(filepath, columns=None, **kwargs):
 # II C. Parquet dataset partial read functions
 
 
-def iterDsToTable(source, columns=None, **kwargs):
+def iter_ds_to_table(source, columns=None, **kwargs):
     """
     iterator for sending chunks of data in parquet
 
@@ -357,7 +357,7 @@ def iterDsToTable(source, columns=None, **kwargs):
         start += num_rows
 
 
-def getInputDataLengthDs(source, **kwargs):
+def get_input_data_length_ds(source, **kwargs):
     """Open a dataset and return the size of a group
 
     Parameters
