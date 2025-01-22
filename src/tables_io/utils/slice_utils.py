@@ -3,7 +3,7 @@
 from collections import OrderedDict
 
 
-from .arrayUtils import sliceDict
+from .array_utils import sliceDict
 from ..types import NUMPY_DICT, tableType
 
 

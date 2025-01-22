@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from tables_io import types
-from tables_io.utils import arrayUtils
+from tables_io.utils import array_utils
 from tables_io.lazy_modules import apTable, lazyImport, pd
 from tests.testUtils import check_deps
 
@@ -19,19 +19,19 @@ def test_check_deps():
 
 def test_array_length():
     """Test the pandas reading"""
-    assert arrayUtils.arrayLength(4) == 0
-    assert arrayUtils.arrayLength(np.ones(5)) == 5
-    assert arrayUtils.arrayLength(np.ones((5, 5, 5))) == 5
-    assert arrayUtils.arrayLength([3, 4, 4]) == 3
+    assert array_utils.arrayLength(4) == 0
+    assert array_utils.arrayLength(np.ones(5)) == 5
+    assert array_utils.arrayLength(np.ones((5, 5, 5))) == 5
+    assert array_utils.arrayLength([3, 4, 4]) == 3
 
 
 def test_force_to_pandasable():
     """Test the force_to_pandasable function"""
     rv = np.random.uniform(size=100)
-    assert arrayUtils.forceToPandables(4) == 4
-    assert np.allclose(arrayUtils.forceToPandables(rv), rv)
+    assert array_utils.forceToPandables(4) == 4
+    assert np.allclose(array_utils.forceToPandables(rv), rv)
     try:
-        arrayUtils.forceToPandables(rv, 95)
+        array_utils.forceToPandables(rv, 95)
     except ValueError:
         pass
     else:
@@ -39,11 +39,11 @@ def test_force_to_pandasable():
             "Failed to catch array length mismatch in arrayUtils.forceToPandables"
         )
     rv2d = rv.reshape(10, 10)
-    rv2d_check = np.vstack(arrayUtils.forceToPandables(rv2d))
+    rv2d_check = np.vstack(array_utils.forceToPandables(rv2d))
     assert np.allclose(rv2d, rv2d_check)
 
     rv3d = rv.reshape(10, 2, 5)
-    rv3d_check = np.vstack(arrayUtils.forceToPandables(rv3d)).reshape(rv3d.shape)
+    rv3d_check = np.vstack(array_utils.forceToPandables(rv3d)).reshape(rv3d.shape)
     assert np.allclose(rv3d, rv3d_check)
 
 
@@ -54,7 +54,7 @@ def test_slice_dict():
         vector=np.random.uniform(size=100).reshape(10, 10),
         mat=np.random.uniform(size=1000).reshape(10, 10, 10),
     )
-    sliced = arrayUtils.sliceDict(test_data, 1)
+    sliced = array_utils.sliceDict(test_data, 1)
     assert np.allclose(sliced["scalar"], test_data["scalar"][1])
     assert np.allclose(sliced["vector"], test_data["vector"][1])
     assert np.allclose(sliced["mat"], test_data["mat"][1])
@@ -62,7 +62,7 @@ def test_slice_dict():
     mask = np.zeros((10), bool)
     mask[1] = True
     mask[4] = True
-    sliced = arrayUtils.sliceDict(test_data, mask)
+    sliced = array_utils.sliceDict(test_data, mask)
     assert np.allclose(sliced["scalar"], test_data["scalar"][mask])
     assert np.allclose(sliced["vector"], test_data["vector"][mask])
     assert np.allclose(sliced["mat"], test_data["mat"][mask])
@@ -75,7 +75,7 @@ def test_print_dict_shape():
         vector=np.random.uniform(size=100).reshape(10, 10),
         mat=np.random.uniform(size=1000).reshape(10, 10, 10),
     )
-    arrayUtils.printDictShape(test_data)
+    array_utils.printDictShape(test_data)
 
 
 def test_concatenateDicts():
@@ -85,7 +85,7 @@ def test_concatenateDicts():
         vector=np.random.uniform(size=100).reshape(10, 10),
         mat=np.random.uniform(size=1000).reshape(10, 10, 10),
     )
-    od = arrayUtils.concatenateDicts([test_data, test_data])
+    od = array_utils.concatenateDicts([test_data, test_data])
     assert np.allclose(od["scalar"][0:10], test_data["scalar"])
     assert np.allclose(od["vector"][0:10], test_data["vector"])
     assert np.allclose(od["mat"][0:10], test_data["mat"])
@@ -101,11 +101,11 @@ def test_getInit():
         mat=np.random.uniform(size=1000).reshape(10, 10, 10),
     )
 
-    dd = arrayUtils.getInitializationForODict(test_data)
+    dd = array_utils.getInitializationForODict(test_data)
     assert dd["scalar"][0] == (10,)
     assert dd["vector"][0] == (10, 10)
     assert dd["mat"][0] == (10, 10, 10)
-    dd = arrayUtils.getInitializationForODict(test_data, 12)
+    dd = array_utils.getInitializationForODict(test_data, 12)
     assert dd["scalar"][0] == (12,)
     assert dd["vector"][0] == (12, 10)
     assert dd["mat"][0] == (12, 10, 10)

@@ -7,15 +7,15 @@ except:  # pylint: disable=bare-except   #pragma: no cover
 
 from .lazy_modules import *
 
-from .tableDict import TableDict
+from .table_dict import TableDict
 
 from . import convert as conv
 
 from . import io_utils
 
-from .utils import concatUtils
+from .utils import concat_utils
 
-from .utils import sliceUtils
+from .utils import slice_utils
 
 # Exposing the primary functions and interfaces for tables_io
 
@@ -49,20 +49,20 @@ iteratorNative = io_utils.iterator.iteratorNative
 
 iterator = io_utils.iterator.iterator
 
-concat_table = concatUtils.concatObjs
+concat_table = concat_utils.concatObjs
 
-concatObjs = concatUtils.concatObjs
+concatObjs = concat_utils.concatObjs
 """This function is being deprecated, please see `concat_table` instead"""
 
-concat = concatUtils.concat
+concat = concat_utils.concat
 # TODO: Does this work on only single table or a table_dict?
 
-slice_table = sliceUtils.sliceObj
+slice_table = slice_utils.sliceObj
 
-sliceObj = sliceUtils.sliceObj
+sliceObj = slice_utils.sliceObj
 """This function is being deprecated, please see `slice_table` instead"""
 
-sliceObjs = sliceUtils.sliceObjs
+sliceObjs = slice_utils.sliceObjs
 # TODO: Should this even exist?
 
 check_columns = io_utils.read.check_columns

@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import numpy as np
 
-from .arrayUtils import concatenateDicts
+from .array_utils import concatenateDicts
 from ..lazy_modules import apTable, pd, pa
 from ..types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE
 

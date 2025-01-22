@@ -6,7 +6,7 @@ from collections import OrderedDict
 import numpy as np
 
 from .read import readHdf5Group, readHdf5DatasetToArray
-from ..utils.arrayUtils import getGroupInputDataLength, forceToPandables
+from ..utils.array_utils import getGroupInputDataLength, forceToPandables
 from ..convert.conv_tabledict import convert
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
 from ..types import (

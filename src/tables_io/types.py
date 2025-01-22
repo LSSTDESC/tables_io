@@ -6,7 +6,7 @@ from collections.abc import Iterable, Mapping
 
 import numpy as np
 
-from .utils.arrayUtils import arrayLength
+from .utils.array_utils import arrayLength
 from .lazy_modules import pa
 
 # Tabular data formats

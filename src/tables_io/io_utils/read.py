@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 import numpy as np
 
-from ..utils.arrayUtils import forceToPandables
+from ..utils.array_utils import forceToPandables
 from ..convert.conv_tabledict import convert
 from ..convert.conv_table import dataFrameToDict, hdf5GroupToDict
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
