@@ -273,7 +273,9 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
 
     def testParquetLoopback(self):
         """Test writing / reading pyarros tables to parquet files"""
-        self._do_loopback_with_keys(types.PA_TABLE, "test_out", "parquet", ["data"])
+        self._do_loopback_with_keys(
+            types.PA_TABLE, "test_out", "parquet", ["data", "md"]
+        )
         self._do_loopback_single(types.PA_TABLE, "test_out_single", "parquet", [""])
         self._do_iterator(
             "test_out_single.parquet", types.PA_TABLE, True, chunk_size=50
