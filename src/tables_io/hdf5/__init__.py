@@ -12,15 +12,15 @@ write_dicts_to_HDF5 = io_utils.write.write_dicts_to_HDF5
 
 finalize_HDF5_write = io_utils.write.finalize_HDF5_write
 
-read_HDF5_group = io_utils.read.readHdf5Group
+read_HDF5_group = io_utils.read.read_HDF5_group
 
-read_HDF5_group_names = io_utils.read.readHdf5GroupNames
+read_HDF5_group_names = io_utils.read.read_HDF5_group_names
 
-read_HDF5_to_dict = io_utils.read.readHdf5ToDict
+read_HDF5_to_dict = io_utils.read.read_HDF5_to_dict
 
-read_HDF5_group_to_dict = io_utils.read.readHdf5GroupToDict
+read_HDF5_group_to_dict = io_utils.read.read_HDF5_group_to_dict
 
-read_HDF5_dataset_to_array = io_utils.read.readHdf5DatasetToArray
+read_HDF5_dataset_to_array = io_utils.read.read_HDF5_dataset_to_array
 
 get_group_input_data_length = get_group_input_data_length
 

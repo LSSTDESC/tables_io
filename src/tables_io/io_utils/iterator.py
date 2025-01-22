@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 import numpy as np
 
-from .read import readHdf5Group, readHdf5DatasetToArray
+from .read import read_HDF5_group, read_HDF5_dataset_to_array
 from ..utils.array_utils import get_group_input_data_length, force_to_pandables
 from ..convert.conv_tabledict import convert
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
@@ -164,7 +164,7 @@ def get_input_data_length_HDF5(filepath, groupname=None):
 
     Normally that is what you want to be iterating over.
     """
-    hg, infp = readHdf5Group(filepath, groupname)
+    hg, infp = read_HDF5_group(filepath, groupname)
     nrow = get_group_input_data_length(hg)
     infp.close()
     return nrow
@@ -203,13 +203,13 @@ def iter_HDF5_to_dict(
             f"MPI rank {rank} larger than the total "
             f"number of processes {parallel_size}"
         )  # pragma: no cover
-    f, infp = readHdf5Group(filepath, groupname)
+    f, infp = read_HDF5_group(filepath, groupname)
     num_rows = get_group_input_data_length(f)
     ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
     data = OrderedDict()
     for start, end in ranges:
         for key, val in f.items():
-            data[key] = readHdf5DatasetToArray(val, start, end)
+            data[key] = read_HDF5_dataset_to_array(val, start, end)
         yield start, end, data
     infp.close()
 

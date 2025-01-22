@@ -36,18 +36,6 @@ from ..types import (
 # I. Top-level interface functions
 
 
-def readSingle():
-    # reads in a single table
-    # gives an error if there are multiple tables?
-    pass
-
-
-def readMulti():
-    # reads in multiple tables to an ordered dict
-    # if there's only one table, reads it into an ordered dict
-    pass
-
-
 def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False, **kwargs):
     """Read a file to the corresponding table type
 
@@ -107,21 +95,21 @@ def read_native(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwarg
     """
     fType = file_type(filepath, fmt)
     if fType == ASTROPY_FITS:
-        return readFitsToApTables(filepath, keys=keys)
+        return read_fits_to_ap_tables(filepath, keys=keys)
     if fType == ASTROPY_HDF5:
-        return readHdf5ToApTables(filepath, keys=keys)
+        return read_HDF5_to_ap_tables(filepath, keys=keys)
     if fType == NUMPY_HDF5:
-        return readHdf5ToDicts(filepath, keys=keys)
+        return read_HDF5_to_dicts(filepath, keys=keys)
     if fType == NUMPY_FITS:
-        return readFitsToRecarrays(filepath, keys=keys)
+        return read_fits_to_recarrays(filepath, keys=keys)
     if fType == PANDAS_HDF5:
-        return readH5ToDataFrames(filepath, keys=keys)
+        return read_H5_to_dataframes(filepath, keys=keys)
     if fType == PANDAS_PARQUET:
-        return readPqToDataFrames(filepath, keys, allow_missing_keys, **kwargs)
+        return read_pq_to_dataframes(filepath, keys, allow_missing_keys, **kwargs)
     if fType == PYARROW_HDF5:
-        return readHd5ToTables(filepath, keys)
+        return read_HDF5_to_tables(filepath, keys)
     if fType == PYARROW_PARQUET:
-        return readPqToTables(filepath, keys, allow_missing_keys, **kwargs)
+        return read_pq_to_tables(filepath, keys, allow_missing_keys, **kwargs)
     raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
 
 
@@ -191,7 +179,7 @@ def check_columns(
                     col_list.append(col.name)
 
     elif fType in [ASTROPY_HDF5, NUMPY_HDF5, PANDAS_HDF5, PYARROW_HDF5]:
-        col_list = readHdf5GroupNames(filepath, parent_groupname=parent_groupname)
+        col_list = read_HDF5_group_names(filepath, parent_groupname=parent_groupname)
 
     elif fType in [PYARROW_PARQUET, PANDAS_PARQUET]:
         col_list = file.schema.names
@@ -211,9 +199,10 @@ def check_columns(
 # II A. Reading `astropy.table.Table` from FITS files
 
 
-def readFitsToApTables(filepath, keys=None):
+def read_fits_to_ap_tables(filepath, keys=None):
     """
-    Reads `astropy.table.Table` objects from a FITS file.
+    Reads `astropy.table.Table` objects into an `OrderedDict` TableDict-like object from a FITS file.
+    If a list of keys is given, will read only those tables.
 
     Parameters
     ----------
@@ -221,7 +210,7 @@ def readFitsToApTables(filepath, keys=None):
         Path to input file
 
     keys : `list` or `None`
-        Which tables to read
+        A list of which tables to read, in lower case.
 
     Returns
     -------
@@ -241,9 +230,10 @@ def readFitsToApTables(filepath, keys=None):
 # II B Reading `np.recarray` from FITS files
 
 
-def readFitsToRecarrays(filepath, keys=None):
+def read_fits_to_recarrays(filepath, keys=None):
     """
-    Reads `np.recarray` objects from a FITS file.
+    Reads `np.recarray` objects into an `OrderedDict` TableDict-like object from a FITS file.
+    If a list of keys is given, will read only those tables.
 
     Parameters
     ----------
@@ -251,7 +241,7 @@ def readFitsToRecarrays(filepath, keys=None):
         Path to input file
 
     keys : `list` or `None`
-        Which tables to read
+        A list of which tables to read, in lower case.
 
     Returns
     -------
@@ -270,9 +260,9 @@ def readFitsToRecarrays(filepath, keys=None):
 # II C Reading `astropy.table.Table` from HDF5 file
 
 
-def readHdf5ToApTables(filepath, keys=None):
+def read_HDF5_to_ap_tables(filepath, keys=None):
     """
-    Reads `astropy.table.Table` objects from an hdf5 file.
+    Reads `astropy.table.Table` objects to an `OrderedDict` TableDict-like object from an hdf5 file.
 
     Parameters
     ----------
@@ -280,7 +270,7 @@ def readHdf5ToApTables(filepath, keys=None):
         Path to input file
 
     keys : `list` or `None`
-        Which tables to read
+        A list of which tables to read.
 
     Returns
     -------
@@ -299,7 +289,7 @@ def readHdf5ToApTables(filepath, keys=None):
 ## II D. Reading `OrderedDict` (`str`, `numpy.array`) and `np.array` from HDF5 file
 
 
-def readHdf5Group(filepath, groupname=None):
+def read_HDF5_group(filepath, groupname=None):
     """Read and return group from an hdf5 file.
 
     Parameters
@@ -322,7 +312,7 @@ def readHdf5Group(filepath, groupname=None):
     return infp[groupname], infp
 
 
-def readHdf5GroupToDict(hg, start=None, end=None):
+def read_HDF5_group_to_dict(hg, start=None, end=None):
     """
     Reads `numpy.array` objects from an hdf5 file.
 
@@ -338,13 +328,13 @@ def readHdf5GroupToDict(hg, start=None, end=None):
     """
     # pylint: disable=unused-argument
     if isinstance(hg, h5py.Dataset):
-        return readHdf5DatasetToArray(hg, start, end)
+        return read_HDF5_dataset_to_array(hg, start, end)
     return OrderedDict(
-        [(key, readHdf5DatasetToArray(val, start, end)) for key, val in hg.items()]
+        [(key, read_HDF5_dataset_to_array(val, start, end)) for key, val in hg.items()]
     )
 
 
-def readHdf5GroupNames(filepath, parent_groupname=None):
+def read_HDF5_group_names(filepath, parent_groupname=None):
     """Read and return group from an hdf5 file.
 
     Parameters
@@ -373,7 +363,7 @@ def readHdf5GroupNames(filepath, parent_groupname=None):
     return list(subgroups)
 
 
-def readHdf5ToDicts(filepath, keys=None):
+def read_HDF5_to_dicts(filepath, keys=None):
     """
     Reads `numpy.array` objects from an hdf5 file.
 
@@ -395,11 +385,11 @@ def readHdf5ToDicts(filepath, keys=None):
     for key, val in fin.items():
         if keys is not None and key not in keys:
             continue
-        l_out.append((key, readHdf5GroupToDict(val)))
+        l_out.append((key, read_HDF5_group_to_dict(val)))
     return OrderedDict(l_out)
 
 
-def readHdf5DatasetToArray(dataset, start=None, end=None):
+def read_HDF5_dataset_to_array(dataset, start=None, end=None):
     """Reads part of a hdf5 dataset into a `numpy.array`
 
     Parameters
@@ -426,9 +416,9 @@ def readHdf5DatasetToArray(dataset, start=None, end=None):
 # II D. Reading `pandas.DataFrame` from HDF5
 
 
-def readHdf5ToDataFrame(filepath, key=None):
+def read_H5_to_dataframe(filepath, key=None):
     """
-    Reads `pandas.DataFrame` objects from an hdf5 file.
+    Reads `pandas.DataFrame` objects from an 'h5' file.
 
     Parameters
     ----------
@@ -445,8 +435,8 @@ def readHdf5ToDataFrame(filepath, key=None):
     return pd.read_hdf(filepath, key)
 
 
-def readH5ToDataFrames(filepath, keys=None):
-    """Open an h5 file and and return a dictionary of `pandas.DataFrame`
+def read_H5_to_dataframes(filepath, keys=None):
+    """Open an `h5` file and and return a dictionary of `pandas.DataFrame`
 
     Parameters
     ----------
@@ -471,14 +461,14 @@ def readH5ToDataFrames(filepath, keys=None):
     for key in fin.keys():
         if keys is not None and key not in keys:
             continue
-        l_out.append((key, readHdf5ToDataFrame(filepath, key=key)))
+        l_out.append((key, read_H5_to_dataframe(filepath, key=key)))
     return OrderedDict(l_out)
 
 
 # II E Reading `pandas.DataFrame` from parquet file
 
 
-def readPqToDataFrame(filepath, columns=None, **kwargs):
+def read_pq_to_dataframe(filepath, columns=None, **kwargs):
     """
     Reads a `pandas.DataFrame` object from an parquet file.
 
@@ -499,7 +489,7 @@ def readPqToDataFrame(filepath, columns=None, **kwargs):
     return pd.read_parquet(filepath, engine="pyarrow", columns=columns, **kwargs)
 
 
-def readPqToDataFrames(
+def read_pq_to_dataframes(
     filepath, keys=None, allow_missing_keys=False, columns=None, **kwargs
 ):
     """
@@ -546,7 +536,7 @@ def readPqToDataFrames(
                 column_list = columns
             print("column_list", column_list)
 
-            dataframes[key] = readPqToDataFrame(
+            dataframes[key] = read_pq_to_dataframe(
                 f"{basepath}{key}{ext}", columns=column_list, **kwargs
             )
         except FileNotFoundError as msg:  # pragma: no cover
@@ -559,7 +549,7 @@ def readPqToDataFrames(
 # II F. Reading `OrderedDict` (`str`, `numpy.array`) from parquet file
 
 
-def readPqToDict(filepath, columns=None, **kwargs):
+def read_pq_to_dict(filepath, columns=None, **kwargs):
     """Open a parquet file and return a dictionary of `numpy.array`
 
     Parameters
@@ -585,7 +575,7 @@ def readPqToDict(filepath, columns=None, **kwargs):
     )
 
 
-def readH5ToDict(filepath, groupname=None):
+def read_H5_to_dict(filepath, groupname=None):
     """Open an h5 file and and return a dictionary of `numpy.array`
 
     Parameters
@@ -606,11 +596,11 @@ def readH5ToDict(filepath, groupname=None):
     We are using the file suffix 'h5' to specify 'hdf5' files written from DataFrames using `pandas`
     They have a different structure than 'hdf5' files written with `h5py` or `astropy.table`
     """
-    df = readHdf5ToDataFrame(filepath, groupname)
+    df = read_H5_to_dataframe(filepath, groupname)
     return dataframe_to_dict(df)
 
 
-def readHdf5ToDict(filepath, groupname=None):
+def read_HDF5_to_dict(filepath, groupname=None):
     """Read in h5py hdf5 data, return a dictionary of all of the keys
 
     Parameters
@@ -631,7 +621,7 @@ def readHdf5ToDict(filepath, groupname=None):
     We are using the file suffix 'hdf5' to specify 'hdf5' files written with `h5py` or `astropy.table`
     They have a different structure than 'h5' files written `panda`
     """
-    hg, infp = readHdf5Group(filepath, groupname)
+    hg, infp = read_HDF5_group(filepath, groupname)
     data = hdf5_group_to_dict(hg)
     infp.close()
     return data
@@ -640,7 +630,7 @@ def readHdf5ToDict(filepath, groupname=None):
 # II G. Reading `pyarrow.Table` from HDF5 file
 
 
-def readHd5ToTable(filepath, key=None):
+def read_HDF5_to_table(filepath, key=None):
     """
     Reads `pyarrow.Table` objects from an hdf5 file.
 
@@ -656,7 +646,7 @@ def readHd5ToTable(filepath, key=None):
     table : `pyarrow.Table`
         The table
     """
-    pydict = readHdf5ToDicts(filepath, [key])[key]
+    pydict = read_HDF5_to_dicts(filepath, [key])[key]
     t_dict = {}
     for key, val in pydict.items():
         t_dict[key] = force_to_pandables(
@@ -665,7 +655,7 @@ def readHd5ToTable(filepath, key=None):
     return pa.Table.from_pydict(t_dict)
 
 
-def readHd5ToTables(filepath, keys=None):
+def read_HDF5_to_tables(filepath, keys=None):
     """Open an h5 file and and return a dictionary of `pyarrow.Table`
 
     Parameters
@@ -687,14 +677,14 @@ def readHd5ToTables(filepath, keys=None):
     for key in fin.keys():
         if keys is not None and key not in keys:  # pragma: no cover
             continue
-        l_out.append((key, readHd5ToTable(filepath, key=key)))
+        l_out.append((key, read_HDF5_to_table(filepath, key=key)))
     return OrderedDict(l_out)
 
 
 # II H. Reading `pyarrow.Table` from parquet file
 
 
-def readPqToTable(filepath, **kwargs):
+def read_pq_to_table(filepath, **kwargs):
     """
     Reads a `pyarrow.Table` object from an parquet file.
 
@@ -715,7 +705,7 @@ def readPqToTable(filepath, **kwargs):
     return pq.read_table(filepath, **kwargs)
 
 
-def readPqToTables(
+def read_pq_to_tables(
     filepath, keys=None, allow_missing_keys=False, columns=None, **kwargs
 ):
     """
@@ -762,7 +752,7 @@ def readPqToTables(
                 column_list = columns
             print("column_list", column_list)
 
-            tables[key] = readPqToTable(
+            tables[key] = read_pq_to_table(
                 f"{basepath}{key}{ext}", columns=column_list, **kwargs
             )
         except FileNotFoundError as msg:  # pragma: no cover
