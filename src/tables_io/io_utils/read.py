@@ -220,11 +220,25 @@ def read_fits_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> M
     """
     fin = fits.open(filepath)
     tables = OrderedDict()
-    for hdu in fin[1:]:
+    for i, hdu in enumerate(fin[1:]):
         if keys is not None:
             if hdu.name.lower() not in keys:
                 continue
-        tables[hdu.name.lower()] = apTable.Table.read(filepath, hdu=hdu.name)
+
+        # In base case, handle cases where no names are provided or
+        # names are repeated. If no names are provided and more than one table
+        # is in the FITS file, use string of extension number as its name
+
+        ext_num = i + 1
+        tab_name = hdu.name.lower()
+        if (tab_name == "") & (len(fin) > 2):
+            tab_name = str(ext_num)
+
+        # Checking for repeated names:
+        if tab_name in tables.keys():
+            tab_name = f"{tab_name}_{str(ext_num)}"
+
+        tables[tab_name] = apTable.Table.read(filepath, hdu=ext_num)
     return tables
 
 
@@ -251,10 +265,25 @@ def read_fits_to_recarrays(filepath: str, keys: Optional[List[str]] = None) -> M
     """
     fin = fits.open(filepath)
     tables = OrderedDict()
-    for hdu in fin[1:]:
+    for i, hdu in enumerate(fin[1:]):
         if keys is not None and hdu.name.lower() not in keys:
             continue
-        tables[hdu.name.lower()] = hdu.data
+
+        # In base case, handle cases where no names are provided or
+        # names are repeated. If no names are provided and more than one table
+        # is in the FITS file, use string of extension number as its name
+
+        ext_num = i + 1
+        tab_name = hdu.name.lower()
+        if (tab_name == "") & (len(fin) > 2):
+            tab_name = str(ext_num)
+
+        # Checking for repeated names:
+        if tab_name in tables.keys():
+            tab_name = f"{tab_name}_{str(ext_num)}"
+
+        tables[tab_name] = hdu.data
+
     return tables
 
 
