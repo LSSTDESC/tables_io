@@ -4,6 +4,7 @@ import os
 from collections import OrderedDict
 
 import numpy as np
+from typing_extensions import List, Mapping, Optional, Union
 
 from ..utils.array_utils import force_to_pandables
 from ..convert.conv_tabledict import convert
@@ -199,7 +200,7 @@ def check_columns(
 # II A. Reading `astropy.table.Table` from FITS files
 
 
-def read_fits_to_ap_tables(filepath, keys=None):
+def read_fits_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
     """
     Reads `astropy.table.Table` objects into an `OrderedDict` TableDict-like object from a FITS file.
     If a list of keys is given, will read only those tables.
@@ -230,7 +231,7 @@ def read_fits_to_ap_tables(filepath, keys=None):
 # II B Reading `np.recarray` from FITS files
 
 
-def read_fits_to_recarrays(filepath, keys=None):
+def read_fits_to_recarrays(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
     """
     Reads `np.recarray` objects into an `OrderedDict` TableDict-like object from a FITS file.
     If a list of keys is given, will read only those tables.
@@ -241,7 +242,7 @@ def read_fits_to_recarrays(filepath, keys=None):
         Path to input file
 
     keys : `list` or `None`
-        A list of which tables to read, in lower case.
+        A list of which HDU names to read, in lower case.
 
     Returns
     -------
@@ -260,9 +261,9 @@ def read_fits_to_recarrays(filepath, keys=None):
 # II C Reading `astropy.table.Table` from HDF5 file
 
 
-def read_HDF5_to_ap_tables(filepath, keys=None):
+def read_HDF5_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
     """
-    Reads `astropy.table.Table` objects to an `OrderedDict` TableDict-like object from an hdf5 file.
+    Reads `astropy.table.Table` objects into an `OrderedDict` TableDict-like object from an hdf5 file.
 
     Parameters
     ----------
@@ -270,7 +271,7 @@ def read_HDF5_to_ap_tables(filepath, keys=None):
         Path to input file
 
     keys : `list` or `None`
-        A list of which tables to read.
+        A list of which datasets to read in.
 
     Returns
     -------
@@ -289,22 +290,22 @@ def read_HDF5_to_ap_tables(filepath, keys=None):
 ## II D. Reading `OrderedDict` (`str`, `numpy.array`) and `np.array` from HDF5 file
 
 
-def read_HDF5_group(filepath, groupname=None):
-    """Read and return group from an hdf5 file.
+def read_HDF5_group(filepath: str, groupname: Optional[str] = None):
+    """Read and return the requested group from an hdf5 file. If no group is provided, returns the `h5py.File` object twice.
 
     Parameters
     ----------
     filepath : `str`
         File in question
     groupname : `str` or `None`
-        For hdf5 files, the groupname for the data
+        The name or path to the desired group.
 
     Returns
     -------
     grp : `h5py.Group` or `h5py.File`
         The requested group
     infp : `h5py.File`
-        The input file (returned so that the used can explicitly close the file)
+        The input file (returned so that the user can explicitly close the file)
     """
     infp = h5py.File(filepath, "r")
     if groupname is None or not groupname:  # pragma: no cover
@@ -312,19 +313,27 @@ def read_HDF5_group(filepath, groupname=None):
     return infp[groupname], infp
 
 
-def read_HDF5_group_to_dict(hg, start=None, end=None):
+def read_HDF5_group_to_dict(hg, start: Optional[int] = None, end: Optional[int] = None):
     """
-    Reads `numpy.array` objects from an hdf5 file.
+    Reads `numpy.array` objects from an open hdf5 file object. If given a dataset, returns a `numpy.array` of that dataset.
+    If given a group, it will read `numpy.array` objects into an `OrderedDict` for all of the keys in that group.
+    If start and end are provided, it will only read in the given slice [start:end] of all the datasets.
 
     Parameters
     ----------
-    filepath: `str`
-        Path to input file
+    hg: `hdf5` object
+        The hdf5 object to read in, either a dataset or a group.
+
+    start : `int` or `None`
+        Starting row of dataset(s) to read.
+
+    end : `int` or `None`
+        Ending row of dataset(s) to read.
 
     Returns
     -------
-    tables : `OrderedDict` of `numpy.array`
-        Keys will be 'paths', values will be tables
+    tables : `OrderedDict` of `numpy.array` or a `numpy.array`
+        Keys will be 'paths', values will be arrays in the case of an `OrderedDict`.
     """
     # pylint: disable=unused-argument
     if isinstance(hg, h5py.Dataset):
@@ -334,8 +343,10 @@ def read_HDF5_group_to_dict(hg, start=None, end=None):
     )
 
 
-def read_HDF5_group_names(filepath, parent_groupname=None):
-    """Read and return group from an hdf5 file.
+def read_HDF5_group_names(
+    filepath: str, parent_groupname: Optional[str] = None
+) -> List[str]:
+    """Read and return the list of group names from one level of an hdf5 file.
 
     Parameters
     ----------
@@ -363,9 +374,10 @@ def read_HDF5_group_names(filepath, parent_groupname=None):
     return list(subgroups)
 
 
-def read_HDF5_to_dicts(filepath, keys=None):
+def read_HDF5_to_dicts(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
     """
-    Reads `numpy.array` objects from an hdf5 file.
+    Reads `numpy.array` objects into an `OrderedDict` from an hdf5 file. If a list of keys is given,
+    will only read those specific datasets.
 
     Parameters
     ----------
@@ -373,7 +385,7 @@ def read_HDF5_to_dicts(filepath, keys=None):
         Path to input file
 
     keys : `list` or `None`
-        Which tables to read
+        A list of which tables to read from the file.
 
     Returns
     -------
@@ -389,8 +401,10 @@ def read_HDF5_to_dicts(filepath, keys=None):
     return OrderedDict(l_out)
 
 
-def read_HDF5_dataset_to_array(dataset, start=None, end=None):
-    """Reads part of a hdf5 dataset into a `numpy.array`
+def read_HDF5_dataset_to_array(
+    dataset, start: Optional[int] = None, end: Optional[int] = None
+) -> np.array:
+    """Reads all or part of a hdf5 dataset into a `numpy.array`
 
     Parameters
     ----------
@@ -405,7 +419,7 @@ def read_HDF5_dataset_to_array(dataset, start=None, end=None):
 
     Returns
     -------
-    out : `numpy.array` or `list` of `numpy.array`
+    out : `numpy.array`
         Something that pandas can handle
     """
     if start is None or end is None:
@@ -416,9 +430,9 @@ def read_HDF5_dataset_to_array(dataset, start=None, end=None):
 # II D. Reading `pandas.DataFrame` from HDF5
 
 
-def read_H5_to_dataframe(filepath, key=None):
+def read_H5_to_dataframe(filepath: str, key: Optional[str] = None):
     """
-    Reads `pandas.DataFrame` objects from an 'h5' file.
+    Reads `pandas.DataFrame` objects from an 'h5' file (a pandas `hdf5` file).
 
     Parameters
     ----------
@@ -435,8 +449,8 @@ def read_H5_to_dataframe(filepath, key=None):
     return pd.read_hdf(filepath, key)
 
 
-def read_H5_to_dataframes(filepath, keys=None):
-    """Open an `h5` file and and return a dictionary of `pandas.DataFrame`
+def read_H5_to_dataframes(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
+    """Open an `h5` (pandas `hdf5`) file and and return an `OrderedDict` of `pandas.DataFrame` objects
 
     Parameters
     ----------
@@ -444,7 +458,7 @@ def read_H5_to_dataframes(filepath, keys=None):
         Path to input file
 
     keys : `list` or `None`
-        Which tables to read
+        A list of which tables to read.
 
     Returns
     -------
@@ -468,9 +482,9 @@ def read_H5_to_dataframes(filepath, keys=None):
 # II E Reading `pandas.DataFrame` from parquet file
 
 
-def read_pq_to_dataframe(filepath, columns=None, **kwargs):
+def read_pq_to_dataframe(filepath: str, columns: Optional[List[str]] = None, **kwargs):
     """
-    Reads a `pandas.DataFrame` object from an parquet file.
+    Reads a `pandas.DataFrame` object from a parquet file.
 
     Parameters
     ----------
@@ -479,6 +493,7 @@ def read_pq_to_dataframe(filepath, columns=None, **kwargs):
 
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
+
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
@@ -490,8 +505,12 @@ def read_pq_to_dataframe(filepath, columns=None, **kwargs):
 
 
 def read_pq_to_dataframes(
-    filepath, keys=None, allow_missing_keys=False, columns=None, **kwargs
-):
+    filepath: str,
+    keys: Optional[List[str]] = None,
+    allow_missing_keys: bool = False,
+    columns: Union[List[str], Mapping, None] = None,
+    **kwargs,
+) -> Mapping:
     """
     Reads `pandas.DataFrame` objects from an parquet file.
 
@@ -549,8 +568,10 @@ def read_pq_to_dataframes(
 # II F. Reading `OrderedDict` (`str`, `numpy.array`) from parquet file
 
 
-def read_pq_to_dict(filepath, columns=None, **kwargs):
-    """Open a parquet file and return a dictionary of `numpy.array`
+def read_pq_to_dict(
+    filepath: str, columns: Optional[List[str]] = None, **kwargs
+) -> Mapping:
+    """Open a parquet file and return an `OrderedDict` of `numpy.array` objects
 
     Parameters
     ----------
@@ -559,6 +580,7 @@ def read_pq_to_dict(filepath, columns=None, **kwargs):
 
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
+
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
@@ -575,8 +597,8 @@ def read_pq_to_dict(filepath, columns=None, **kwargs):
     )
 
 
-def read_H5_to_dict(filepath, groupname=None):
-    """Open an h5 file and and return a dictionary of `numpy.array`
+def read_H5_to_dict(filepath: str, groupname: Optional[str] = None) -> Mapping:
+    """Open an `h5` file and and return an `OrderedDict` of `numpy.array` objects.
 
     Parameters
     ----------
@@ -584,7 +606,7 @@ def read_H5_to_dict(filepath, groupname=None):
         Path to input file
 
     groupname : `str` or `None`
-        The group with the data
+        The name of the group with the data
 
     Returns
     -------
@@ -600,7 +622,7 @@ def read_H5_to_dict(filepath, groupname=None):
     return dataframe_to_dict(df)
 
 
-def read_HDF5_to_dict(filepath, groupname=None):
+def read_HDF5_to_dict(filepath: str, groupname: Optional[str] = None) -> Mapping:
     """Read in h5py hdf5 data, return a dictionary of all of the keys
 
     Parameters
