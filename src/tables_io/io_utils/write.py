@@ -34,8 +34,13 @@ from ..types import (
 # I. Top-level interface functions
 
 
-def write(obj, filepath, fmt=None):
-    """Write a file or files with tables
+def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
+    """Writes `Tablelike` or `TableDictlike` objects to a file or files. If the format (`fmt`) is given,
+    or the file has a suffix, the function will convert the given data to the associated tabular type,
+    and then write out the file as the requested type. If no file type is requested, the function will
+    use `write_native` to write the file to the default file type for the tabular type.
+
+    Note: This function will automatically overwrite any previously existing files at the given filepath.
 
     Parameters
     ----------
@@ -44,7 +49,13 @@ def write(obj, filepath, fmt=None):
     filepath : `str`
         File name for the file to write. If there's no suffix, it will be applied based on the object type.
     fmt : `str` or `None`
-        The output file format, If `None` this will use `write_native`
+        The output file format, If `None` and the file path provided does not have a suffix,
+        this will use `write_native` to write out the default file type for the given tabular type.
+
+    Returns
+    -------
+    filepath: `str` or None
+        Returns the path to the new file, or None if there was no data given.
     """
     if fmt is None:
         splitpath = os.path.splitext(filepath)
@@ -100,10 +111,14 @@ def write(obj, filepath, fmt=None):
     raise TypeError(f"Unsupported File type {fType}")  # pragma: no cover
 
 
-def write_native(odict, filepath: str):
-    """Writes a file or files with tables.
+def write_native(odict, filepath: str) -> Optional[str]:
+    """Writes `Tablelike` or `TableDictlike` objects to a file or files. The file type will be determined
+    by the default file type given the tabular format. The supported file types are:
+    [ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_PARQUET, PYARROW_PARQUET].
 
-    This function will delete any existing file at given filepath.
+    To write to a specific file format, use `write` instead.
+
+    Note: This function will automatically overwrite any previously existing files at the given filepath.
 
     Parameters
     ----------
@@ -111,6 +126,11 @@ def write_native(odict, filepath: str):
         The data to write
     filepath : `str`
         File name for the file to write. If there's no suffix, it will be applied based on the object type.
+
+    Returns
+    -------
+    filepath: `str` or None
+        Returns the path to the new file, or None if there was no data given.
     """
     istable = False
     if is_table_like(odict):
