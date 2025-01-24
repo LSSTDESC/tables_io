@@ -4,7 +4,7 @@ import os
 from collections import OrderedDict
 
 import numpy as np
-from typing_extensions import List, Mapping, Optional, Union
+from typing import List, Mapping, Optional, Union
 
 from ..utils.array_utils import force_to_pandables
 from ..convert.conv_tabledict import convert
@@ -46,7 +46,8 @@ def read(
     **kwargs,
 ):
     """Reads in a given file to either a `Tablelike` format if there is one table within the file,
-    or a `TableDictlike` format if there are multiple tables or files.
+    or a `TableDictlike` format if there are multiple tables or files. Uses `read_native` to read the file.
+
     The `TableDictlike` format is an `OrderedDict` of `Tablelike` objects. The `Tablelike` objects
     currently supported are: astropy Table, numpy recarray, `OrderedDict` of numpy arrays, pandas DataFrame,
     and pyarrow table.

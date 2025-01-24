@@ -2,6 +2,7 @@
 
 import os
 from collections import OrderedDict
+from typing import Mapping, Optional, Union, List
 
 import numpy as np
 
@@ -99,12 +100,14 @@ def write(obj, filepath, fmt=None):
     raise TypeError(f"Unsupported File type {fType}")  # pragma: no cover
 
 
-def write_native(odict, filepath):
-    """Write a file or files with tables
+def write_native(odict, filepath: str):
+    """Writes a file or files with tables.
+
+    This function will delete any existing file at given filepath.
 
     Parameters
     ----------
-    odict : `OrderedDict`, (`str`, `Tablelike`)
+    odict : `Tablelike` or `TableDictLike`
         The data to write
     filepath : `str`
         File name for the file to write. If there's no suffix, it will be applied based on the object type.
@@ -159,8 +162,16 @@ def write_native(odict, filepath):
 # II A. Writing HDF5 files
 
 
-def initialize_HDF5_write_single(filepath, groupname=None, comm=None, **kwds):
-    """Prepares an hdf5 file for output
+def initialize_HDF5_write_single(
+    filepath: str, groupname: Optional[str] = None, comm=None, **kwds
+):
+    """Prepares an HDF5 file for output, where the file will be have datasets in only one group.
+    The keywords (`**kwds`) argument(s) are required. They provide the data structure of the file.
+    The name of each keyword argument provides the name of the dataset, and the value of the argument should
+    be a dictionary with the dataset information (see below for details).
+
+    The function will run in series if no MPI communicator (`comm`) is provided. To write the file
+    in parallel, the MPI communicator argument is required.
 
     Parameters
     ----------
@@ -168,6 +179,15 @@ def initialize_HDF5_write_single(filepath, groupname=None, comm=None, **kwds):
         The output file name
     groupname : `str` or `None`
         The output group name
+    comm: `communicator`
+        MPI communicator to do parallel writing
+    **kwds: one or more dictionaries
+        Each keyword should provide a tuple of ( (shape), (dtype) )
+
+        shape : `tuple` ( `int` )
+            The shape of the data for this dataset
+        dtype : `str`
+            The data type for this dataset
 
     Returns
     -------
@@ -176,19 +196,22 @@ def initialize_HDF5_write_single(filepath, groupname=None, comm=None, **kwds):
     fout : `h5py.File`
         The output file
 
-    Notes
-    -----
-    The keywords should be used to create_datasets within the hdf5 file.
-    Each keyword should provide a tuple of ( (shape), (dtype) )
+    Example
+    -------
 
-    shape : `tuple` ( `int` )
-        The shape of the data for this dataset
-    dtype : `str`
-        The data type for this dataset
+    To initialize an HDF5 file with two datasets with different shapes:
+    .. code-block:: python
+        from tables_io import hdf5
+        data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4')
+        group, fout = hdf5.initialize_HDF5_write_single('test.hdf5',data=data)``
 
-    For example
-    ``initializeHdf5WriteSingle('test.hdf5', data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))``
-    Would initialize an hdf5 file with two datasets, with shapes and data types as given
+    To do the same in parallel with MPI using `mpi4py`:
+    .. code-block:: python
+        from tables_io import hdf5
+        from mpi4py import MPI
+        data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4')
+        groups, fout = hdf5.intialize_HDF5_write_single('test.hdf5',comm=MPI.COMM_WORLD, data=data)
+
 
     """
     outdir = os.path.dirname(os.path.abspath(filepath))
@@ -211,8 +234,14 @@ def initialize_HDF5_write_single(filepath, groupname=None, comm=None, **kwds):
     return group, outf
 
 
-def initialize_HDF5_write(filepath, comm=None, **kwds):
-    """Prepares an hdf5 file for output
+def initialize_HDF5_write(filepath: str, comm=None, **kwds):
+    """Prepares an HDF5 file for output, where the file will be split up into one or more groups.
+    The keywords (`**kwds`) argument(s) are required. They provide the data structure of the file.
+    The name of each keyword argument provides the group name, and the value of the argument should
+    be a dictionary with dataset name and information (see below for details).
+
+    The function will run in series if no MPI communicator (`comm`) is provided. To write the file
+    in parallel, the MPI communicator argument is required.
 
     Parameters
     ----------
@@ -220,33 +249,46 @@ def initialize_HDF5_write(filepath, comm=None, **kwds):
         The output file name
     comm: `communicator`
         MPI communicator to do parallel writing
+    kwds: one or more `dict` arguments
+        Each keyword should provide a dictionary with the group name and data set information
+        of the form:
+        ``group = {'data1' : ( (shape1), (dtype1) ), 'data2' : ( (shape2), (dtype2) )}``
+
+        group : `str`
+            Name of the Hdf5 group
+        data  : `str`
+            Name of the column to be written
+        shape : `tuple` ( `int` )
+            The shape of the data for this dataset
+        dtype : `str`
+            The data type for this dataset
 
     Returns
     -------
-    group : `h5py.File` or `h5py.Group`
-        The group to write to
+    group : `dict` of `h5py.File` or `h5py.Group`
+        A dictionary of the groups to write to
     fout : `h5py.File`
         The output file
 
-    Notes
-    -----
-    The keywords should be used to create groups within the hdf5 file.
-    Each keyword should provide a dictionary with the data set information of the form:
-    ``group = {'data1' : ( (shape1), (dtype1) ), 'data2' : ( (shape2), (dtype2) )}``
 
-    group : `str`
-        Name of the Hdf5 group
-    data  : `str`
-        Name of the column to be written
-    shape : `tuple` ( `int` )
-        The shape of the data for this dataset
-    dtype : `str`
-        The data type for this dataset
+    Example
+    -------
 
-    For example
-    ``initializeHdf5Write('test.hdf5', data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4'))``
+    To initialize an HDF5 file with two groups named `group1` and `group2`:
+    .. code-block:: python
+        from tables_io import hdf5
+        group1 = {'data1' : ((10,), 'f8'), 'data2': ((50,2), 'f8')}
+        group2 = {'data3': ((20,20), 'f8)}
+        groups, fout = hdf5.intializeHdf5Write('test.hdf5', group1=group1, group2=group2)
 
-    Would initialize an hdf5 file with one group and two datasets, with shapes and data types as given
+
+    To do the same in parallel with MPI using `mpi4py`:
+    .. code-block:: python
+        from tables_io import hdf5
+        from mpi4py import MPI
+        group1 = {'data1' : ((10,), 'f8'), 'data2': ((50,2), 'f8')}
+        group2 = {'data3': ((20,20), 'f8)}
+        groups, fout = hdf5.intialize_HDF5_write('test.hdf5',comm=MPI.COMM_WORLD, group1=group1, group2=group2)
     """
     outdir = os.path.dirname(os.path.abspath(filepath))
     if not os.path.exists(outdir):  # pragma: no cover
@@ -268,8 +310,8 @@ def initialize_HDF5_write(filepath, comm=None, **kwds):
     return groups, outf
 
 
-def write_dict_to_HDF5_chunk_single(fout, odict, start, end, **kwds):
-    """Writes a data chunk to an hdf5 file
+def write_dict_to_HDF5_chunk_single(fout, odict: Mapping, start: int, end: int, **kwds):
+    """Writes a data chunk from a `Tablelike` object to an hdf5 file
 
     Parameters
     ----------
@@ -288,7 +330,7 @@ def write_dict_to_HDF5_chunk_single(fout, odict, start, end, **kwds):
     Notes
     -----
     The kwds can be used to control the output locations, i.e., to
-    rename the columns in data_dict when they good into the output file.
+    rename the columns in data_dict when they go into the output file.
 
     For each item in data_dict, the output location is set as
 
@@ -304,15 +346,15 @@ def write_dict_to_HDF5_chunk_single(fout, odict, start, end, **kwds):
         fout[k_out][start:end] = val
 
 
-def write_dict_to_HDF5_chunk(groups, odict, start, end, **kwds):
-    """Writes a data chunk to an hdf5 file
+def write_dict_to_HDF5_chunk(groups, odict: Mapping, start: int, end: int, **kwds):
+    """Writes a data chunk from an `OrderedDict` or `TableDictlike` object to an hdf5 file in groups.
 
     Parameters
     ----------
-    fout : `h5py.File`
-        The file
+    groups : `h5py.Group`
+        The h5py groups or file object (which is also a group object)
 
-    odict : `OrderedDict`, (`str`, `numpy.array`)
+    odict : `OrderedDict`, (`str`, `OrderedDict`(`str`, `numpy.array`))
         The data being written
 
     start : `int`
@@ -324,7 +366,7 @@ def write_dict_to_HDF5_chunk(groups, odict, start, end, **kwds):
     Notes
     -----
     The kwds can be used to control the output locations, i.e., to
-    rename the columns in data_dict when they good into the output file.
+    rename the columns in data_dict when they go into the output file.
 
     For each item in data_dict, the output location is set as
 
@@ -341,13 +383,18 @@ def write_dict_to_HDF5_chunk(groups, odict, start, end, **kwds):
             group[k_out][start:end] = val
 
 
-def finalize_HDF5_write(fout, groupname=None, **kwds):
-    """Write any last data and closes an hdf5 file
+def finalize_HDF5_write(fout, groupname: Optional[str] = None, **kwds):
+    """Write any last data and closes an hdf5 file. If `groupname` is given,
+    will create a group with that name before writing the data. If not,
+    no new group will be created.
 
     Parameters
     ----------
     fout : `h5py.File`
         The file
+
+    groupname: None or `str`
+        The name to give the group. If None, no group will be created.
 
     Notes
     -----
@@ -365,7 +412,7 @@ def finalize_HDF5_write(fout, groupname=None, **kwds):
 # II B. Writing `astropy.table.Table`
 
 
-def write_ap_tables_to_fits(tables, filepath, **kwargs):
+def write_ap_tables_to_fits(tables: Mapping, filepath: str, **kwargs):
     """
     Writes a dictionary of `astropy.table.Table` to a single FITS file
 
@@ -387,7 +434,7 @@ def write_ap_tables_to_fits(tables, filepath, **kwargs):
     hdu_list.writeto(filepath, **kwargs)
 
 
-def write_ap_tables_to_HDF5(tables, filepath, **kwargs):
+def write_ap_tables_to_HDF5(tables: Mapping, filepath: str, **kwargs):
     """
     Writes a dictionary of `astropy.table.Table` to a single hdf5 file
 
@@ -408,7 +455,7 @@ def write_ap_tables_to_HDF5(tables, filepath, **kwargs):
 # II C. Writing `numpy.recarray`
 
 
-def write_recarrays_to_fits(recarrays, filepath, **kwargs):
+def write_recarrays_to_fits(recarrays: Mapping, filepath: str, **kwargs):
     """
     Writes a dictionary of `np.recarray` to a single FITS file
 
@@ -419,6 +466,7 @@ def write_recarrays_to_fits(recarrays, filepath, **kwargs):
 
     filepath: `str`
         Path to output file
+
     kwargs:
         kwargs are passed to `astropy.io.fits.writeto` call.
     """
@@ -434,7 +482,9 @@ def write_recarrays_to_fits(recarrays, filepath, **kwargs):
 # II D. Writing `OrderedDict`, (`str`, `numpy.array`) to `hdf5`
 
 
-def write_dict_to_HDF5(odict, filepath, groupname, **kwargs):
+def write_dict_to_HDF5(
+    odict: Mapping, filepath: str, groupname: Optional[str], **kwargs
+):
     """
     Writes a dictionary of `numpy.array` or `jaxlib.xla_extension.DeviceArray`
     to a single hdf5 file
@@ -476,9 +526,11 @@ def write_dict_to_HDF5(odict, filepath, groupname, **kwargs):
     fout.close()
 
 
-def write_dicts_to_HDF5(odicts, filepath):
+def write_dicts_to_HDF5(odicts: Mapping, filepath: str):
     """
-    Writes a dictionary of `numpy.array` to a single hdf5 file
+    Writes a `TableDictlike` object, a `OrderedDict` of dictionaries of `numpy.array`, to a single hdf5 file.
+
+    Note: This will remove any previously existing files at the filepath.
 
     Parameters
     ----------
@@ -499,7 +551,7 @@ def write_dicts_to_HDF5(odicts, filepath):
 # II E. Writing `pandas.DataFrame`
 
 
-def write_dataframes_to_HDF5(dataFrames, filepath):
+def write_dataframes_to_HDF5(dataFrames: Mapping, filepath: str):
     """
     Writes a dictionary of `pandas.DataFrame` to a single hdf5 file
 
@@ -515,9 +567,9 @@ def write_dataframes_to_HDF5(dataFrames, filepath):
         val.to_hdf(filepath, key)
 
 
-def write_dataframes_to_pq(dataFrames, filepath, **kwargs):
+def write_dataframes_to_pq(dataFrames: Mapping, filepath: str, **kwargs):
     """
-    Writes a dictionary of `pandas.DataFrame` to a parquet files
+    Writes a dictionary of `pandas.DataFrame` to parquet files
 
     Parameters
     ----------
@@ -538,7 +590,7 @@ def write_dataframes_to_pq(dataFrames, filepath, **kwargs):
 # II F. Writing pyarrow table(s)
 
 
-def write_table_to_HDF5(table, filepath, key):
+def write_table_to_HDF5(table, filepath: str, key: str):
     """
     Writes a `pyarrow.Table` to a single hdf5 file
 
@@ -556,7 +608,7 @@ def write_table_to_HDF5(table, filepath, key):
     write_dict_to_HDF5(table.to_pydict(), filepath, key)
 
 
-def write_tables_to_HDF5(tables, filepath):
+def write_tables_to_HDF5(tables: Mapping, filepath: str):
     """
     Writes a dictionary of `pyarrow.Table` to a single hdf5 file
 
@@ -572,9 +624,10 @@ def write_tables_to_HDF5(tables, filepath):
         write_table_to_HDF5(val, filepath, key)
 
 
-def write_tables_to_pq(tables, filepath, **kwargs):
+def write_tables_to_pq(tables: Mapping, filepath: str, **kwargs):
     """
-    Writes a dictionary of `pyarrow.Table` to a parquet files
+    Writes a dictionary of `pyarrow.Table` to parquet files. If no extension is
+    given in the base path, it will be written as a `.parq` file.
 
     Parameters
     ----------
