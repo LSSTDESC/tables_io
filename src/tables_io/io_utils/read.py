@@ -37,27 +37,59 @@ from ..types import (
 # I. Top-level interface functions
 
 
-def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False, **kwargs):
-    """Read a file to the corresponding table type
+def read(
+    filepath: str,
+    tType: Optional[int] = None,
+    fmt: Optional[str] = None,
+    keys: Optional[List[str]] = None,
+    allow_missing_keys: bool = False,
+    **kwargs,
+):
+    """Reads in a given file to either a `Tablelike` format if there is one table within the file,
+    or a `TableDictlike` format if there are multiple tables or files.
+    The `TableDictlike` format is an `OrderedDict` of `Tablelike` objects. The `Tablelike` objects
+    currently supported are: astropy Table, numpy recarray, `OrderedDict` of numpy arrays, pandas DataFrame,
+    and pyarrow table.
+
+    If given just the filepath, the function will read any tables in the file to its default `Tablelike`
+    format in memory. If given a specific tabular type, the function will read in the file to the default
+    type and then convert to the requested type.
+
+    The `keys` argument is required when reading in multi-dataset parquet files, to specify which
+    dataset files to read in. Otherwise, the only required argument is the filepath.
+
 
     Parameters
     ----------
     filepath : `str`
-        File to load
+        Full path to the file to load
     tType : `int` or `None`
-        Table type, if `None` this will use `readNative`
+        Table type, if `None` the default table type will be used. List table types?
     fmt : `str` or `None`
-        File format, if `None` it will be taken from the file extension
+        File format, if `None` it will be taken from the file extension. List file extensions?
     keys : `list` or `None`
-        For parquet files we must specify which keys to read, as each is in its own file
-    allow_missing_keys : `bool`
-        If False will raise FileNotFoundError if a key is missing
+        This argument is required for reading multiple associated parquet files.
+        The keys should be the unique identifiers for each dataset or file.
+    allow_missing_keys : `bool`, by default False
+        If False will raise FileNotFoundError if a key is missing from the given file.
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
     -------
     data : `OrderedDict` ( `str` -> `Tablelike` )
         The data
+
+    Example
+    -------
+    # single Tablelike object
+    import tables_io
+    tab = tables_io.read('filename.h5') # reads in as pandas dataframe
+    tab.info()
+
+    a_tab = tables_io.read('filename.h5',tType='astropyTable') # reads in as astropy table
+    a_tab.info
+
+    # TableDictlike object
 
     """
     odict = read_native(
@@ -73,25 +105,50 @@ def read(filepath, tType=None, fmt=None, keys=None, allow_missing_keys=False, **
     return convert(odict, tType)
 
 
-def read_native(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwargs):
-    """Read a file to the corresponding table type
+def read_native(
+    filepath: str,
+    fmt: Optional[str] = None,
+    keys: Optional[List[str]] = None,
+    allow_missing_keys: bool = False,
+    **kwargs,
+):
+    """Reads in a file to its corresponding default tabular format.
+
+    The format of the file is either given by `fmt`, or determined based on the `suffix` of
+    the file path. This determines what tabular format the file is read in as. In all cases,
+    the data from the file is returned as an `OrderedDict` or `TableDict-like` object, with
+    `str` keys and `Tablelike` values. The `Tablelike` values can either be astropy Tables,
+    numpy recarrays, an `OrderedDict` of numpy arrays, a pandas dataframe, or a pyarrow table.
+
+    List available file formats?
 
     Parameters
     ----------
     filepath : `str`
-        File to load
+        Full path of the file to load
     fmt : `str` or `None`
-        File format, if `None` it will be taken from the file extension
+        File format, if `None` it will be taken from the file extension.
     keys : `list` or `None`
-        For parquet files we must specify with keys to read, as each is in its own file
-    allow_missing_keys : `bool`
-        If False will raise FileNotFoundError if a key is missing
+        This argument is required for reading multiple associated parquet files.
+        The keys should be the unique identifiers for each dataset or file.
+    allow_missing_keys : `bool`, by default False.
+        If False will raise FileNotFoundError if a key is missing from the given file.
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
     -------
     data : `OrderedDict` ( `str` -> `Tablelike` )
         The data
+
+    Example
+    -------
+
+    import tables_io
+    # this is numpy hdf5 file format, fmt = 'hdf5'
+    tab = tables_io.read_native('filename.hdf5')
+    tab.keys() = ['table_1','table_2']
+    # reads in each table as an `OrderedDict` of numpy arrays
+    tab['table_1'] = {'col1': [array], 'col2': [array] ...}
 
     """
     fType = file_type(filepath, fmt)
@@ -114,19 +171,36 @@ def read_native(filepath, fmt=None, keys=None, allow_missing_keys=False, **kwarg
     raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
 
 
-def io_open(filepath, fmt=None, **kwargs):
-    """Open a file
+def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
+    """Returns the file object. This allows you to
+    open large files without reading the whole file into memory.
+
+    It opens the file object with different packages depending on the file type. It uses
+    astropy to open FITS files (astropy.io.fits.open()), h5py for any HDF5 files (h5py.File()), or
+    pyarrow parquet for any parquet files (pyarrow.parquet.ParquetFile()). You can specify which
+    file type you are supplying via the `fmt` argument, or it will automatically determine the file type
+    from its suffix.
+
+    If the given file is not one of the supported types, it will raise a TypeError.
+
 
     Parameters
     ----------
     filepath : `str`
-        File to load
+        The path to the file to load.
     fmt : `str` or `None`
-        File format, if `None` it will be taken from the file extension
+        The file format, if `None` it will be taken from the file extension. (either list options or give example)
 
     Returns
     -------
-    file
+    File object. One of `pyarrow.parquet.ParquetFile`, `h5py.File` or `astropy.io.fits.HDUList`.
+
+    Example:
+    --------
+    import tables_io
+    hdul = tables_io.io_open("./data/test.fits", "fits") # reads in using astropy.io.fits.open
+    hdul.info()
+
     """
     fType = file_type(filepath, fmt)
     if fType in [ASTROPY_FITS, NUMPY_FITS]:
@@ -140,7 +214,11 @@ def io_open(filepath, fmt=None, **kwargs):
 
 
 def check_columns(
-    filepath, columns_to_check, fmt=None, parent_groupname=None, **kwargs
+    filepath: str,
+    columns_to_check: List[str],
+    fmt: Optional[str] = None,
+    parent_groupname: Optional[str] = None,
+    **kwargs,
 ):
     """Read the file column names from file and ensure that it contains at least
     the columns specified in a provided list. If not, an error will be raised.
@@ -681,7 +759,7 @@ def read_HDF5_to_dict(filepath: str, groupname: Optional[str] = None) -> Mapping
 # II G. Reading `pyarrow.Table` from HDF5 file
 
 
-def read_HDF5_to_table(filepath, key=None):
+def read_HDF5_to_table(filepath: str, key: Optional[str] = None):
     """
     Reads `pyarrow.Table` objects from an hdf5 file.
 
@@ -706,8 +784,8 @@ def read_HDF5_to_table(filepath, key=None):
     return pa.Table.from_pydict(t_dict)
 
 
-def read_HDF5_to_tables(filepath, keys=None):
-    """Open an h5 file and and return a dictionary of `pyarrow.Table`
+def read_HDF5_to_tables(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
+    """Open an `h5` (pandas `hdf5`) file and and return an `OrderedDict` of `pyarrow.Table`
 
     Parameters
     ----------
@@ -735,7 +813,7 @@ def read_HDF5_to_tables(filepath, keys=None):
 # II H. Reading `pyarrow.Table` from parquet file
 
 
-def read_pq_to_table(filepath, **kwargs):
+def read_pq_to_table(filepath: str, columns: Optional[List[str]] = None, **kwargs):
     """
     Reads a `pyarrow.Table` object from an parquet file.
 
@@ -746,6 +824,7 @@ def read_pq_to_table(filepath, **kwargs):
 
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
+
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
@@ -753,14 +832,18 @@ def read_pq_to_table(filepath, **kwargs):
     table : `pyarrow.Table`
         The table
     """
-    return pq.read_table(filepath, **kwargs)
+    return pq.read_table(filepath, columns=columns, **kwargs)
 
 
 def read_pq_to_tables(
-    filepath, keys=None, allow_missing_keys=False, columns=None, **kwargs
-):
+    filepath: str,
+    keys: Optional[List[str]] = None,
+    allow_missing_keys: bool = False,
+    columns: Union[List[str], Mapping, None] = None,
+    **kwargs,
+) -> Mapping:
     """
-    Reads `pyarrow.Table` objects from an parquet file.
+    Reads `pyarrow.Table` objects from a parquet file into an `OrderedDict`.
 
     Parameters
     ----------
@@ -771,7 +854,7 @@ def read_pq_to_tables(
         Keys for the input objects.  Used to complete filepaths
 
     allow_missing_keys: `bool`
-        If False will raise FileNotFoundError if a key is missing
+        If False will raise FileNotFoundError if a key is missing. By default False.
 
     columns : `dict` of `list (str)`, `list` (`str`), or `None`
         Names of the columns to read.
