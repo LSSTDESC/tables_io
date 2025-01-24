@@ -56,6 +56,17 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
     -------
     filepath: `str` or None
         Returns the path to the new file, or None if there was no data given.
+
+    Example
+    -------
+
+    .. code-block:: python
+        import tables_io
+        import pandas as pd
+        tab = pd.DataFrame({'col1': [2,4,6], 'col2': [5,7,9]})
+        tables_io.write(tab, 'data','h5') # tells the function to write it to PANDAS_HDF5
+        #outputs filepath with suffix 'h5' added
+        tables_io.write(tab, 'data.h5') # does the same thing as the line above
     """
     if fmt is None:
         splitpath = os.path.splitext(filepath)
@@ -131,6 +142,17 @@ def write_native(odict, filepath: str) -> Optional[str]:
     -------
     filepath: `str` or None
         Returns the path to the new file, or None if there was no data given.
+
+    Example
+    -------
+
+    .. code-block:: python
+        import tables_io
+        from astropy.table import Table
+        tab = Table([[1,3,5],[10,8,6]], names=('c1','c2'))
+        tables_io.write(tab, 'data') # writes the file to ASTROPY_HDF5 by default
+        #outputs filepath with the suffix added ('hf5')
+
     """
     istable = False
     if is_table_like(odict):
