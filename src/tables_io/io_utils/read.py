@@ -82,6 +82,7 @@ def read(
 
     Example
     -------
+    ```
     # single Tablelike object
     import tables_io
     tab = tables_io.read('filename.h5') # reads in as pandas dataframe
@@ -91,7 +92,7 @@ def read(
     a_tab.info
 
     # TableDictlike object
-
+    ```
     """
     odict = read_native(
         filepath, fmt, keys, allow_missing_keys, **kwargs
@@ -143,13 +144,14 @@ def read_native(
 
     Example
     -------
-
+    ```
     import tables_io
     # this is numpy hdf5 file format, fmt = 'hdf5'
     tab = tables_io.read_native('filename.hdf5')
     tab.keys() = ['table_1','table_2']
     # reads in each table as an `OrderedDict` of numpy arrays
     tab['table_1'] = {'col1': [array], 'col2': [array] ...}
+    ```
 
     """
     fType = file_type(filepath, fmt)
@@ -198,10 +200,11 @@ def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
 
     Example:
     --------
+    ```
     import tables_io
     hdul = tables_io.io_open("./data/test.fits", "fits") # reads in using astropy.io.fits.open
     hdul.info()
-
+    ```
     """
     fType = file_type(filepath, fmt)
     if fType in [ASTROPY_FITS, NUMPY_FITS]:
