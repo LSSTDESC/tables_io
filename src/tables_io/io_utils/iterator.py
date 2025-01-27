@@ -39,12 +39,24 @@ from ..types import (
 
 
 def iterator(
-    filepath: str, tType: Optional[int] = None, fmt: Optional[str] = None, **kwargs
+    filepath: str,
+    tType: Optional[int] = None,
+    fmt: Optional[str] = None,
+    chunk_size: Optional[int] = 100_000,
+    rank: Optional[int] = 0,
+    parallel_size: Optional[int] = 1,
+    **kwargs,
 ):
-    """Iterates through the data in a given file. The default maximum chunk size of the data is
-    100 000. The data is yielded (along with the start and stop index)
-    as a `Tablelike` object. If no `tType` is given, the tabular format will be the default for that file
-    type. If `tType` is given, the tabular format will be converted to that table type.
+    """Iterates through the data in a given file. The data is yielded (along with
+    the start and stop index) as a `Tablelike` object. If no `tType` is given,
+    the tabular format will be the default for that file type. If `tType` is given,
+    the tabular format will be converted to that table type.
+
+    For a given file type, there are additional arguments that can be supplied to
+    the native file reader. The main arguments that are needed are `groupname` for
+    HDF5 files, and `columns` for parquet files. Other arguments for reading parquet
+    files can be found in the documentation of `pyarrow.parquet.read_table` or
+    `pyarrow.dataset.dataset`.
 
     Parameters
     ----------
@@ -54,8 +66,20 @@ def iterator(
         Table type, if `None` this will use `readNative`
     fmt : `str` or `None`
         File format, if `None` it will be taken from the file extension
+    chunk_size: int
+        The size of data chunk to iterate over, by default 100 000
+    rank: int
+        The rank of this process under MPI, by default 0
+    parallel_size: int
+        The number of processes under MPI, by default 1
+
+    Optional **kwargs
+    -----------------
     groupname : `str` or `None`
-        For hdf5 files, the groupname for the data
+        For HDF5 files, the group name where the data is
+    columns : `str` or `None`
+        For parquet files, the names of the columns to read.
+        `None` will read all the columns
 
     Returns
     -------
@@ -68,11 +92,20 @@ def iterator(
         if no `tType` is given. Otherwise, the data will be in the tabular format `tType`.
 
     """
-    for start, stop, data in iterator_native(filepath, fmt, **kwargs):
+    for start, stop, data in iterator_native(
+        filepath, fmt, chunk_size, rank, parallel_size, **kwargs
+    ):
         yield start, stop, convert(data, tType)
 
 
-def iterator_native(filepath: str, fmt: Optional[str] = None, **kwargs):
+def iterator_native(
+    filepath: str,
+    fmt: Optional[str] = None,
+    chunk_size: Optional[int] = 100_000,
+    rank: Optional[int] = 0,
+    parallel_size: Optional[int] = 1,
+    **kwargs,
+):
     """Read a file to the corresponding table type and iterate over the file
 
     Parameters
@@ -81,6 +114,12 @@ def iterator_native(filepath: str, fmt: Optional[str] = None, **kwargs):
         File to load
     fmt : `str` or `None`
         File format, if `None` it will be taken from the file extension. By default `None`.
+    chunk_size: int
+        The size of data chunk to iterate over, by default 100 000
+    rank: int
+        The rank of this process under MPI, by default 0
+    parallel_size: int
+        The number of processes under MPI, by default 1
 
     Returns
     -------
@@ -103,7 +142,13 @@ def iterator_native(filepath: str, fmt: Optional[str] = None, **kwargs):
 
     try:
         theFunc = funcDict[fType]
-        return theFunc(filepath, **kwargs)
+        return theFunc(
+            filepath,
+            chunk_size=chunk_size,
+            rank=rank,
+            parallel_size=parallel_size,
+            **kwargs,
+        )
     except KeyError as msg:
         raise NotImplementedError(
             f"Unsupported FileType for iterateNative {fType}"
@@ -163,13 +208,14 @@ def get_input_data_length_HDF5(filepath: str, groupname: Optional[str] = None) -
         The input filepath.
 
     groupname : `str` or `None`
-        The groupname for the data, by default None.
+        The group name where the data is, by default None.
 
 
     Returns
     -------
     length : `int`
-        The length of the data. In the case of a multi-dimensional array, this is the length of the first axis.
+        The length of the data. In the case of a multi-dimensional array,
+        this is the length of the first axis.
 
     Notes
     -----
@@ -186,24 +232,27 @@ def get_input_data_length_HDF5(filepath: str, groupname: Optional[str] = None) -
 
 def iter_HDF5_to_dict(
     filepath: str,
-    chunk_size: int = 100_000,
     groupname: Optional[str] = None,
+    chunk_size: int = 100_000,
     rank: int = 0,
     parallel_size: int = 1,
 ) -> Iterator[int, int, Mapping]:
     """
-    Iterates through an `HDF5` file, yielding one chunk of data at a time.
+    Iterates through an `HDF5` file, yielding one chunk of data at a time
+    as an `OrderedDict` of `np.array` objects.
 
     Parameters
     ----------
     filepath: str
         The input filepath
+    groupname: str
+        The group name where the data is, by default None.
     chunk_size: int
-        The size of data chunk to iterate over
+        The size of data chunk to iterate over, by default 100 000
     rank: int
-        The rank of this process under MPI
+        The rank of this process under MPI, by default 0
     parallel_size: int
-        The number of processes under MPI
+        The number of processes under MPI, by default 1
 
     Yields
     -------
@@ -230,7 +279,13 @@ def iter_HDF5_to_dict(
     infp.close()
 
 
-def iter_HDF5_to_dataframe(filepath, chunk_size=100_000, groupname=None):
+def iter_HDF5_to_dataframe(
+    filepath: str,
+    chunk_size: Optional[int] = 100_000,
+    groupname=None,
+    rank: Optional[int] = 0,
+    parallel_size: Optional[int] = 1,
+):
     """
     iterator for sending chunks of data in hdf5.
 
@@ -279,14 +334,14 @@ def iter_pq_to_dataframe(
     ----------
     filepath: str
         path to input file
-    chunk_size: int, by default = 100_000
-        The maximum chunk size of the data
+    chunk_size: int
+        The maximum chunk size of the data, by default = 100_000
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
     rank: int
-        The rank of this process under MPI
+        The rank of this process under MPI, by default 0
     parallel_size: int
-        The number of processes under MPI
+        The number of processes under MPI, by default 1
     **kwargs : additional arguments to pass to the parquet read_table function
 
     Yields
@@ -378,7 +433,7 @@ def iter_ds_to_table(source, columns: Optional[List[str]] = None, **kwargs):
     """
     start = 0
     end = 0
-    dataset = ds.dataset(source)
+    dataset = ds.dataset(source, **kwargs)
 
     for batch in dataset.to_batches(columns=columns):
         data = pa.Table.from_pydict(batch.to_pydict())
@@ -415,7 +470,7 @@ def get_input_data_length_ds(source, **kwargs) -> int:
 def split_tasks_by_rank(
     tasks: Iterable[int], parallel_size: int, rank: int
 ) -> Iterator[int]:
-    """Iterate through a list of items, yielding ones this process is responsible for.
+    """Iterate through a list of tasks, yielding ones this process is responsible for.
 
     Tasks are allocated in a round-robin way.
 
