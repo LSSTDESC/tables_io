@@ -27,6 +27,7 @@ from ..types import (
     PYARROW_HDF5,
     PYARROW_PARQUET,
     PD_DATAFRAME,
+    TABULAR_FORMAT_NAMES,
     file_type,
     is_tabledict_like,
     is_table_like,
@@ -39,7 +40,7 @@ from ..types import (
 
 def read(
     filepath: str,
-    tType: Optional[int] = None,
+    tType: Union[int, str, None] = None,
     fmt: Optional[str] = None,
     keys: Optional[List[str]] = None,
     allow_missing_keys: bool = False,
@@ -64,7 +65,7 @@ def read(
     ----------
     filepath : `str`
         Full path to the file to load
-    tType : `int` or `None`
+    tType : `int`, `str` or `None`
         Table type, if `None` the default table type will be used. List table types?
     fmt : `str` or `None`
         File format, if `None` it will be taken from the file extension. List file extensions?
@@ -85,13 +86,11 @@ def read(
     ```
     # single Tablelike object
     import tables_io
-    tab = tables_io.read('filename.h5') # reads in as pandas dataframe
+    tab = tables_io.read('filename.h5') # reads in as default, which is pandas DataFrame
     tab.info()
 
-    a_tab = tables_io.read('filename.h5',tType='astropyTable') # reads in as astropy table
-    a_tab.info
-
     # TableDictlike object
+    table_dict = tables_io.read('filename.hdf5', tType='astropyTable') # reads in as an OrderedDict of astropy tables
     ```
     """
     odict = read_native(
@@ -104,6 +103,7 @@ def read(
             odict = odict[single_dict_key]
     if tType is None:  # pragma: no cover
         return odict
+
     return convert(odict, tType)
 
 

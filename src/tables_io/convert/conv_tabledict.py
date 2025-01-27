@@ -21,6 +21,8 @@ from ..types import (
     NUMPY_RECARRAY,
     PD_DATAFRAME,
     PA_TABLE,
+    TABULAR_FORMAT_NAMES,
+    TABULAR_FORMATS,
     is_table_like,
     table_type,
 )
@@ -55,10 +57,23 @@ def convert(obj, tType):
         PA_TABLE: convert_to_pa_tables,
         PD_DATAFRAME: convert_to_dataframes,
     }
+
+    if isinstance(tType, str):
+        try:
+            int_tType = TABULAR_FORMAT_NAMES[tType]
+        except:
+            raise TypeError(
+                f"Unsupported tableType '{tType}', must be one of {TABULAR_FORMAT_NAMES.keys()}"
+            )
+    if isinstance(tType, int):
+        int_tType = tType
+
     try:
-        theFunc = funcMap[tType]
+        theFunc = funcMap[int_tType]
     except KeyError as msg:  # pragma: no cover
-        raise KeyError(f"Unsupported type {tType}") from msg
+        raise KeyError(
+            f"Unsupported tabular type {int_tType} ({TABULAR_FORMATS[int_tType]}, must be one of {TABULAR_FORMAT_NAMES.keys()})"
+        ) from msg
     return theFunc(obj)
 
 

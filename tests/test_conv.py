@@ -58,3 +58,13 @@ def test_type_conversion(data_tables, data_table, tType1, tType2):
     t1 = convertObj(data_table, tType1)
     t2 = convertObj(t1, tType2)
     _ = convertObj(t2, types.AP_TABLE)
+
+
+def test_conversion_strings(data_tables, data_table):
+    tType = types.TABULAR_FORMATS[2]
+    odict_1 = convert(data_tables, tType)
+    odict_2 = convert(data_tables, types.PD_DATAFRAME)
+
+    tab = convert(data_table, tType)
+
+    assert compare_table_dicts(odict_1, data_tables)

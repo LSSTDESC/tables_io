@@ -28,6 +28,7 @@ from ..types import (
     PYARROW_HDF5,
     PYARROW_PARQUET,
     PD_DATAFRAME,
+    TABULAR_FORMAT_NAMES,
     file_type,
     is_tabledict_like,
     is_table_like,
@@ -92,10 +93,20 @@ def iterator(
         if no `tType` is given. Otherwise, the data will be in the tabular format `tType`.
 
     """
+    if isinstance(tType, str):
+        try:
+            int_tType = TABULAR_FORMAT_NAMES[tType]
+        except:
+            raise TypeError(
+                f"Unsupported tableType '{tType}', must be one of {TABULAR_FORMAT_NAMES.keys()}"
+            )
+    if isinstance(tType, int):
+        int_tType = tType
+
     for start, stop, data in iterator_native(
         filepath, fmt, chunk_size, rank, parallel_size, **kwargs
     ):
-        yield start, stop, convert(data, tType)
+        yield start, stop, convert(data, int_tType)
 
 
 def iterator_native(

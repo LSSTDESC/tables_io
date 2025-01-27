@@ -1,6 +1,7 @@
 """Single-table Conversion Functions for tables_io"""
 
 from collections import OrderedDict
+from typing import Union
 
 import numpy as np
 
@@ -13,6 +14,7 @@ from ..types import (
     PD_DATAFRAME,
     PA_TABLE,
     TABULAR_FORMAT_NAMES,
+    TABULAR_FORMATS,
     is_table_like,
     table_type,
 )
@@ -22,7 +24,7 @@ from ..types import (
 # I A. Generic `convert`
 
 
-def convert_obj(obj, tType):
+def convert_obj(obj, tType: Union[str, int]):
     """
     Convert an object to a specific type of `Tablelike`
 
@@ -38,17 +40,30 @@ def convert_obj(obj, tType):
     out :  `Tablelike`
         The converted object
     """
-    if tType == AP_TABLE:
+
+    if isinstance(tType, str):
+        try:
+            int_tType = TABULAR_FORMAT_NAMES[tType]
+        except:
+            raise TypeError(
+                f"Unsupported tableType '{tType}', must be one of {TABULAR_FORMAT_NAMES.keys()}"
+            )
+    if isinstance(tType, int):
+        int_tType = tType
+
+    if int_tType == AP_TABLE:
         return convert_to_ap_table(obj)
-    if tType == NUMPY_DICT:
+    if int_tType == NUMPY_DICT:
         return convert_to_dict(obj)
-    if tType == NUMPY_RECARRAY:
+    if int_tType == NUMPY_RECARRAY:
         return convert_to_recarray(obj)
-    if tType == PA_TABLE:
+    if int_tType == PA_TABLE:
         return convert_to_pa_table(obj)
-    if tType == PD_DATAFRAME:
+    if int_tType == PD_DATAFRAME:
         return convert_to_dataframe(obj)
-    raise TypeError(f"Unsupported tableType {tType}")  # pragma: no cover
+    raise TypeError(
+        f"Unsupported tableType {int_tType} ({TABULAR_FORMATS[int_tType]})"
+    )  # pragma: no cover
 
 
 ### I B. Converting to `astropy.table.Table`
