@@ -5,6 +5,8 @@ good first contributions for new contributors to the project.
 
 ## Code Debt
 
+- `iter_HDF5_to_dataframe` is not implemented
+
 ## Organizational Debt
 
 ## Requested Features
