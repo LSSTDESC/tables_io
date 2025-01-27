@@ -106,7 +106,11 @@ def iterator_native(
     parallel_size: Optional[int] = 1,
     **kwargs,
 ):
-    """Read a file to the corresponding table type and iterate over the file
+    """Iterates through the data in a given file. The data is yielded (along with
+    the start and stop index) as a `Tablelike` object that has the default format
+    for the given file type.
+
+    Any **kwargs are passed to the specific iterator function for the file type.
 
     Parameters
     ----------
@@ -123,12 +127,13 @@ def iterator_native(
 
     Returns
     -------
+    start: int
+        Data start index
+    stop: int
+        Data ending index
     data : `TableLike`
-        The data in the native type for that file.
+        The data in the native type for that file, from [start:stop]
 
-    Notes
-    -----
-    The kwargs are passed to the specific iterator type
 
     """
     fType = file_type(filepath, fmt)
