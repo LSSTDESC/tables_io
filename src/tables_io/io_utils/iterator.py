@@ -2,6 +2,8 @@
 
 import os
 from collections import OrderedDict
+from collections.abc import Iterator, Iterable
+from typing import Optional, Union, Mapping, List
 
 import numpy as np
 
@@ -36,8 +38,13 @@ from ..types import (
 # I. Top Level Interface Functions
 
 
-def iterator(filepath, tType=None, fmt=None, **kwargs):
-    """Read a file to the corresponding table type iterate over the file
+def iterator(
+    filepath: str, tType: Optional[int] = None, fmt: Optional[str] = None, **kwargs
+):
+    """Iterates through the data in a given file. The default maximum chunk size of the data is
+    100 000. The data is yielded (along with the start and stop index)
+    as a `Tablelike` object. If no `tType` is given, the tabular format will be the default for that file
+    type. If `tType` is given, the tabular format will be converted to that table type.
 
     Parameters
     ----------
@@ -52,15 +59,20 @@ def iterator(filepath, tType=None, fmt=None, **kwargs):
 
     Returns
     -------
-    data : `OrderedDict` ( `str` -> `Tablelike` )
-        The data
+    start: int
+        The starting index for the data.
+    stop: int
+        The end index for the data.
+    data : Tablelike
+        The data from [start:stop]. The format will be the native tabular format for the file
+        if no `tType` is given. Otherwise, the data will be in the tabular format `tType`.
 
     """
     for start, stop, data in iterator_native(filepath, fmt, **kwargs):
         yield start, stop, convert(data, tType)
 
 
-def iterator_native(filepath, fmt=None, **kwargs):
+def iterator_native(filepath: str, fmt: Optional[str] = None, **kwargs):
     """Read a file to the corresponding table type and iterate over the file
 
     Parameters
@@ -68,16 +80,16 @@ def iterator_native(filepath, fmt=None, **kwargs):
     filepath : `str`
         File to load
     fmt : `str` or `None`
-        File format, if `None` it will be taken from the file extension
+        File format, if `None` it will be taken from the file extension. By default `None`.
 
     Returns
     -------
     data : `TableLike`
-        The data
+        The data in the native type for that file.
 
     Notes
     -----
-    The kwargs are used passed to the specific iterator type
+    The kwargs are passed to the specific iterator type
 
     """
     fType = file_type(filepath, fmt)
@@ -98,15 +110,17 @@ def iterator_native(filepath, fmt=None, **kwargs):
         ) from msg  # pragma: no cover
 
 
-def get_input_data_length(filepath, fmt=None, **kwargs):
-    """Read a file to the corresponding table type and iterate over the file
+def get_input_data_length(filepath: str, fmt: Optional[str] = None, **kwargs):
+    """Opens the given file and gets the length of data in that file. If the data is multi-dimensional, the
+    function will give the length of the first axis of the data, which is typically the axis that you want
+    to iterate over.
 
     Parameters
     ----------
     filepath : `str`
         File to load
     fmt : `str` or `None`
-        File format, if `None` it will be taken from the file extension
+        File format, if `None` it will be taken from the file extension.
 
     Returns
     -------
@@ -115,7 +129,7 @@ def get_input_data_length(filepath, fmt=None, **kwargs):
 
     Notes
     -----
-    The kwargs are used passed to the specific iterator type
+    The kwargs are passed to the specific iterator type.
 
     """
     fType = file_type(filepath, fmt)
@@ -140,26 +154,26 @@ def get_input_data_length(filepath, fmt=None, **kwargs):
 # II A. HDF5 partial read functions
 
 
-def get_input_data_length_HDF5(filepath, groupname=None):
+def get_input_data_length_HDF5(filepath: str, groupname: Optional[str] = None) -> int:
     """Open an HDF5 file and return the size of a group
 
     Parameters
     ----------
     filepath: `str`
-        Path to input file
+        The input filepath.
 
     groupname : `str` or `None`
-        The groupname for the data
+        The groupname for the data, by default None.
 
 
     Returns
     -------
     length : `int`
-        The length of the data
+        The length of the data. In the case of a multi-dimensional array, this is the length of the first axis.
 
     Notes
     -----
-    For a multi-D array this return the length of the first axis
+    For a multi-D array this returns the length of the first axis
     and not the total size of the array.
 
     Normally that is what you want to be iterating over.
@@ -171,32 +185,34 @@ def get_input_data_length_HDF5(filepath, groupname=None):
 
 
 def iter_HDF5_to_dict(
-    filepath, chunk_size=100_000, groupname=None, rank=0, parallel_size=1
-):
+    filepath: str,
+    chunk_size: int = 100_000,
+    groupname: Optional[str] = None,
+    rank: int = 0,
+    parallel_size: int = 1,
+) -> Iterator[int, int, Mapping]:
     """
-    iterator for sending chunks of data in hdf5.
-
-    Currently only implemented for hdf5, returns `tuple`
+    Iterates through an `HDF5` file, yielding one chunk of data at a time.
 
     Parameters
     ----------
     filepath: str
-        input file name
+        The input filepath
     chunk_size: int
-        size of chunk to iterate over
+        The size of data chunk to iterate over
     rank: int
-        the rank of this process under MPI
+        The rank of this process under MPI
     parallel_size: int
-        the number of processes under MPI
+        The number of processes under MPI
 
     Yields
     -------
     start: int
-        start index
+        Data start index
     end: int
-        ending index
+        Data ending index
     data: dict
-        dictionary of all data from start:end
+        `OrderedDict` of `np.array` of all data from start:end
     """
     if rank >= parallel_size:
         raise TypeError(
@@ -249,27 +265,38 @@ def iter_HDF5_to_dataframe(filepath, chunk_size=100_000, groupname=None):
 
 
 def iter_pq_to_dataframe(
-    filepath, chunk_size=100_000, columns=None, rank=0, parallel_size=1, **kwargs
+    filepath: str,
+    chunk_size: int = 100_000,
+    columns: Optional[List[str]] = None,
+    rank: int = 0,
+    parallel_size: int = 1,
+    **kwargs,
 ):
     """
-    iterator for sending chunks of data in parquet
+    Iterates through a parquet file, yielding one chunk of data at a time.
 
     Parameters
     ----------
     filepath: str
-        input file name
+        path to input file
+    chunk_size: int, by default = 100_000
+        The maximum chunk size of the data
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
-    **kwargs : additional arguments to pass to the native file reader
+    rank: int
+        The rank of this process under MPI
+    parallel_size: int
+        The number of processes under MPI
+    **kwargs : additional arguments to pass to the parquet read_table function
 
     Yields
     ------
     start: int
-        start index
+        Data start index
     end: int
-        ending index
+        Data ending index
     data: `pandas.DataFrame`
-        data frame of all data from start:end
+        DataFrame of all data from start:end
     """
     if rank >= parallel_size:
         raise TypeError(
@@ -280,7 +307,7 @@ def iter_pq_to_dataframe(
     num_rows = get_input_data_length_pq(filepath, columns=columns)
     _ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
 
-    parquet_file = pq.read_table(filepath, columns=columns)
+    parquet_file = pq.read_table(filepath, columns=columns, **kwargs)
     start = 0
     end = 0
 
@@ -294,21 +321,23 @@ def iter_pq_to_dataframe(
         start += num_rows
 
 
-def get_input_data_length_pq(filepath, columns=None, **kwargs):
+def get_input_data_length_pq(
+    filepath: str, columns: Optional[List[str]] = None, **kwargs
+) -> int:
     """Open a Parquet file and return the size of a group
 
     Parameters
     ----------
     filepath: `str`
         Path to input file
-
-    groupname : `str` or `None`
+    columns : `List[str]` or `None`
         The groupname for the data
+    **kwargs: additional arguments to pass to the pyarrow.parquet.read_table function
 
 
     Returns
     -------
-    length : `int`
+    nrow : `int`
         The length of the data
 
     Notes
@@ -326,22 +355,24 @@ def get_input_data_length_pq(filepath, columns=None, **kwargs):
 # II C. Parquet dataset partial read functions
 
 
-def iter_ds_to_table(source, columns=None, **kwargs):
+def iter_ds_to_table(source, columns: Optional[List[str]] = None, **kwargs):
     """
-    iterator for sending chunks of data in parquet
+    Iterator for sending chunks of data in parquet
 
     Parameters
     ----------
-    dataset: str
+    source: str
         input file name
-    **kwargs : additional arguments to pass to the native file reader
+    columns: List[str], default None
+        The list of columns to use
+    **kwargs : additional arguments to pass to the pyarrow.dataset.to_batches() function
 
     Yields
     ------
     start: int
-        start index
+        Data start index
     end: int
-        ending index
+        Data ending index
     data: `pyarrow.Table`
         table of all data from start:end
     """
@@ -357,22 +388,21 @@ def iter_ds_to_table(source, columns=None, **kwargs):
         start += num_rows
 
 
-def get_input_data_length_ds(source, **kwargs):
-    """Open a dataset and return the size of a group
+def get_input_data_length_ds(source, **kwargs) -> int:
+    """Open a dataset and return the number of rows in a group
 
     Parameters
     ----------
-    filepath: `str`
-        Path to input file
+    source: `str`
+        Path to input file or directory
+    **kwargs:
+        **kwargs are passed to pyarrow.dataset.dataset()
 
     Returns
     -------
-    length : `int`
+    nrows : `int`
         The length of the data
 
-    Notes
-    -----
-    Normally that is what you want to be iterating over.
     """
     dataset = ds.dataset(source, **kwargs)
     nrows = dataset.count_rows()
@@ -382,8 +412,10 @@ def get_input_data_length_ds(source, **kwargs):
 # II D. Iteration utility functions
 
 
-def split_tasks_by_rank(tasks, parallel_size, rank):
-    """Iterate through a list of items, yielding ones this process is responsible for/
+def split_tasks_by_rank(
+    tasks: Iterable[int], parallel_size: int, rank: int
+) -> Iterator[int]:
+    """Iterate through a list of items, yielding ones this process is responsible for.
 
     Tasks are allocated in a round-robin way.
 
@@ -392,21 +424,23 @@ def split_tasks_by_rank(tasks, parallel_size, rank):
     tasks: iterator
         Tasks to split up
     parallel_size: int
-        the number of processes under MPI
+        The number of processes under MPI
     rank: int
-        the rank of this process under MPI
+        The rank of this process under MPI
 
-    Returns
+    Yields
     -------
-    output: iterator
-        number of the first task for this process
+    task: int
+        The number of the first task for this process
     """
     for i, task in enumerate(tasks):
         if i % parallel_size == rank:
             yield task
 
 
-def data_ranges_by_rank(n_rows, chunk_rows, parallel_size, rank):
+def data_ranges_by_rank(
+    n_rows: int, chunk_rows: int, parallel_size: int, rank: int
+) -> Iterator[int, int]:
     """Split a number of rows by process.
 
     Given a total number of rows to read and a chunk size, yield
@@ -419,16 +453,16 @@ def data_ranges_by_rank(n_rows, chunk_rows, parallel_size, rank):
     chunk_rows: int
         Size of each chunk to be read
     parallel_size: int
-        the number of processes under MPI
+        The number of processes under MPI
     rank: int
-        the rank of this process under MPI
+        The rank of this process under MPI
 
     Yields
     ------
     start: int
-        start index
+        Data start index
     end: int
-        ending index
+        Data ending index
     """
     n_chunks = n_rows // chunk_rows
     if n_chunks * chunk_rows < n_rows:  # pragma: no cover
