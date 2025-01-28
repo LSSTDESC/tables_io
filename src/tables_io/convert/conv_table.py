@@ -17,6 +17,7 @@ from ..types import (
     TABULAR_FORMATS,
     is_table_like,
     table_type,
+    tType_to_int,
 )
 
 ### I. Single `Tablelike` conversions
@@ -42,15 +43,7 @@ def convert_obj(obj, tType: Union[str, int]):
     """
 
     # Convert tType to an int if necessary
-    if isinstance(tType, str):
-        try:
-            int_tType = TABULAR_FORMAT_NAMES[tType]
-        except:
-            raise TypeError(
-                f"Unsupported tableType '{tType}', must be one of {TABULAR_FORMAT_NAMES.keys()}"
-            )
-    if isinstance(tType, int):
-        int_tType = tType
+    int_tType = tType_to_int(tType)
 
     if int_tType == AP_TABLE:
         return convert_to_ap_table(obj)

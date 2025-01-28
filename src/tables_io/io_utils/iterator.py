@@ -28,7 +28,7 @@ from ..types import (
     PYARROW_HDF5,
     PYARROW_PARQUET,
     PD_DATAFRAME,
-    TABULAR_FORMAT_NAMES,
+    tType_to_int,
     file_type,
     is_tabledict_like,
     is_table_like,
@@ -41,7 +41,7 @@ from ..types import (
 
 def iterator(
     filepath: str,
-    tType: Optional[int] = None,
+    tType: Union[str, int, None] = None,
     fmt: Optional[str] = None,
     chunk_size: Optional[int] = 100_000,
     rank: Optional[int] = 0,
@@ -93,15 +93,8 @@ def iterator(
         if no `tType` is given. Otherwise, the data will be in the tabular format `tType`.
 
     """
-    if isinstance(tType, str):
-        try:
-            int_tType = TABULAR_FORMAT_NAMES[tType]
-        except:
-            raise TypeError(
-                f"Unsupported tableType '{tType}', must be one of {TABULAR_FORMAT_NAMES.keys()}"
-            )
-    if isinstance(tType, int):
-        int_tType = tType
+    # convert tType to int if necessary
+    int_tType = tType_to_int(tType)
 
     for start, stop, data in iterator_native(
         filepath, fmt, chunk_size, rank, parallel_size, **kwargs
@@ -155,6 +148,8 @@ def iterator_native(
         PYARROW_PARQUET: iter_ds_to_table,
         PYARROW_HDF5: iter_ds_to_table,
     }
+
+    # kwargs[""]
 
     try:
         theFunc = funcDict[fType]

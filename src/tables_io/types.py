@@ -3,6 +3,7 @@
 import os
 from collections import OrderedDict
 from collections.abc import Iterable, Mapping
+from typing import Union
 
 import numpy as np
 
@@ -248,3 +249,36 @@ def file_type(filepath, fmt=None):
             f"Unknown file format {fmt}, supported types are"
             f"{list(FILE_FORMAT_SUFFIXS.keys())}"
         ) from msg
+
+
+def tType_to_int(tType: Union[str, int]) -> int:
+    """Takes table type as an `int` or `str`, and converts it to the corresponding
+      `int` if it's a `str`.
+
+    Parameters
+    ----------
+    tType : Union[str, int]
+        The tabular format
+
+    Returns
+    -------
+    int
+        The number corresponding to the tabular format
+
+    Raises
+    ------
+    TypeError
+        Raised if the given `str` is not one of the available tabular format options.
+    """
+
+    if isinstance(tType, str):
+        try:
+            int_tType = TABULAR_FORMAT_NAMES[tType]
+        except:
+            raise TypeError(
+                f"Unsupported tableType '{tType}', must be one of {TABULAR_FORMAT_NAMES}"
+            )
+    if isinstance(tType, int):
+        int_tType = tType
+
+    return int_tType

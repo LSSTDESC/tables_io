@@ -25,6 +25,7 @@ from ..types import (
     TABULAR_FORMATS,
     is_table_like,
     table_type,
+    tType_to_int,
 )
 
 
@@ -59,21 +60,13 @@ def convert(obj, tType):
     }
 
     # Convert tType to int if necessary
-    if isinstance(tType, str):
-        try:
-            int_tType = TABULAR_FORMAT_NAMES[tType]
-        except:
-            raise TypeError(
-                f"Unsupported tableType '{tType}', must be one of {TABULAR_FORMAT_NAMES.keys()}"
-            )
-    if isinstance(tType, int):
-        int_tType = tType
+    int_tType = tType_to_int(tType)
 
     try:
         theFunc = funcMap[int_tType]
     except KeyError as msg:  # pragma: no cover
         raise KeyError(
-            f"Unsupported tabular type {int_tType} ({TABULAR_FORMATS[int_tType]}, must be one of {TABULAR_FORMAT_NAMES.keys()})"
+            f"Unsupported tabular type {int_tType} ({TABULAR_FORMATS[int_tType]}, must be one of {TABULAR_FORMAT_NAMES})"
         ) from msg
     return theFunc(obj)
 

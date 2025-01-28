@@ -4,6 +4,7 @@ from collections import OrderedDict
 from typing import Union, Optional, List, Mapping
 
 import numpy as np
+from numpy.lib import recfunctions as rfn
 
 from .array_utils import concatenate_dicts
 from ..lazy_modules import apTable, pd, pa
@@ -13,7 +14,7 @@ from ..types import (
     NUMPY_RECARRAY,
     PD_DATAFRAME,
     PA_TABLE,
-    TABULAR_FORMAT_NAMES,
+    tType_to_int,
 )
 
 
@@ -47,15 +48,7 @@ def concat_objs(tableList: List, tType: Union[str, int]):
     }
 
     # convert tType to int if necessary
-    if isinstance(tType, str):
-        try:
-            int_tType = TABULAR_FORMAT_NAMES[tType]
-        except:
-            raise TypeError(
-                f"Unsupported tableType '{tType}', must be one of {TABULAR_FORMAT_NAMES.keys()}"
-            )
-    if isinstance(tType, int):
-        int_tType = tType
+    int_tType = tType_to_int(tType)
 
     try:
         theFunc = funcDict[int_tType]
@@ -71,7 +64,16 @@ def concat_objs(tableList: List, tType: Union[str, int]):
 
 def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
     """
-    Vertically concatanates a list of `TableDict-like` objects.
+    Vertically concatenates a list of `TableDict-like` objects. Each `Tablelike` object
+    in a `TableDict-like` object will be concatenated with any matching `Tablelike` objects
+    in the other `TableDict-like` objects (where matching means they have the same key). The
+    final `TableDict-like` object will contain all unique `Tablelike` objects (those with unique
+    keys).
+
+    The concatenation will be of join type `outer`, which means that no data will be lost.
+
+    Note: If concatenating `NUMPY_RECARRAY` objects, the output arrays will be masked arrays if
+    any fill values are required by the concatenation.
 
     Parameters
     ----------
@@ -84,6 +86,16 @@ def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
     -------
     tabs : `OrderedDict` of `table-like`
         A `TableDict-like` object of the concatenated `Tablelike` objects
+
+
+    Example
+    -------
+    ```
+    import tables_io
+    tabledict_1 = {'data1': data, 'data2': data}
+    tabledict_2 = {'data2': data, 'data3': data}
+    tables_io.concat([tabledict1, tabledict_2],)
+    ```
     """
     odict_in = OrderedDict()
     first = True
@@ -109,14 +121,14 @@ def concat_ap_tables(tablelist: List):
     Parameters
     ----------
     tablelist :  `list`
-        The tables
+        The list of tables
 
     Returns
     -------
     tab : `astropy.table.Table`
-        The table
+        The concatenated table
     """
-    return apTable.vstack(tablelist)
+    return apTable.vstack(tablelist, join_type="outer")
 
 
 ### II B. Concatanating dicts of numpy arrays
@@ -127,12 +139,12 @@ def concat_numpy_dicts(tablelist: List):
     Parameters
     ----------
     tablelist :  `list`
-        The tables
+        The list of tables
 
     Returns
     -------
     tab : `dict`
-        The table
+        The concatenated table
     """
     return concatenate_dicts(tablelist)
 
@@ -152,7 +164,7 @@ def concat_numpy_recarrays(tablelist: List):
     tab : `dict`
         The table
     """
-    return np.lib.recfunctions.stack_arrays(tablelist)
+    return rfn.stack_arrays(tablelist)
 
 
 ### II D. Concatanating pandas dataframes
@@ -167,10 +179,10 @@ def concat_dataframes(tablelist: List):
 
     Returns
     -------
-    tab : `dict`
-        The table
+    tab : `pandas.DataFrame`
+        The concatenated table
     """
-    return pd.concat(tablelist)
+    return pd.concat(tablelist, join="outer", axis=0, ignore_index=True)
 
 
 ### II E. Concatanating pyarrow tables
@@ -185,7 +197,7 @@ def concat_pa_tables(tablelist: List):
 
     Returns
     -------
-    tab : `dict`
-        The table
+    tab : `pyarrow.Table`
+        The concatenated table
     """
     return pa.concat_tables(tablelist)
