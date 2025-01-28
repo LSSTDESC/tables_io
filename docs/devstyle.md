@@ -10,7 +10,19 @@ This is what you should do
 
 ### Building the Documentation Locally
 
-This is how you do that!
+To build the documentation locally, for instance, for preview or to manually upload to a specified location, run the following from the `docs/` directory with the appropriate conda environment activated: 
+
+```bash
+
+# Remove any previous compiled documentation
+make clean
+
+# Make the HTML Documentation
+make html
+
+```
+
+The HTML rendered documentation will live in the `_readthedocs/html` directory. 
 
 ## Understanding the code
 
