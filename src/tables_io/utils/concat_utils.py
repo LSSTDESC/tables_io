@@ -24,12 +24,28 @@ from ..types import (
 # I A. Generic `concat`
 def concat_objs(tableList: List, tType: Union[str, int]):
     """
-    Concatanate a list of `table-like` objects
+    Vertically concatenates a list of `Tablelike` objects. The concatenation
+    is performed as an `outer` join, where no data is lost.
+
+    Note: When concatenating `NUMPY_RECARRAY` objects, the output arrays will be masked
+    arrays if any fill values are required by the concatenation.
+
+    Accepted table formats:
+
+    ==================  ===============
+    Format string       Format integer
+    ==================  ===============
+    "astropyTable"      0
+    "numpyDict"         1
+    "numpyRecarray"     2
+    "pandasDataFrame"   3
+    "pyarrowTable"      4
+    ==================  ===============
 
     Parameters
     ----------
     tablelist :  `list`
-        The tables
+        The list of tables
 
     tType: `str` or `int`
         The tabular format of the tables given.
@@ -38,6 +54,9 @@ def concat_objs(tableList: List, tType: Union[str, int]):
     -------
     tab : `Tablelike`
         The concatenated table
+
+    Example
+    -------
     """
     funcDict = {
         AP_TABLE: concat_ap_tables,
@@ -134,7 +153,7 @@ def concat_ap_tables(tablelist: List):
 ### II B. Concatanating dicts of numpy arrays
 def concat_numpy_dicts(tablelist: List):
     """
-    Concatanate a list of `dicts` of `np.array`
+    Concatanate a list of `dicts` of `np.array` objects
 
     Parameters
     ----------
@@ -152,12 +171,12 @@ def concat_numpy_dicts(tablelist: List):
 ### II C. Concatanating numpy recarrays
 def concat_numpy_recarrays(tablelist: List):
     """
-    Concatanate a list of `dicts` of `np.recarray`
+    Concatanate a list of `dicts` of `np.recarray` objects
 
     Parameters
     ----------
     tablelist :  `list`
-        The tables
+        The list of tables
 
     Returns
     -------
@@ -188,12 +207,12 @@ def concat_dataframes(tablelist: List):
 ### II E. Concatanating pyarrow tables
 def concat_pa_tables(tablelist: List):
     """
-    Concatanate a list of `pyarrow.Table`
+    Concatanate a list of `pyarrow.Table` objects
 
     Parameters
     ----------
     tablelist :  `list`
-        The tables
+        The list of tables
 
     Returns
     -------

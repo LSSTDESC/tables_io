@@ -60,6 +60,18 @@ def read(
     The `keys` argument is required when reading in multi-dataset parquet files, to specify which
     dataset files to read in. Otherwise, the only required argument is the filepath.
 
+    Accepted tabular types:
+
+    ==================  ===============
+    Format string       Format integer
+    ==================  ===============
+    "astropyTable"      0
+    "numpyDict"         1
+    "numpyRecarray"     2
+    "pandasDataFrame"   3
+    "pyarrowTable"      4
+    ==================  ===============
+
 
     Parameters
     ----------
@@ -83,15 +95,38 @@ def read(
 
     Example
     -------
-    ```
-    # single Tablelike object
-    import tables_io
-    tab = tables_io.read('filename.h5') # reads in as default, which is pandas DataFrame
-    tab.info()
 
-    # TableDictlike object
-    table_dict = tables_io.read('filename.hdf5', tType='astropyTable') # reads in as an OrderedDict of astropy tables
-    ```
+        For a single `Tablelike` object, we can read it in as follows:
+
+        >>> import tables_io
+        >>> df = tables_io.read('filename.h5')
+        >>> print(df)
+           col1  col2
+        0     1     3
+        1     2     4
+
+        Notice that it has been automatically read in as the default tabular type for `h5` files,
+        a `pandas.DataFrame`.
+
+        For a `TableDict-like` object, we read it in as follows:
+
+        >>> table_dict = tables_io.read('filename.hdf5', tType='astropyTable')
+        >>> table_dict
+        OrderedDict({'tab_1': <Table length=2>
+          x     y
+        int64 int64
+        ----- -----
+            2     1
+            4     3, 'tab_2': <Table length=2>
+          a     b
+        int64 int64
+        ----- -----
+            5     3
+            7     4})
+
+        Notice that the resulting `OrderedDict` has `astropy.Table` objects as the values.
+
+
     """
     odict = read_native(
         filepath, fmt, keys, allow_missing_keys, **kwargs
@@ -144,14 +179,15 @@ def read_native(
 
     Example
     -------
-    ```
-    import tables_io
-    # this is numpy hdf5 file format, fmt = 'hdf5'
-    tab = tables_io.read_native('filename.hdf5')
-    tab.keys() = ['table_1','table_2']
-    # reads in each table as an `OrderedDict` of numpy arrays
-    tab['table_1'] = {'col1': [array], 'col2': [array] ...}
-    ```
+
+    Reading in a file that is in `NUMPY_HDF5` format:
+
+    >>> import tables_io
+    >>> tab = tables_io.read_native('filename.hdf5')
+    >>> print(tab)
+    OrderedDict({'tab_1': OrderedDict({'col_1': array([0., 2.]), 'col_2': array([2., 3.])}),
+    'tab_2': OrderedDict({'col_a': array([1., 1.]), 'col_b': array([3., 3.])})})
+
 
     """
     fType = file_type(filepath, fmt)
@@ -200,11 +236,15 @@ def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
 
     Example:
     --------
-    ```
-    import tables_io
-    hdul = tables_io.io_open("./data/test.fits", "fits") # reads in using astropy.io.fits.open
-    hdul.info()
-    ```
+
+    For example, to read in a sample `fits` file:
+
+    >>> import tables_io
+    >>> hdul = tables_io.io_open("./data/test.fits", "fits")
+    >>> hdul.info()
+    No.    Name      Ver    Type      Cards   Dimensions   Format
+      0  PRIMARY       1 PrimaryHDU       4   ()
+      1  DF            1 BinTableHDU     37   10R x 14C   [K, E, E, E, E, E, E, E, E, E, E, E, E, D]
     """
     fType = file_type(filepath, fmt)
     if fType in [ASTROPY_FITS, NUMPY_FITS]:

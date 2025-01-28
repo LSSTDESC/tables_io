@@ -27,13 +27,25 @@ from ..types import (
 
 def convert_obj(obj, tType: Union[str, int]):
     """
-    Convert an object to a specific type of `Tablelike`
+    Convert a `Tablelike` object to a specific tabular format.
+
+    Accepted table formats:
+
+    ==================  ===============
+    Format string       Format integer
+    ==================  ===============
+    "astropyTable"      0
+    "numpyDict"         1
+    "numpyRecarray"     2
+    "pandasDataFrame"   3
+    "pyarrowTable"      4
+    ==================  ===============
 
     Parameters
     ----------
-    obj : `object`
+    obj : `Tablelike`
        The object being converted
-    tType : `int`
+    tType : `int` or `str`
        The type of object to convert to, one of `TABULAR_FORMAT_NAMES.keys()`
 
     Returns

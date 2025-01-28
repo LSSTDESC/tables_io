@@ -30,6 +30,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "sphinx.ext.doctest",
     "sphinx_design",
     "myst_nb",
     "sphinx_copybutton",

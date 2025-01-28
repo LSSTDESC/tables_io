@@ -59,6 +59,18 @@ def iterator(
     files can be found in the documentation of `pyarrow.parquet.read_table` or
     `pyarrow.dataset.dataset`.
 
+    Accepted tabular types:
+
+    ==================  ===============
+    Format string       Format integer
+    ==================  ===============
+    "astropyTable"      0
+    "numpyDict"         1
+    "numpyRecarray"     2
+    "pandasDataFrame"   3
+    "pyarrowTable"      4
+    ==================  ===============
+
     Parameters
     ----------
     filepath : `str`
@@ -346,8 +358,6 @@ def iter_pq_to_dataframe(
     filepath: str,
     chunk_size: int = 100_000,
     columns: Optional[List[str]] = None,
-    rank: int = 0,
-    parallel_size: int = 1,
     **kwargs,
 ):
     """
@@ -361,10 +371,6 @@ def iter_pq_to_dataframe(
         The maximum chunk size of the data, by default = 100,000
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
-    rank: int
-        The rank of this process under MPI, by default 0
-    parallel_size: int
-        The number of processes under MPI, by default 1
     **kwargs : additional arguments to pass to the parquet read_table function
 
     Yields
@@ -376,14 +382,14 @@ def iter_pq_to_dataframe(
     data: `pandas.DataFrame`
         DataFrame of all data from start:end
     """
-    if rank >= parallel_size:
-        raise TypeError(
-            f"MPI rank {rank} larger than the total "
-            f"number of processes {parallel_size}"
-        )  # pragma: no cover
+    # if rank >= parallel_size:
+    #     raise TypeError(
+    #         f"MPI rank {rank} larger than the total "
+    #         f"number of processes {parallel_size}"
+    #     )  # pragma: no cover
 
     num_rows = get_input_data_length_pq(filepath, columns=columns)
-    _ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
+    # _ranges = data_ranges_by_rank(num_rows, chunk_size, parallel_size, rank)
 
     parquet_file = pq.read_table(filepath, columns=columns, **kwargs)
     start = 0

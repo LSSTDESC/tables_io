@@ -3,7 +3,7 @@
 from collections import OrderedDict
 
 import numpy as np
-from typing import Mapping
+from typing import Mapping, Union
 
 from .conv_table import (
     convert_obj,
@@ -30,17 +30,31 @@ from ..types import (
 
 
 ### II.  Multi-table conversion utilities
-# TODO: Make tType also accept strings or ints
-def convert(obj, tType):
+def convert(obj, tType: Union[str, int]):
     """
-    Convert several `objects` to a specific type
+    Converts `Tablelike` or `TableDictlike` objects to a specific tabular format.
+    The given table format type must be one of the supported types. If given a
+    `TableDictlike` object, each of the `Tablelike` objects in it are converted to
+    the desired format. `convert_obj` is used to convert the `Tablelike` objects.
+
+    Accepted table formats:
+
+    ==================  ===============
+    Format string       Format integer
+    ==================  ===============
+    "astropyTable"      0
+    "numpyDict"         1
+    "numpyRecarray"     2
+    "pandasDataFrame"   3
+    "pyarrowTable"      4
+    ==================  ===============
 
     Parameters
     ----------
     obj :  'Tablelike` or `TableDictlike`
-        The input object
+        The input object.
 
-    tType : `int`
+    tType : `int` or `str`
         One of `TABULAR_FORMAT_NAMES.keys()`
 
     Returns

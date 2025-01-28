@@ -60,13 +60,13 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
     Example
     -------
 
-    .. code-block:: python
-        import tables_io
-        import pandas as pd
-        tab = pd.DataFrame({'col1': [2,4,6], 'col2': [5,7,9]})
-        tables_io.write(tab, 'data','h5') # tells the function to write it to PANDAS_HDF5
-        #outputs filepath with suffix 'h5' added
-        tables_io.write(tab, 'data.h5') # does the same thing as the line above
+        >>> import tables_io
+        >>> import pandas as pd
+        >>> tab = pd.DataFrame({'col1': [2,4,6], 'col2': [5,7,9]})
+        >>> tables_io.write(tab, 'data','h5') # tells the function to write it to PANDAS_HDF5
+        'data.h5'
+        >>> tables_io.write(tab, 'data.h5') # does the same thing as the line above
+        'data.h5'
     """
     if fmt is None:
         splitpath = os.path.splitext(filepath)
@@ -146,12 +146,12 @@ def write_native(odict, filepath: str) -> Optional[str]:
     Example
     -------
 
-    .. code-block:: python
-        import tables_io
-        from astropy.table import Table
-        tab = Table([[1,3,5],[10,8,6]], names=('c1','c2'))
-        tables_io.write(tab, 'data') # writes the file to ASTROPY_HDF5 by default
-        #outputs filepath with the suffix added ('hf5')
+
+        >>> import tables_io
+        >>> from astropy.table import Table
+        >>> tab = Table([[1,3,5],[10,8,6]], names=('c1','c2'))
+        >>> tables_io.write(tab, 'data') # writes the file to ASTROPY_HDF5 by default
+        'data.hf5'
 
     """
     istable = False
@@ -234,7 +234,7 @@ def initialize_HDF5_write_single(
     Returns
     -------
     group : `h5py.File` or `h5py.Group`
-        The group to write to
+        The group to write to. Only returned if the function is not run in MPI.
     fout : `h5py.File`
         The output file
 
@@ -242,17 +242,20 @@ def initialize_HDF5_write_single(
     -------
 
     To initialize an HDF5 file with two datasets with different shapes:
-    .. code-block:: python
-        from tables_io import hdf5
-        data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4')
-        group, fout = hdf5.initialize_HDF5_write_single('test.hdf5',data=data)``
+
+        >>> from tables_io import hdf5
+        >>> data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4')
+        >>> group, fout = hdf5.initialize_HDF5_write_single('test.hdf5',data=data)
+        >>> print(group.name))
+        '/data'
+
 
     To do the same in parallel with MPI using `mpi4py`:
-    .. code-block:: python
-        from tables_io import hdf5
-        from mpi4py import MPI
-        data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4')
-        groups, fout = hdf5.intialize_HDF5_write_single('test.hdf5',comm=MPI.COMM_WORLD, data=data)
+
+        >>> from tables_io import hdf5
+        >>> from mpi4py import MPI
+        >>> data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4')
+        >>> fout = hdf5.intialize_HDF5_write_single('test.hdf5',comm=MPI.COMM_WORLD, data=data)
 
 
     """
@@ -308,7 +311,8 @@ def initialize_HDF5_write(filepath: str, comm=None, **kwds):
     Returns
     -------
     group : `dict` of `h5py.File` or `h5py.Group`
-        A dictionary of the groups to write to
+        A dictionary of the groups to write to. Only returned if the file is not
+        opened in MPI.
     fout : `h5py.File`
         The output file
 
@@ -317,20 +321,21 @@ def initialize_HDF5_write(filepath: str, comm=None, **kwds):
     -------
 
     To initialize an HDF5 file with two groups named `group1` and `group2`:
-    .. code-block:: python
-        from tables_io import hdf5
-        group1 = {'data1' : ((10,), 'f8'), 'data2': ((50,2), 'f8')}
-        group2 = {'data3': ((20,20), 'f8)}
-        groups, fout = hdf5.intializeHdf5Write('test.hdf5', group1=group1, group2=group2)
+
+
+        >>> from tables_io import hdf5
+        >>> group1 = {'data1' : ((10,), 'f8'), 'data2': ((50,2), 'f8')}
+        >>> group2 = {'data3': ((20,20), 'f8)}
+        >>> groups, fout = hdf5.intializeHdf5Write('test.hdf5', group1=group1, group2=group2)
 
 
     To do the same in parallel with MPI using `mpi4py`:
-    .. code-block:: python
-        from tables_io import hdf5
-        from mpi4py import MPI
-        group1 = {'data1' : ((10,), 'f8'), 'data2': ((50,2), 'f8')}
-        group2 = {'data3': ((20,20), 'f8)}
-        groups, fout = hdf5.intialize_HDF5_write('test.hdf5',comm=MPI.COMM_WORLD, group1=group1, group2=group2)
+
+        >>> from tables_io import hdf5
+        >>> from mpi4py import MPI
+        >>> group1 = {'data1' : ((10,), 'f8'), 'data2': ((50,2), 'f8')}
+        >>> group2 = {'data3': ((20,20), 'f8)}
+        >>> fout = hdf5.intialize_HDF5_write('test.hdf5',comm=MPI.COMM_WORLD, group1=group1, group2=group2)
     """
     outdir = os.path.dirname(os.path.abspath(filepath))
     if not os.path.exists(outdir):  # pragma: no cover
