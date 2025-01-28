@@ -68,7 +68,7 @@ def iterator(
     fmt : `str` or `None`
         File format, if `None` it will be taken from the file extension
     chunk_size: int
-        The size of data chunk to iterate over, by default 100 000
+        The size of data chunk to iterate over, by default 100,000
     rank: int
         The rank of this process under MPI, by default 0
     parallel_size: int
@@ -78,7 +78,7 @@ def iterator(
     -----------------
     groupname : `str` or `None`
         For HDF5 files, the group name where the data is
-    columns : `str` or `None`
+    columns : list of `str` or `None`
         For parquet files, the names of the columns to read.
         `None` will read all the columns
 
@@ -123,11 +123,19 @@ def iterator_native(
     fmt : `str` or `None`
         File format, if `None` it will be taken from the file extension. By default `None`.
     chunk_size: int
-        The size of data chunk to iterate over, by default 100 000
+        The size of data chunk to iterate over, by default 100,000
     rank: int
         The rank of this process under MPI, by default 0
     parallel_size: int
         The number of processes under MPI, by default 1
+
+    Optional **kwargs
+    -----------------
+    groupname : `str` or `None`
+        For HDF5 files, the group name where the data is
+    columns : list of `str` or `None`
+        For parquet files, the names of the columns to read.
+        `None` will read all the columns
 
     Returns
     -------
@@ -149,15 +157,19 @@ def iterator_native(
         PYARROW_HDF5: iter_ds_to_table,
     }
 
-    # kwargs[""]
-
     try:
         theFunc = funcDict[fType]
+
+        # add relevant arguments to kwargs
+        kwargs["chunk_size"] = chunk_size
+
+        # only add MPI arguments if using MPI-capable function
+        if theFunc == iter_HDF5_to_dataframe or theFunc == iter_HDF5_to_dict:
+            kwargs["parallel_size"] = parallel_size
+            kwargs["rank"] = rank
+
         return theFunc(
             filepath,
-            chunk_size=chunk_size,
-            rank=rank,
-            parallel_size=parallel_size,
             **kwargs,
         )
     except KeyError as msg:
@@ -259,7 +271,7 @@ def iter_HDF5_to_dict(
     groupname: str
         The group name where the data is, by default None.
     chunk_size: int
-        The size of data chunk to iterate over, by default 100 000
+        The size of data chunk to iterate over, by default 100,000
     rank: int
         The rank of this process under MPI, by default 0
     parallel_size: int
@@ -346,7 +358,7 @@ def iter_pq_to_dataframe(
     filepath: str
         path to input file
     chunk_size: int
-        The maximum chunk size of the data, by default = 100_000
+        The maximum chunk size of the data, by default = 100,000
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
     rank: int
@@ -421,7 +433,9 @@ def get_input_data_length_pq(
 # II C. Parquet dataset partial read functions
 
 
-def iter_ds_to_table(source, columns: Optional[List[str]] = None, **kwargs):
+def iter_ds_to_table(
+    source, columns: Optional[List[str]] = None, chunk_size: int = 100_000, **kwargs
+):
     """
     Iterator for sending chunks of data in parquet
 
@@ -431,6 +445,8 @@ def iter_ds_to_table(source, columns: Optional[List[str]] = None, **kwargs):
         input file name
     columns: List[str], default None
         The list of columns to use
+    chunk_size: int
+        The maximum size of the batches to be read in
     **kwargs : additional arguments to pass to the pyarrow.dataset.to_batches() function
 
     Yields
@@ -446,7 +462,7 @@ def iter_ds_to_table(source, columns: Optional[List[str]] = None, **kwargs):
     end = 0
     dataset = ds.dataset(source, **kwargs)
 
-    for batch in dataset.to_batches(columns=columns):
+    for batch in dataset.to_batches(columns=columns, batch_size=chunk_size):
         data = pa.Table.from_pydict(batch.to_pydict())
         num_rows = len(data)
         end += num_rows
