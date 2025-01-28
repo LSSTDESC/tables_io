@@ -58,6 +58,7 @@ def convert(obj, tType):
         PD_DATAFRAME: convert_to_dataframes,
     }
 
+    # Convert tType to int if necessary
     if isinstance(tType, str):
         try:
             int_tType = TABULAR_FORMAT_NAMES[tType]

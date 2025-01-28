@@ -60,11 +60,27 @@ def test_type_conversion(data_tables, data_table, tType1, tType2):
     _ = convertObj(t2, types.AP_TABLE)
 
 
+@pytest.mark.skipif(
+    not check_deps([apTable, pd]), reason="Missing panda or astropy.table"
+)
 def test_conversion_strings(data_tables, data_table):
-    tType = types.TABULAR_FORMATS[2]
+    """Tests that the conversion functions work when given table types as strings."""
+
+    # test convert works with a string
+    tType = types.TABULAR_FORMATS[0]
     odict_1 = convert(data_tables, tType)
+    assert compare_table_dicts(odict_1, data_tables)
+
+    # test it still works without a string
     odict_2 = convert(data_tables, types.PD_DATAFRAME)
 
+    # test it works on just one table
     tab = convert(data_table, tType)
+    # and with convertObj
+    tab = convertObj(data_table, tType)
 
-    assert compare_table_dicts(odict_1, data_tables)
+
+def test_bad_conversion(data_table):
+    """Tests that the conversion fails as expected when given an incorrect table type."""
+    with pytest.raises(TypeError) as e:
+        bad = convert(data_table, "astropytable")

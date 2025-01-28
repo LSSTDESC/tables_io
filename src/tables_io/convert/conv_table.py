@@ -41,6 +41,7 @@ def convert_obj(obj, tType: Union[str, int]):
         The converted object
     """
 
+    # Convert tType to an int if necessary
     if isinstance(tType, str):
         try:
             int_tType = TABULAR_FORMAT_NAMES[tType]

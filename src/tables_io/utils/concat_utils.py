@@ -1,19 +1,27 @@
 """Concatanation functions for tables_io"""
 
 from collections import OrderedDict
+from typing import Union, Optional, List, Mapping
 
 import numpy as np
 
 from .array_utils import concatenate_dicts
 from ..lazy_modules import apTable, pd, pa
-from ..types import AP_TABLE, NUMPY_DICT, NUMPY_RECARRAY, PD_DATAFRAME, PA_TABLE
+from ..types import (
+    AP_TABLE,
+    NUMPY_DICT,
+    NUMPY_RECARRAY,
+    PD_DATAFRAME,
+    PA_TABLE,
+    TABULAR_FORMAT_NAMES,
+)
 
 
 ### I. concatanating list of table-like objects
 
 
 # I A. Generic `concat`
-def concat_objs(tableList, tType):
+def concat_objs(tableList: List, tType: Union[str, int]):
     """
     Concatanate a list of `table-like` objects
 
@@ -22,13 +30,13 @@ def concat_objs(tableList, tType):
     tablelist :  `list`
         The tables
 
-    tType:
-        What type of tables we expect the objects to be
+    tType: `str` or `int`
+        The tabular format of the tables given.
 
     Returns
     -------
-    tab : `dict`
-        The table
+    tab : `Tablelike`
+        The concatenated table
     """
     funcDict = {
         AP_TABLE: concat_ap_tables,
@@ -38,8 +46,19 @@ def concat_objs(tableList, tType):
         PA_TABLE: concat_pa_tables,
     }
 
+    # convert tType to int if necessary
+    if isinstance(tType, str):
+        try:
+            int_tType = TABULAR_FORMAT_NAMES[tType]
+        except:
+            raise TypeError(
+                f"Unsupported tableType '{tType}', must be one of {TABULAR_FORMAT_NAMES.keys()}"
+            )
+    if isinstance(tType, int):
+        int_tType = tType
+
     try:
-        theFunc = funcDict[tType]
+        theFunc = funcDict[int_tType]
         return theFunc(tableList)
     except KeyError as msg:  # pragma: no cover
         raise NotImplementedError(
@@ -50,19 +69,21 @@ def concat_objs(tableList, tType):
 ### I B.  Multi-table concatanating
 
 
-def concat(odictlist, tType):
+def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
     """
-    Concatanate all the tables in a list of dicts
+    Vertically concatanates a list of `TableDict-like` objects.
 
     Parameters
     ----------
-    odictlist :  `list`, 'tableDict-like'
+    odictlist :  `list`, 'TableDict-like'
         The input objects
+    tType: `str` or `int`
+        The tabular format of the tables given.
 
     Returns
     -------
     tabs : `OrderedDict` of `table-like`
-        The tables
+        A `TableDict-like` object of the concatenated `Tablelike` objects
     """
     odict_in = OrderedDict()
     first = True
@@ -81,7 +102,7 @@ def concat(odictlist, tType):
 ### II A. Concatanating `astropy.table.Table`
 
 
-def concat_ap_tables(tablelist):
+def concat_ap_tables(tablelist: List):
     """
     Concatanate a list of `astropy.table.Table`
 
@@ -99,7 +120,7 @@ def concat_ap_tables(tablelist):
 
 
 ### II B. Concatanating dicts of numpy arrays
-def concat_numpy_dicts(tablelist):
+def concat_numpy_dicts(tablelist: List):
     """
     Concatanate a list of `dicts` of `np.array`
 
@@ -117,7 +138,7 @@ def concat_numpy_dicts(tablelist):
 
 
 ### II C. Concatanating numpy recarrays
-def concat_numpy_recarrays(tablelist):
+def concat_numpy_recarrays(tablelist: List):
     """
     Concatanate a list of `dicts` of `np.recarray`
 
@@ -135,7 +156,7 @@ def concat_numpy_recarrays(tablelist):
 
 
 ### II D. Concatanating pandas dataframes
-def concat_dataframes(tablelist):
+def concat_dataframes(tablelist: List):
     """
     Concatanate a list of `pandas.DataFrame`
 
@@ -153,7 +174,7 @@ def concat_dataframes(tablelist):
 
 
 ### II E. Concatanating pyarrow tables
-def concat_pa_tables(tablelist):
+def concat_pa_tables(tablelist: List):
     """
     Concatanate a list of `pyarrow.Table`
 
