@@ -62,7 +62,7 @@ concat_table = concat_utils.concat_objs
 concatObjs = concat_utils.concat_objs
 """This function is being deprecated, please see `concat_table` instead"""
 concat = concat_utils.concat
-# TODO: Does this work on only single table or a table_dict?
+
 
 #
 # Slicing Functions
@@ -72,4 +72,6 @@ slice_table = slice_utils.slice_obj
 sliceObj = slice_utils.slice_obj
 """This function is being deprecated, please see `slice_table` instead"""
 sliceObjs = slice_utils.slice_objs
+"""This function is being deprecated, please see `slice_table` instead"""
+slice = slice_utils.slice_objs
 # TODO: Should this even exist?

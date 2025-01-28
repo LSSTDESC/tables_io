@@ -179,6 +179,11 @@ def iterator_native(
         if theFunc == iter_HDF5_to_dataframe or theFunc == iter_HDF5_to_dict:
             kwargs["parallel_size"] = parallel_size
             kwargs["rank"] = rank
+        else:
+            if parallel_size != 1 or rank != 0:
+                raise Warning(
+                    f"MPI arguments were provided for this function, but it will run in series as it cannot be run in parallel."
+                )
 
         return theFunc(
             filepath,

@@ -1,6 +1,7 @@
 """Slicing functions for tables_io"""
 
 from collections import OrderedDict
+from typing import Mapping
 
 
 from .array_utils import slice_dict
@@ -8,22 +9,33 @@ from ..types import NUMPY_DICT, table_type
 
 
 # I F. Generic `slice`
-def slice_obj(obj, the_slice):
+def slice_obj(obj, the_slice: slice):
     """
-    Slice a `table-like` objects
+    Slice a `Tablelike` object. The slice must be supplied as a python `slice()`
+    object. In some cases, an `int` will work.
 
     Parameters
     ----------
-    obj :  `table_like`
+    obj :  `tablelike`
         Table like object to slice
 
-    the_slice: `slice`
-        Slice to make
+    the_slice: `slice` or `int`
+        A python `slice(start, stop, step)` object of the slice to take.
 
     Returns
     -------
     tab : `table-like`
         The slice of the table
+
+    Example
+    -------
+
+        >>> import tables_io
+        >>> import pandas as pd
+        >>> df = pd.DataFrame({'col1': [1,2,3], 'col2':[3,4,5]})
+        >>> tables_io.slice_table(df, slice(1,2))
+           col1  col2
+        1     2     4
     """
     tType = table_type(obj)
     if tType is NUMPY_DICT:
@@ -31,21 +43,43 @@ def slice_obj(obj, the_slice):
     return obj[the_slice]
 
 
-def slice_objs(odict, the_slice):
-    """Slice many `table-like` objects
+def slice_objs(odict: Mapping, the_slice: slice) -> Mapping:
+    """Slice many `Tablelike` objects inside a `TableDictlike` object.
+    This will take the same slice from each of the `Tablelike` objects,
+    and return a `TableDictlike` object with those slices.
 
     Parameters
     ----------
-    odict :  `table_like`
-       Objects to slice
+    odict :  `TableDictlike`
+       Dictionary of objects to slice
 
     the_slice: `slice`
-        Slice to make
+        A python `slice(start, stop, step)` object of the slice to take.
 
 
     Returns
     -------
-    odict : tableDict-like
+    odict : `TableDictlike`
         The sliced tables
+
+    Example
+    -------
+
+        >>> import tables_io
+        >>> from astropy.table import Table
+        >>> odict = OrderedDict([('tab_1', Table([[1,2],[5,3]],names=("x","y"))),
+                                ('tab_2', Table([[1,2,4],[5,3,7]],names=("x","y")))])
+        >>> tables_io.slice(odict, slice(2,3))
+        OrderedDict([('tab_1',
+              <Table length=0>
+                x     y
+              int64 int64
+              ----- -----),
+             ('tab_2',
+              <Table length=1>
+                x     y
+              int64 int64
+              ----- -----
+                  4     7)])
     """
     return OrderedDict([(k, slice_obj(v, the_slice)) for k, v in odict.items()])
