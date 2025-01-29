@@ -152,7 +152,7 @@ def slice_dict(in_dict: Mapping, subslice: Union[int, slice]) -> Mapping:
     Returns
     -------
     out_dict : `dict`
-        The converted dicionary
+        The converted dictionary
     """
 
     out_dict = OrderedDict()
@@ -198,7 +198,7 @@ def concatenate_dicts(in_dicts: List[Mapping]) -> Mapping:
     Returns
     -------
     out_dict : `dict`
-        The stacked dicionary
+        The stacked dictionary
     """
     if not in_dicts:  # pragma: no cover
         return OrderedDict()

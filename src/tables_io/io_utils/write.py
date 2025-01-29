@@ -260,7 +260,7 @@ def initialize_HDF5_write_single(
         >>> from tables_io import hdf5
         >>> from mpi4py import MPI
         >>> data = dict(scalar=((100000,), 'f4'), vect=((100000, 3), 'f4')
-        >>> fout = hdf5.intialize_HDF5_write_single('test.hdf5',comm=MPI.COMM_WORLD, data=data)
+        >>> fout = hdf5.initialize_HDF5_write_single('test.hdf5',comm=MPI.COMM_WORLD, data=data)
 
 
     """
@@ -331,7 +331,7 @@ def initialize_HDF5_write(filepath: str, comm=None, **kwds):
         >>> from tables_io import hdf5
         >>> group1 = {'data1' : ((10,), 'f8'), 'data2': ((50,2), 'f8')}
         >>> group2 = {'data3': ((20,20), 'f8)}
-        >>> groups, fout = hdf5.intializeHdf5Write('test.hdf5', group1=group1, group2=group2)
+        >>> groups, fout = hdf5.initializeHdf5Write('test.hdf5', group1=group1, group2=group2)
 
 
     To do the same in parallel with MPI using `mpi4py`:
@@ -340,7 +340,7 @@ def initialize_HDF5_write(filepath: str, comm=None, **kwds):
         >>> from mpi4py import MPI
         >>> group1 = {'data1' : ((10,), 'f8'), 'data2': ((50,2), 'f8')}
         >>> group2 = {'data3': ((20,20), 'f8)}
-        >>> fout = hdf5.intialize_HDF5_write('test.hdf5',comm=MPI.COMM_WORLD, group1=group1, group2=group2)
+        >>> fout = hdf5.initialize_HDF5_write('test.hdf5',comm=MPI.COMM_WORLD, group1=group1, group2=group2)
     """
     outdir = os.path.dirname(os.path.abspath(filepath))
     if not os.path.exists(outdir):  # pragma: no cover
