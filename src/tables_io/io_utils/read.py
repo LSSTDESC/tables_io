@@ -194,12 +194,10 @@ def read_native(
         try:
             return read_fits_to_ap_tables(filepath, keys=keys)
         except Exception as e:
-            # print(
-            #     f"{FILE_FORMATS[ASTROPY_FITS]} file could not be read in with \n filepath: {filepath} and keys: {keys}"
-            # )
-            # raise e
             raise RuntimeError(
-                f"{FILE_FORMATS[ASTROPY_FITS]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+                read_native_error_message(
+                    filepath, fType, fmt, keys, allow_missing_keys, **kwargs
+                )
             ) from e
 
     if fType == ASTROPY_HDF5:
@@ -207,49 +205,63 @@ def read_native(
             return read_HDF5_to_ap_tables(filepath, keys=keys)
         except Exception as e:
             raise RuntimeError(
-                f"{FILE_FORMATS[ASTROPY_HDF5]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+                read_native_error_message(
+                    filepath, fType, fmt, keys, allow_missing_keys, **kwargs
+                )
             ) from e
     if fType == NUMPY_HDF5:
         try:
             return read_HDF5_to_dicts(filepath, keys=keys)
         except Exception as e:
             raise RuntimeError(
-                f"{FILE_FORMATS[NUMPY_HDF5]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+                read_native_error_message(
+                    filepath, fType, fmt, keys, allow_missing_keys, **kwargs
+                )
             ) from e
     if fType == NUMPY_FITS:
         try:
             return read_fits_to_recarrays(filepath, keys=keys)
         except Exception as e:
             raise RuntimeError(
-                f"{FILE_FORMATS[NUMPY_FITS]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+                read_native_error_message(
+                    filepath, fType, fmt, keys, allow_missing_keys, **kwargs
+                )
             ) from e
     if fType == PANDAS_HDF5:
         try:
             return read_H5_to_dataframes(filepath, keys=keys)
         except Exception as e:
             raise RuntimeError(
-                f"{FILE_FORMATS[PANDAS_HDF5]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+                read_native_error_message(
+                    filepath, fType, fmt, keys, allow_missing_keys, **kwargs
+                )
             ) from e
     if fType == PANDAS_PARQUET:
         try:
             return read_pq_to_dataframes(filepath, keys, allow_missing_keys, **kwargs)
         except Exception as e:
             raise RuntimeError(
-                f"{FILE_FORMATS[PANDAS_PARQUET]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+                read_native_error_message(
+                    filepath, fType, fmt, keys, allow_missing_keys, **kwargs
+                )
             ) from e
     if fType == PYARROW_HDF5:
         try:
             return read_HDF5_to_tables(filepath, keys)
         except Exception as e:
             raise RuntimeError(
-                f"{FILE_FORMATS[PYARROW_HDF5]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+                read_native_error_message(
+                    filepath, fType, fmt, keys, allow_missing_keys, **kwargs
+                )
             ) from e
     if fType == PYARROW_PARQUET:
         try:
             return read_pq_to_tables(filepath, keys, allow_missing_keys, **kwargs)
         except Exception as e:
             raise RuntimeError(
-                f"{FILE_FORMATS[PYARROW_PARQUET]} file could not be read in with \n filepath: '{filepath}', keys: {keys} and **kwargs: {kwargs}"
+                read_native_error_message(
+                    filepath, fType, fmt, keys, allow_missing_keys, **kwargs
+                )
             ) from e
     raise TypeError(
         f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
@@ -985,3 +997,37 @@ def read_pq_to_tables(
                 continue
             raise msg
     return tables
+
+
+# III. Miscellaneous
+
+
+def read_native_error_message(
+    filepath: str,
+    fType: int,
+    fmt: Optional[str],
+    keys: Optional[List[str]],
+    allow_missing_keys: bool,
+    **kwargs,
+) -> str:
+    """Generates an error message to be printed out if a file cannot be read in by read_native.
+
+    Parameters
+    ----------
+    filepath : `str`
+        Full path of the file to load
+    fmt : `str` or `None`
+        File format, if `None` it will be taken from the file extension.
+    keys : `list` or `None`
+        This argument is required for reading multiple associated parquet files.
+        The keys should be the unique identifiers for each dataset or file.
+    allow_missing_keys : `bool`, by default False.
+        If False will raise FileNotFoundError if a key is missing from the given file.
+    **kwargs : additional arguments to pass to the native file reader
+
+    Returns
+    -------
+    str
+        The error message string.
+    """
+    return f"{FILE_FORMATS[fType]} file could not be read in with the following arguments: \n filepath: '{filepath}', fmt: '{fmt}', keys: {keys}, allow_missing_keys: {allow_missing_keys}, and **kwargs: {kwargs}"
