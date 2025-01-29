@@ -158,8 +158,6 @@ def read_native(
     `str` keys and `Table-like` values. The `Table-like` values can either be astropy Tables,
     numpy recarrays, an `OrderedDict` of numpy arrays, a pandas dataframe, or a pyarrow table.
 
-    List available file formats?
-
     Parameters
     ----------
     filepath : `str`
@@ -263,8 +261,8 @@ def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
     open large files without reading the whole file into memory.
 
     It opens the file object with different packages depending on the file type. It uses
-    astropy to open FITS files (astropy.io.fits.open()), h5py for any HDF5 files (h5py.File()), or
-    pyarrow parquet for any parquet files (pyarrow.parquet.ParquetFile()). You can specify which
+    astropy to open FITS files (`astropy.io.fits.open()`), h5py for any HDF5 files (`h5py.File()`), or
+    pyarrow parquet for any parquet files (`pyarrow.parquet.ParquetFile()`). You can specify which
     file type you are supplying via the `fmt` argument, or it will automatically determine the file type
     from its suffix.
 
@@ -276,7 +274,7 @@ def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
     filepath : `str`
         The path to the file to load.
     fmt : `str` or `None`
-        The file format, if `None` it will be taken from the file extension. (either list options or give example)
+        The file format, if `None` it will be taken from the file extension.
 
     Returns
     -------
