@@ -1,5 +1,5 @@
 from .. import io_utils
-from ..utils.array_utils import get_group_input_data_length
+from ..utils import array_utils
 
 # Exposing HDF5 Interfaces
 
@@ -22,7 +22,7 @@ read_HDF5_group_to_dict = io_utils.read.read_HDF5_group_to_dict
 
 read_HDF5_dataset_to_array = io_utils.read.read_HDF5_dataset_to_array
 
-get_group_input_data_length = get_group_input_data_length
+get_group_input_data_length = array_utils.get_group_input_data_length
 
 # Convenience Functions for MPI
 
