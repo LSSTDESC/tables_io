@@ -171,28 +171,29 @@ def iterator_native(
 
     try:
         theFunc = funcDict[fType]
-
-        # add relevant arguments to kwargs
-        kwargs["chunk_size"] = chunk_size
-
-        # only add MPI arguments if using MPI-capable function
-        if theFunc == iter_HDF5_to_dataframe or theFunc == iter_HDF5_to_dict:
-            kwargs["parallel_size"] = parallel_size
-            kwargs["rank"] = rank
-        else:
-            if parallel_size != 1 or rank != 0:
-                raise Warning(
-                    f"MPI arguments were provided for this function, but it will run in series as it cannot be run in parallel."
-                )
-
-        return theFunc(
-            filepath,
-            **kwargs,
-        )
     except KeyError as msg:
         raise NotImplementedError(
             f"Unsupported FileType for iterateNative {fType}"
         ) from msg  # pragma: no cover
+
+    # add relevant arguments to kwargs
+    kwargs["chunk_size"] = chunk_size
+
+    # only add MPI arguments if using MPI-capable function
+    if theFunc == iter_HDF5_to_dataframe or theFunc == iter_HDF5_to_dict:
+        kwargs["parallel_size"] = parallel_size
+        kwargs["rank"] = rank
+    else:
+        if parallel_size != 1 or rank != 0:
+            raise Warning(
+                f"MPI arguments were provided for this function, but it will run in series as it cannot be run in parallel."
+            )
+
+    # TODO: add try except here?
+    return theFunc(
+        filepath,
+        **kwargs,
+    )
 
 
 def get_input_data_length(filepath: str, fmt: Optional[str] = None, **kwargs):

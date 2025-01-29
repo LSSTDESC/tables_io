@@ -85,7 +85,7 @@ def convert(obj, tType: Union[str, int]):
     return theFunc(obj)
 
 
-def convert_to_ap_tables(odict: Mapping):
+def convert_to_ap_tables(odict: Mapping) -> Mapping:
     """
     Convert several `objects` to `astropy.table.Table`
 
@@ -102,7 +102,7 @@ def convert_to_ap_tables(odict: Mapping):
     return OrderedDict([(k, convert_to_ap_table(v)) for k, v in odict.items()])
 
 
-def convert_to_dicts(odict: Mapping):
+def convert_to_dicts(odict: Mapping) -> Mapping:
     """
     Convert several `objects` to `OrderedDict`, (`str`, `numpy.array`)
 
@@ -119,7 +119,7 @@ def convert_to_dicts(odict: Mapping):
     return OrderedDict([(k, convert_to_dict(v)) for k, v in odict.items()])
 
 
-def convert_to_recarrays(odict: Mapping):
+def convert_to_recarrays(odict: Mapping) -> Mapping:
     """
     Convert several `objects` to `np.recarray`
 
@@ -136,7 +136,7 @@ def convert_to_recarrays(odict: Mapping):
     return OrderedDict([(k, convert_to_recarray(v)) for k, v in odict.items()])
 
 
-def convert_to_pa_tables(odict: Mapping):
+def convert_to_pa_tables(odict: Mapping) -> Mapping:
     """
     Convert several `objects` to `pa.Table`
 
@@ -153,7 +153,7 @@ def convert_to_pa_tables(odict: Mapping):
     return OrderedDict([(k, convert_to_pa_table(v)) for k, v in odict.items()])
 
 
-def convert_to_dataframes(odict: Mapping):
+def convert_to_dataframes(odict: Mapping) -> Mapping:
     """
     Convert several `objects` to `pandas.DataFrame`
 

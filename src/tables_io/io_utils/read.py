@@ -17,6 +17,7 @@ from ..types import (
     DEFAULT_TABLE_KEY,
     FILE_FORMAT_SUFFIX_MAP,
     FILE_FORMAT_SUFFIXS,
+    FILE_FORMATS,
     NATIVE_FORMAT,
     NATIVE_TABLE_TYPE,
     NUMPY_FITS,
@@ -128,9 +129,9 @@ def read(
 
 
     """
-    odict = read_native(
-        filepath, fmt, keys, allow_missing_keys, **kwargs
-    )  # TODO: put a try except here or in each of the individual read functions
+
+    odict = read_native(filepath, fmt, keys, allow_missing_keys, **kwargs)
+
     if len(odict) == 1:
         # For special keys, use the table alone without an enclosing dictionary.
         single_dict_key = list(odict.keys())[0]
@@ -192,22 +193,69 @@ def read_native(
     """
     fType = file_type(filepath, fmt)
     if fType == ASTROPY_FITS:
-        return read_fits_to_ap_tables(filepath, keys=keys)
+        try:
+            return read_fits_to_ap_tables(filepath, keys=keys)
+        except Exception as e:
+            # print(
+            #     f"{FILE_FORMATS[ASTROPY_FITS]} file could not be read in with \n filepath: {filepath} and keys: {keys}"
+            # )
+            # raise e
+            raise RuntimeError(
+                f"{FILE_FORMATS[ASTROPY_FITS]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+            ) from e
+
     if fType == ASTROPY_HDF5:
-        return read_HDF5_to_ap_tables(filepath, keys=keys)
+        try:
+            return read_HDF5_to_ap_tables(filepath, keys=keys)
+        except Exception as e:
+            raise RuntimeError(
+                f"{FILE_FORMATS[ASTROPY_HDF5]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+            ) from e
     if fType == NUMPY_HDF5:
-        return read_HDF5_to_dicts(filepath, keys=keys)
+        try:
+            return read_HDF5_to_dicts(filepath, keys=keys)
+        except Exception as e:
+            raise RuntimeError(
+                f"{FILE_FORMATS[NUMPY_HDF5]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+            ) from e
     if fType == NUMPY_FITS:
-        return read_fits_to_recarrays(filepath, keys=keys)
+        try:
+            return read_fits_to_recarrays(filepath, keys=keys)
+        except Exception as e:
+            raise RuntimeError(
+                f"{FILE_FORMATS[NUMPY_FITS]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+            ) from e
     if fType == PANDAS_HDF5:
-        return read_H5_to_dataframes(filepath, keys=keys)
+        try:
+            return read_H5_to_dataframes(filepath, keys=keys)
+        except Exception as e:
+            raise RuntimeError(
+                f"{FILE_FORMATS[PANDAS_HDF5]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+            ) from e
     if fType == PANDAS_PARQUET:
-        return read_pq_to_dataframes(filepath, keys, allow_missing_keys, **kwargs)
+        try:
+            return read_pq_to_dataframes(filepath, keys, allow_missing_keys, **kwargs)
+        except Exception as e:
+            raise RuntimeError(
+                f"{FILE_FORMATS[PANDAS_PARQUET]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+            ) from e
     if fType == PYARROW_HDF5:
-        return read_HDF5_to_tables(filepath, keys)
+        try:
+            return read_HDF5_to_tables(filepath, keys)
+        except Exception as e:
+            raise RuntimeError(
+                f"{FILE_FORMATS[PYARROW_HDF5]} file could not be read in with \n filepath: '{filepath}' and keys: {keys}"
+            ) from e
     if fType == PYARROW_PARQUET:
-        return read_pq_to_tables(filepath, keys, allow_missing_keys, **kwargs)
-    raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
+        try:
+            return read_pq_to_tables(filepath, keys, allow_missing_keys, **kwargs)
+        except Exception as e:
+            raise RuntimeError(
+                f"{FILE_FORMATS[PYARROW_PARQUET]} file could not be read in with \n filepath: '{filepath}', keys: {keys} and **kwargs: {kwargs}"
+            ) from e
+    raise TypeError(
+        f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
+    )  # pragma: no cover
 
 
 def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
@@ -254,7 +302,9 @@ def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
     if fType in [PYARROW_PARQUET, PANDAS_PARQUET]:
         # basepath = os.path.splitext(filepath)[0]
         return pq.ParquetFile(filepath, **kwargs)
-    raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
+    raise TypeError(
+        f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
+    )  # pragma: no cover
 
 
 def check_columns(
@@ -307,7 +357,9 @@ def check_columns(
     elif fType in [PYARROW_PARQUET, PANDAS_PARQUET]:
         col_list = file.schema.names
     else:
-        raise TypeError(f"Unsupported FileType {fType}")  # pragma: no cover
+        raise TypeError(
+            f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
+        )  # pragma: no cover
 
     # check columns
     intersection = set(columns_to_check).intersection(col_list)
@@ -822,14 +874,12 @@ def read_HDF5_to_table(filepath: str, key: Optional[str] = None):
     pydict = read_HDF5_to_dicts(filepath, [key])[key]
     t_dict = {}
     for key, val in pydict.items():
-        t_dict[key] = force_to_pandables(
-            val
-        )  # TODO: add a try except around this to raise a more understandable error?
+        t_dict[key] = force_to_pandables(val)
     return pa.Table.from_pydict(t_dict)
 
 
 def read_HDF5_to_tables(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
-    """Open an `h5` (pandas `hdf5`) file and and return an `OrderedDict` of `pyarrow.Table`
+    """Open an `HDF5` file and and return an `OrderedDict` of `pyarrow.Table`
 
     Parameters
     ----------

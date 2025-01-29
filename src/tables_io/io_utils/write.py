@@ -15,6 +15,7 @@ from ..types import (
     DEFAULT_TABLE_KEY,
     FILE_FORMAT_SUFFIX_MAP,
     FILE_FORMAT_SUFFIXS,
+    FILE_FORMATS,
     NATIVE_FORMAT,
     NATIVE_TABLE_TYPE,
     NUMPY_FITS,
@@ -119,7 +120,9 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
         write_tables_to_HDF5(forcedPaTables, filepath)
         return filepath
 
-    raise TypeError(f"Unsupported File type {fType}")  # pragma: no cover
+    raise TypeError(
+        f"Unsupported File type {fType}. Supported types are: {list(FILE_FORMATS.values())}"
+    )  # pragma: no cover
 
 
 def write_native(odict, filepath: str) -> Optional[str]:
@@ -196,7 +199,9 @@ def write_native(odict, filepath: str) -> Optional[str]:
     if fType == PYARROW_PARQUET:
         write_tables_to_pq(odict, filepath)
         return filepath
-    raise TypeError(f"Unsupported Native file type {fType}")  # pragma: no cover
+    raise TypeError(
+        f"Unsupported Native file type {fType}. Must be one of ['astropyHdf5','numpyHdf5','numpyFits','pandaParquet','pyarrowParquet']"
+    )  # pragma: no cover
 
 
 # II. Writing Files

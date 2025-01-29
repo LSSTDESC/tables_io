@@ -159,7 +159,7 @@ def table_type(obj):
     if not isinstance(obj, Mapping):
         raise TypeError(
             f"Object of type {type(obj)} is not one of the supported types"
-            f"{list(TABULAR_FORMAT_NAMES.keys())}"
+            f"Must be one of {list(TABULAR_FORMAT_NAMES.keys())}"
         )
 
     nRow = None
