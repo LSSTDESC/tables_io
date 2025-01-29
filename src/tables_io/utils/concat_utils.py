@@ -102,9 +102,6 @@ def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
     final `TableDict-like` object will contain all unique `Table-like` objects (those with unique
     keys).
 
-    In order for this function to work, the first `TableDict-like` object must have all of the
-    keys that are found in the other `TableDict-like` objects.
-
     The concatenation will be of join type `outer`, which means that no data will be lost.
 
     Note: If concatenating `NUMPY_RECARRAY` objects, the output arrays will be masked arrays if
@@ -156,14 +153,13 @@ def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
 
     """
     odict_in = OrderedDict()
-    first = True
+
     for odict_ in odictlist:
         for key, val in odict_.items():
-            if first:
+            if key not in odict_in.keys():
                 odict_in[key] = [val]
             else:
                 odict_in[key].append(val)
-        first = False
 
     return OrderedDict([(k, concat_objs(v, tType)) for k, v in odict_in.items()])
 
