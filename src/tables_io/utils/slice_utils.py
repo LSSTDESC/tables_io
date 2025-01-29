@@ -5,14 +5,14 @@ from typing import Mapping
 
 
 from .array_utils import slice_dict
-from ..types import NUMPY_DICT, table_type
+from ..types import NUMPY_DICT, PD_DATAFRAME, table_type
 
 
 # I F. Generic `slice`
 def slice_obj(obj, the_slice: slice):
     """
-    Slice a `Table-like` object. The slice must be supplied as a python `slice()`
-    object. In some cases, an `int` will work.
+    Slice a `Table-like` object. The slice may be supplied as a single integer,
+    or as a python `slice(start,stop,step)` object.
 
     Parameters
     ----------
@@ -20,7 +20,8 @@ def slice_obj(obj, the_slice: slice):
         Table like object to slice
 
     the_slice: `slice` or `int`
-        A python `slice(start, stop, step)` object of the slice to take.
+        The slice of the object to take. Either a single integer, or a
+        python `slice(start, stop, step)` object.
 
     Returns
     -------
@@ -41,6 +42,8 @@ def slice_obj(obj, the_slice: slice):
     tType = table_type(obj)
     if tType is NUMPY_DICT:
         return slice_dict(obj, the_slice)
+    if tType is PD_DATAFRAME:
+        return obj.iloc[the_slice]
     return obj[the_slice]
 
 
