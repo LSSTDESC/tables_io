@@ -1,4 +1,4 @@
-"""Concatanation functions for tables_io"""
+"""Concatenation functions for tables_io"""
 
 from collections import OrderedDict
 from typing import Union, Optional, List, Mapping
@@ -18,7 +18,7 @@ from ..types import (
 )
 
 
-### I. concatanating list of table-like objects
+### I. concatenating list of table-like objects
 
 
 # I A. Generic `concat`
@@ -91,7 +91,7 @@ def concat_objs(tableList: List, tType: Union[str, int]):
         ) from msg  # pragma: no cover
 
 
-### I B.  Multi-table concatanating
+### I B.  Multi-table concatenating
 
 
 def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
@@ -169,12 +169,12 @@ def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
 
 
 ### II. Concatenating specific data tables
-### II A. Concatanating `astropy.table.Table`
+### II A. Concatenating `astropy.table.Table`
 
 
 def concat_ap_tables(tablelist: List):
     """
-    Concatanate a list of `astropy.table.Table`
+    Concatenate a list of `astropy.table.Table`
 
     Parameters
     ----------
@@ -189,10 +189,10 @@ def concat_ap_tables(tablelist: List):
     return apTable.vstack(tablelist, join_type="outer")
 
 
-### II B. Concatanating dicts of numpy arrays
+### II B. Concatenating dicts of numpy arrays
 def concat_numpy_dicts(tablelist: List):
     """
-    Concatanate a list of `dicts` of `np.array` objects
+    Concatenate a list of `dicts` of `np.array` objects
 
     Parameters
     ----------
@@ -207,10 +207,10 @@ def concat_numpy_dicts(tablelist: List):
     return concatenate_dicts(tablelist)
 
 
-### II C. Concatanating numpy recarrays
+### II C. Concatenating numpy recarrays
 def concat_numpy_recarrays(tablelist: List):
     """
-    Concatanate a list of `dicts` of `np.recarray` objects
+    Concatenate a list of `dicts` of `np.recarray` objects
 
     Parameters
     ----------
@@ -225,10 +225,10 @@ def concat_numpy_recarrays(tablelist: List):
     return rfn.stack_arrays(tablelist)
 
 
-### II D. Concatanating pandas dataframes
+### II D. Concatenating pandas dataframes
 def concat_dataframes(tablelist: List):
     """
-    Concatanate a list of `pandas.DataFrame`
+    Concatenate a list of `pandas.DataFrame`
 
     Parameters
     ----------
@@ -243,10 +243,10 @@ def concat_dataframes(tablelist: List):
     return pd.concat(tablelist, join="outer", axis=0, ignore_index=True)
 
 
-### II E. Concatanating pyarrow tables
+### II E. Concatenating pyarrow tables
 def concat_pa_tables(tablelist: List):
     """
-    Concatanate a list of `pyarrow.Table` objects
+    Concatenate a list of `pyarrow.Table` objects
 
     Parameters
     ----------

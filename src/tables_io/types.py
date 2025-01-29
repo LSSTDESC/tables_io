@@ -3,7 +3,7 @@
 import os
 from collections import OrderedDict
 from collections.abc import Iterable, Mapping
-from typing import Union
+from typing import Union, Optional
 
 import numpy as np
 
@@ -128,7 +128,7 @@ def is_ap_table(obj):
     return False
 
 
-def table_type(obj):
+def table_type(obj) -> int:
     """Identify the type of table we have
 
     Parameters
@@ -178,7 +178,7 @@ def table_type(obj):
     return NUMPY_DICT
 
 
-def is_table_like(obj):
+def is_table_like(obj) -> bool:
     """Test to see if an object is one of the supported table types
 
     Parameters
@@ -198,7 +198,7 @@ def is_table_like(obj):
     return True
 
 
-def is_tabledict_like(obj):
+def is_tabledict_like(obj) -> bool:
     """Test to see if an object is a `Mapping`, (`str`, `Table-like`),
     or `TableDict-like`.
 
@@ -220,7 +220,7 @@ def is_tabledict_like(obj):
     return True
 
 
-def file_type(filepath, fmt=None):
+def file_type(filepath: str, fmt: Optional[str] = None) -> int:
     """Identify the type of file we have
 
     Parameters

@@ -3,9 +3,11 @@
 from collections import OrderedDict
 
 import numpy as np
+from numpy.typing import ArrayLike
+from typing import Optional, Mapping, Union, List
 
 
-def array_length(arr):
+def array_length(arr: ArrayLike) -> int:
     """Get the length of an array
 
     The works on scalars and arrays, so it is safe to use
@@ -29,7 +31,7 @@ def array_length(arr):
     return shape[0]
 
 
-def force_to_pandables(arr, check_nrow=None):
+def force_to_pandables(arr: ArrayLike, check_nrow: Optional[int] = None):
     """
     Forces a  `numpy.array` into a format that pandas can handle
 
@@ -62,7 +64,7 @@ def force_to_pandables(arr, check_nrow=None):
     return list(arr.reshape(nrow, ncol))
 
 
-def get_group_input_data_length(hg):
+def get_group_input_data_length(hg) -> int:
     """Return the length of a HDF5 group
 
     Parameters
@@ -98,7 +100,9 @@ def get_group_input_data_length(hg):
     return nrows
 
 
-def get_initialization_for_ODict(in_dict, nRow_out=None):
+def get_initialization_for_ODict(
+    in_dict: Mapping, nRow_out: Optional[int] = None
+) -> Mapping:
     """shape of arrays and dtypes in a dictionary.
     This is useful for initialize hdf5 files
 
@@ -122,7 +126,7 @@ def get_initialization_for_ODict(in_dict, nRow_out=None):
     return out_dict
 
 
-def print_dict_shape(in_dict):
+def print_dict_shape(in_dict: Mapping):
     """Print the shape of arrays in a dictionary.
     This is useful for debugging `astropy.Table` creation.
 
@@ -135,7 +139,7 @@ def print_dict_shape(in_dict):
         print(key, np.shape(val))
 
 
-def slice_dict(in_dict, subslice):
+def slice_dict(in_dict: Mapping, subslice: Union[int, slice]) -> Mapping:
     """Create a new `dict` by taking a slice of of every array in a `dict`
 
     Parameters
@@ -160,7 +164,7 @@ def slice_dict(in_dict, subslice):
     return out_dict
 
 
-def check_keys(in_dicts):
+def check_keys(in_dicts: List[Mapping]):
     """Check that the keys in all the in_dicts match
 
     Parameters
@@ -183,7 +187,7 @@ def check_keys(in_dicts):
             )
 
 
-def concatenate_dicts(in_dicts):
+def concatenate_dicts(in_dicts: List[Mapping]) -> Mapping:
     """Create a new `dict` by concatenating each array in `in_dicts`
 
     Parameters
