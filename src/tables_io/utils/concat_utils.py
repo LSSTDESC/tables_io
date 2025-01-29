@@ -57,6 +57,19 @@ def concat_objs(tableList: List, tType: Union[str, int]):
 
     Example
     -------
+
+    >>> import tables_io
+    >>> import pandas as pd
+    >>> df = pd.DataFrame({'col_1': [1,2,3], 'col_2':[3,4,5]})
+    >>> df_2 = pd.DataFrame({'col_2': [8,9], 'col_3': [10,11]})
+    >>> tables_io.concat_table([df,df_2],'pandasDataFrame')
+       col_1  col_2  col_3
+    0    1.0      3    NaN
+    1    2.0      4    NaN
+    2    3.0      5    NaN
+    3    NaN      8   10.0
+    4    NaN      9   11.0
+
     """
     funcDict = {
         AP_TABLE: concat_ap_tables,
@@ -89,6 +102,9 @@ def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
     final `TableDict-like` object will contain all unique `Table-like` objects (those with unique
     keys).
 
+    In order for this function to work, the first `TableDict-like` object must have all of the
+    keys that are found in the other `TableDict-like` objects.
+
     The concatenation will be of join type `outer`, which means that no data will be lost.
 
     Note: If concatenating `NUMPY_RECARRAY` objects, the output arrays will be masked arrays if
@@ -109,12 +125,35 @@ def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
 
     Example
     -------
-    ```
-    import tables_io
-    tabledict_1 = {'data1': data, 'data2': data}
-    tabledict_2 = {'data2': data, 'data3': data}
-    tables_io.concat([tabledict1, tabledict_2],)
-    ```
+
+    >>> import tables_io
+    >>> from astropy.table import Table
+    >>> odict_1 = OrderedDict([('tab_1', Table([[1.5,2.2],[5,3]],names=("x","y"))),
+    ... ('tab_2', Table([[1,2.4,4],[5,3,7]],names=("x","y")))])
+    >>> odict_2 = OrderedDict([('tab_1', Table([[5.2,7.6],[14,20],[8,16]],names=("x","y","z"))),
+    ... ('tab_2', Table([[8,9.1,3],[1,4,8]],names=("x","y")))])
+    >>> tables_io.concat([odict1, odict_2], ')
+    OrderedDict([('tab_1',
+              <Table length=4>
+                 x      y     z
+              float64 int64 int64
+              ------- ----- -----
+                  1.5     5    --
+                  2.2     3    --
+                  5.2    14     8
+                  7.6    20    16),
+             ('tab_2',
+              <Table length=6>
+                 x      y
+              float64 int64
+              ------- -----
+                  1.0     5
+                  2.4     3
+                  4.0     7
+                  8.0     1
+                  9.1     4
+                  3.0     8)])
+
     """
     odict_in = OrderedDict()
     first = True

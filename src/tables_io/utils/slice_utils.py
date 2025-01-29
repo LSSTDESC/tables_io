@@ -36,6 +36,7 @@ def slice_obj(obj, the_slice: slice):
         >>> tables_io.slice_table(df, slice(1,2))
            col1  col2
         1     2     4
+
     """
     tType = table_type(obj)
     if tType is NUMPY_DICT:
@@ -68,7 +69,7 @@ def slice_objs(odict: Mapping, the_slice: slice) -> Mapping:
         >>> import tables_io
         >>> from astropy.table import Table
         >>> odict = OrderedDict([('tab_1', Table([[1,2],[5,3]],names=("x","y"))),
-                                ('tab_2', Table([[1,2,4],[5,3,7]],names=("x","y")))])
+        ... ('tab_2', Table([[1,2,4],[5,3,7]],names=("x","y")))])
         >>> tables_io.slice(odict, slice(2,3))
         OrderedDict([('tab_1',
               <Table length=0>
@@ -81,5 +82,6 @@ def slice_objs(odict: Mapping, the_slice: slice) -> Mapping:
               int64 int64
               ----- -----
                   4     7)])
+
     """
     return OrderedDict([(k, slice_obj(v, the_slice)) for k, v in odict.items()])
