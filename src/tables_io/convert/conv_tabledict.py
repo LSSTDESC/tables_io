@@ -32,10 +32,10 @@ from ..types import (
 ### II.  Multi-table conversion utilities
 def convert(obj, tType: Union[str, int]):
     """
-    Converts `Tablelike` or `TableDictlike` objects to a specific tabular format.
+    Converts `Table-like` or `TableDict-like` objects to a specific tabular format.
     The given table format type must be one of the supported types. If given a
-    `TableDictlike` object, each of the `Tablelike` objects in it are converted to
-    the desired format. `convert_obj` is used to convert the `Tablelike` objects.
+    `TableDict-like` object, each of the `Table-like` objects in it are converted to
+    the desired format. `convert_obj` is used to convert the `Table-like` objects.
 
     Accepted table formats:
 
@@ -51,7 +51,7 @@ def convert(obj, tType: Union[str, int]):
 
     Parameters
     ----------
-    obj :  'Tablelike` or `TableDictlike`
+    obj :  'Table-like` or `TableDict-like`
         The input object.
 
     tType : `int` or `str`
@@ -59,7 +59,7 @@ def convert(obj, tType: Union[str, int]):
 
     Returns
     -------
-    out :  `Tablelike` or `TableDictlike`
+    out :  `Table-like` or `TableDict-like`
         The converted data
     """
     if is_table_like(obj):
@@ -91,7 +91,7 @@ def convert_to_ap_tables(odict: Mapping) -> Mapping:
 
     Parameters
     ----------
-    odict :  `Mapping`, (`str`, `Tablelike`)
+    odict :  `Mapping`, (`str`, `Table-like`)
         The input objects
 
     Returns
@@ -108,7 +108,7 @@ def convert_to_dicts(odict: Mapping) -> Mapping:
 
     Parameters
     ----------
-    odict :  `Mapping`, (`str`, `Tablelike`)
+    odict :  `Mapping`, (`str`, `Table-like`)
         The input objects
 
     Returns
@@ -125,7 +125,7 @@ def convert_to_recarrays(odict: Mapping) -> Mapping:
 
     Parameters
     ----------
-    odict :  `Mapping`, (`str`, `Tablelike`)
+    odict :  `Mapping`, (`str`, `Table-like`)
         The input objects
 
     Returns
@@ -142,7 +142,7 @@ def convert_to_pa_tables(odict: Mapping) -> Mapping:
 
     Parameters
     ----------
-    odict :  `Mapping`, (`str`, `Tablelike`)
+    odict :  `Mapping`, (`str`, `Table-like`)
         The input objects
 
     Returns
@@ -159,7 +159,7 @@ def convert_to_dataframes(odict: Mapping) -> Mapping:
 
     Parameters
     ----------
-    odict :  `Mapping`, (`str`, `Tablelike`)
+    odict :  `Mapping`, (`str`, `Table-like`)
         The input objects
 
     Returns

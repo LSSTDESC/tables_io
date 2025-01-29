@@ -24,7 +24,7 @@ from ..types import (
 # I A. Generic `concat`
 def concat_objs(tableList: List, tType: Union[str, int]):
     """
-    Vertically concatenates a list of `Tablelike` objects. The concatenation
+    Vertically concatenates a list of `Table-like` objects. The concatenation
     is performed as an `outer` join, where no data is lost.
 
     Note: When concatenating `NUMPY_RECARRAY` objects, the output arrays will be masked
@@ -52,7 +52,7 @@ def concat_objs(tableList: List, tType: Union[str, int]):
 
     Returns
     -------
-    tab : `Tablelike`
+    tab : `Table-like`
         The concatenated table
 
     Example
@@ -83,10 +83,10 @@ def concat_objs(tableList: List, tType: Union[str, int]):
 
 def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
     """
-    Vertically concatenates a list of `TableDict-like` objects. Each `Tablelike` object
-    in a `TableDict-like` object will be concatenated with any matching `Tablelike` objects
+    Vertically concatenates a list of `TableDict-like` objects. Each `Table-like` object
+    in a `TableDict-like` object will be concatenated with any matching `Table-like` objects
     in the other `TableDict-like` objects (where matching means they have the same key). The
-    final `TableDict-like` object will contain all unique `Tablelike` objects (those with unique
+    final `TableDict-like` object will contain all unique `Table-like` objects (those with unique
     keys).
 
     The concatenation will be of join type `outer`, which means that no data will be lost.
@@ -103,8 +103,8 @@ def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
 
     Returns
     -------
-    tabs : `OrderedDict` of `table-like`
-        A `TableDict-like` object of the concatenated `Tablelike` objects
+    tabs : `OrderedDict` of `Table-like`
+        A `TableDict-like` object of the concatenated `Table-like` objects
 
 
     Example

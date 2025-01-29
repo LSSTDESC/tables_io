@@ -20,14 +20,14 @@ from ..types import (
     tType_to_int,
 )
 
-### I. Single `Tablelike` conversions
+### I. Single `Table-like` conversions
 
 # I A. Generic `convert`
 
 
 def convert_obj(obj, tType: Union[str, int]):
     """
-    Convert a `Tablelike` object to a specific tabular format.
+    Convert a `Table-like` object to a specific tabular format.
 
     Accepted table formats:
 
@@ -43,14 +43,14 @@ def convert_obj(obj, tType: Union[str, int]):
 
     Parameters
     ----------
-    obj : `Tablelike`
+    obj : `Table-like`
        The object being converted
     tType : `int` or `str`
        The type of object to convert to, one of `TABULAR_FORMAT_NAMES.keys()`
 
     Returns
     -------
-    out :  `Tablelike`
+    out :  `Table-like`
         The converted object
     """
 

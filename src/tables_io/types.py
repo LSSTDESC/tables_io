@@ -188,8 +188,8 @@ def is_table_like(obj):
 
     Returns
     -------
-    tablelike : `bool`
-        True is the object is `Tablelike`, False otherwise
+    table-like : `bool`
+        True is the object is `Table-like`, False otherwise
     """
     try:
         _ = table_type(obj)
@@ -199,7 +199,8 @@ def is_table_like(obj):
 
 
 def is_tabledict_like(obj):
-    """Test to see if an object is a `Mapping`, (`str`, `Tablelike`)
+    """Test to see if an object is a `Mapping`, (`str`, `Table-like`),
+    or `TableDict-like`.
 
     Parameters
     ----------
@@ -209,7 +210,7 @@ def is_tabledict_like(obj):
     Returns
     -------
     tabledict : `bool`
-        True is the object is a `Mapping`, (`str`, `Tablelike`), False otherwise
+        True is the object is a `Mapping`, (`str`, `Table-like`), False otherwise
     """
     if not isinstance(obj, Mapping):
         return False

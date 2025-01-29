@@ -36,7 +36,7 @@ from ..types import (
 
 
 def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
-    """Writes `Tablelike` or `TableDictlike` objects to a file or files. If the format (`fmt`) is given,
+    """Writes `Table-like` or `TableDict-like` objects to a file or files. If the format (`fmt`) is given,
     or the file has a suffix, the function will convert the given data to the associated tabular type,
     and then write out the file as the requested type. If no file type is requested, the function will
     use `write_native` to write the file to the default file type for the tabular type.
@@ -45,7 +45,7 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
 
     Parameters
     ----------
-    obj : `Tablelike` or `TableDictLike`
+    obj : `Table-like` or `TableDict-like`
         The data to write
     filepath : `str`
         File name for the file to write. If there's no suffix, it will be applied based on the object type.
@@ -126,9 +126,9 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
 
 
 def write_native(odict, filepath: str) -> Optional[str]:
-    """Writes `Tablelike` or `TableDictlike` objects to a file or files. The file type will be determined
+    """Writes `Table-like` or `TableDict-like` objects to a file or files. The file type will be determined
     by the default file type given the tabular format. The supported file types are:
-    [ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_PARQUET, PYARROW_PARQUET].
+    [ASTROPY_HDF5 (".hf5"), NUMPY_HDF5 (".hdf5"), NUMPY_FITS (".fit"), PANDAS_PARQUET (".parq"), PYARROW_PARQUET (".parquet")].
 
     To write to a specific file format, use `write` instead.
 
@@ -136,7 +136,7 @@ def write_native(odict, filepath: str) -> Optional[str]:
 
     Parameters
     ----------
-    odict : `Tablelike` or `TableDictLike`
+    odict : `Table-like` or `TableDict-like`
         The data to write
     filepath : `str`
         File name for the file to write. If there's no suffix, it will be applied based on the object type.
@@ -363,7 +363,7 @@ def initialize_HDF5_write(filepath: str, comm=None, **kwds):
 
 
 def write_dict_to_HDF5_chunk_single(fout, odict: Mapping, start: int, end: int, **kwds):
-    """Writes a data chunk from a `Tablelike` object to an hdf5 file
+    """Writes a data chunk from a `Table-like` object to an hdf5 file
 
     Parameters
     ----------
@@ -399,7 +399,7 @@ def write_dict_to_HDF5_chunk_single(fout, odict: Mapping, start: int, end: int, 
 
 
 def write_dict_to_HDF5_chunk(groups, odict: Mapping, start: int, end: int, **kwds):
-    """Writes a data chunk from an `OrderedDict` or `TableDictlike` object to an hdf5 file in groups.
+    """Writes a data chunk from an `OrderedDict` or `TableDict-like` object to an hdf5 file in groups.
 
     Parameters
     ----------
@@ -418,16 +418,18 @@ def write_dict_to_HDF5_chunk(groups, odict: Mapping, start: int, end: int, **kwd
     Notes
     -----
     The kwds can be used to control the output locations, i.e., to
-    rename the columns in data_dict when they go into the output file.
+    rename the columns in the input data when they go into the output file.
+    The format of `kwds` should be `old_key = new_key`, where `old_key` is the
+    key to be replaced by `new_key`.
 
-    For each item in data_dict, the output location is set as
+    For each item in the input data, the output location is set as
 
     `k_out = kwds.get(key, key)`
 
     This will check the kwds to see if they contain `key` and if so, will
     return the corresponding value.  Otherwise it will just return `key`.
 
-    I.e., if `key` is present in kwds in will override the name.
+    I.e., if `key` is present in kwds it will override the name.
     """
     for group_name, group in groups.items():
         for key, val in odict[group_name].items():
@@ -580,13 +582,13 @@ def write_dict_to_HDF5(
 
 def write_dicts_to_HDF5(odicts: Mapping, filepath: str):
     """
-    Writes a `TableDictlike` object, a `OrderedDict` of dictionaries of `numpy.array`, to a single hdf5 file.
+    Writes a `TableDict-like` object, a `OrderedDict` of dictionaries of `numpy.array`, to a single hdf5 file.
 
     Note: This will remove any previously existing files at the filepath.
 
     Parameters
     ----------
-    odicts : `OrderedDict`, (`str`, `Tablelike`)
+    odicts : `OrderedDict`, (`str`, `Table-like`)
         The data being written
 
     filepath: `str`

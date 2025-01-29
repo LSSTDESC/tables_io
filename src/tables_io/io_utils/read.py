@@ -47,14 +47,14 @@ def read(
     allow_missing_keys: bool = False,
     **kwargs,
 ):
-    """Reads in a given file to either a `Tablelike` format if there is one table within the file,
-    or a `TableDictlike` format if there are multiple tables or files. Uses `read_native` to read the file.
+    """Reads in a given file to either a `Table-like` format if there is one table within the file,
+    or a `TableDict-like` format if there are multiple tables or files. Uses `read_native` to read the file.
 
-    The `TableDictlike` format is an `OrderedDict` of `Tablelike` objects. The `Tablelike` objects
+    The `TableDict-like` format is an `OrderedDict` of `Table-like` objects. The `Table-like` objects
     currently supported are: astropy Table, numpy recarray, `OrderedDict` of numpy arrays, pandas DataFrame,
     and pyarrow table.
 
-    If given just the filepath, the function will read any tables in the file to its default `Tablelike`
+    If given just the filepath, the function will read any tables in the file to its default `Table-like`
     format in memory. If given a specific tabular type, the function will read in the file to the default
     type and then convert to the requested type.
 
@@ -79,9 +79,9 @@ def read(
     filepath : `str`
         Full path to the file to load
     tType : `int`, `str` or `None`
-        Table type, if `None` the default table type will be used. List table types?
+        Table type, if `None` the default table type will be used.
     fmt : `str` or `None`
-        File format, if `None` it will be taken from the file extension. List file extensions?
+        File format, if `None` it will be taken from the file extension.
     keys : `list` or `None`
         This argument is required for reading multiple associated parquet files.
         The keys should be the unique identifiers for each dataset or file.
@@ -91,13 +91,13 @@ def read(
 
     Returns
     -------
-    data : `OrderedDict` ( `str` -> `Tablelike` )
+    data : `OrderedDict` ( `str` -> `Table-like` )
         The data
 
     Example
     -------
 
-        For a single `Tablelike` object, we can read it in as follows:
+        For a single `Table-like` object, we can read it in as follows:
 
         >>> import tables_io
         >>> df = tables_io.read('filename.h5')
@@ -155,7 +155,7 @@ def read_native(
     The format of the file is either given by `fmt`, or determined based on the `suffix` of
     the file path. This determines what tabular format the file is read in as. In all cases,
     the data from the file is returned as an `OrderedDict` or `TableDict-like` object, with
-    `str` keys and `Tablelike` values. The `Tablelike` values can either be astropy Tables,
+    `str` keys and `Table-like` values. The `Table-like` values can either be astropy Tables,
     numpy recarrays, an `OrderedDict` of numpy arrays, a pandas dataframe, or a pyarrow table.
 
     List available file formats?
@@ -175,7 +175,7 @@ def read_native(
 
     Returns
     -------
-    data : `OrderedDict` ( `str` -> `Tablelike` )
+    data : `OrderedDict` ( `str` -> `Table-like` )
         The data
 
     Example
@@ -282,8 +282,8 @@ def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
     -------
     File object. One of `pyarrow.parquet.ParquetFile`, `h5py.File` or `astropy.io.fits.HDUList`.
 
-    Example:
-    --------
+    Example
+    -------
 
     For example, to read in a sample `fits` file:
 
@@ -293,6 +293,7 @@ def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
     No.    Name      Ver    Type      Cards   Dimensions   Format
       0  PRIMARY       1 PrimaryHDU       4   ()
       1  DF            1 BinTableHDU     37   10R x 14C   [K, E, E, E, E, E, E, E, E, E, E, E, E, D]
+
     """
     fType = file_type(filepath, fmt)
     if fType in [ASTROPY_FITS, NUMPY_FITS]:

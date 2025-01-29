@@ -11,12 +11,12 @@ from ..types import NUMPY_DICT, table_type
 # I F. Generic `slice`
 def slice_obj(obj, the_slice: slice):
     """
-    Slice a `Tablelike` object. The slice must be supplied as a python `slice()`
+    Slice a `Table-like` object. The slice must be supplied as a python `slice()`
     object. In some cases, an `int` will work.
 
     Parameters
     ----------
-    obj :  `tablelike`
+    obj :  `table-like`
         Table like object to slice
 
     the_slice: `slice` or `int`
@@ -44,13 +44,13 @@ def slice_obj(obj, the_slice: slice):
 
 
 def slice_objs(odict: Mapping, the_slice: slice) -> Mapping:
-    """Slice many `Tablelike` objects inside a `TableDictlike` object.
-    This will take the same slice from each of the `Tablelike` objects,
-    and return a `TableDictlike` object with those slices.
+    """Slice many `Table-like` objects inside a `TableDict-like` object.
+    This will take the same slice from each of the `Table-like` objects,
+    and return a `TableDict-like` object with those slices.
 
     Parameters
     ----------
-    odict :  `TableDictlike`
+    odict :  `TableDict-like`
        Dictionary of objects to slice
 
     the_slice: `slice`
@@ -59,7 +59,7 @@ def slice_objs(odict: Mapping, the_slice: slice) -> Mapping:
 
     Returns
     -------
-    odict : `TableDictlike`
+    odict : `TableDict-like`
         The sliced tables
 
     Example

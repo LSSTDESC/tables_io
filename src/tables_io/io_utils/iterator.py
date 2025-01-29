@@ -49,7 +49,7 @@ def iterator(
     **kwargs,
 ):
     """Iterates through the data in a given file. The data is yielded (along with
-    the start and stop index) as a `Tablelike` object. If no `tType` is given,
+    the start and stop index) as a `Table-like` object. If no `tType` is given,
     the tabular format will be the default for that file type. If `tType` is given,
     the tabular format will be converted to that table type.
 
@@ -79,12 +79,23 @@ def iterator(
         Table type, if `None` this will use `readNative`
     fmt : `str` or `None`
         File format, if `None` it will be taken from the file extension
-    chunk_size: int
-        The size of data chunk to iterate over, by default 100,000
-    rank: int
-        The rank of this process under MPI, by default 0
-    parallel_size: int
-        The number of processes under MPI, by default 1
+    chunk_size: int, by default 100,000
+        The size of data chunk to iterate over
+    rank: int, by default 0
+        The rank of this process under MPI
+    parallel_size: int, by default 1
+        The number of processes under MPI
+
+    Returns
+    -------
+    start: int
+        The starting index for the data.
+    stop: int
+        The end index for the data.
+    data : Table-like
+        The data from [start:stop]. The format will be the native tabular format for the file
+        if no `tType` is given. Otherwise, the data will be in the tabular format `tType`.
+
 
     Optional **kwargs
     -----------------
@@ -94,15 +105,6 @@ def iterator(
         For parquet files, the names of the columns to read.
         `None` will read all the columns
 
-    Returns
-    -------
-    start: int
-        The starting index for the data.
-    stop: int
-        The end index for the data.
-    data : Tablelike
-        The data from [start:stop]. The format will be the native tabular format for the file
-        if no `tType` is given. Otherwise, the data will be in the tabular format `tType`.
 
     """
     # convert tType to int if necessary
@@ -123,7 +125,7 @@ def iterator_native(
     **kwargs,
 ):
     """Iterates through the data in a given file. The data is yielded (along with
-    the start and stop index) as a `Tablelike` object that has the default format
+    the start and stop index) as a `Table-like` object that has the default format
     for the given file type.
 
     Any **kwargs are passed to the specific iterator function for the file type.
@@ -134,12 +136,22 @@ def iterator_native(
         File to load
     fmt : `str` or `None`
         File format, if `None` it will be taken from the file extension. By default `None`.
-    chunk_size: int
-        The size of data chunk to iterate over, by default 100,000
-    rank: int
-        The rank of this process under MPI, by default 0
-    parallel_size: int
-        The number of processes under MPI, by default 1
+    chunk_size: int, by default 100,000
+        The size of data chunk to iterate over
+    rank: int, by default 0
+        The rank of this process under MPI
+    parallel_size: int, by default 1
+        The number of processes under MPI
+
+    Returns
+    -------
+    start: int
+        Data start index
+    stop: int
+        Data ending index
+    data : `Table-like`
+        The data in the native type for that file, from [start:stop]
+
 
     Optional **kwargs
     -----------------
@@ -148,17 +160,6 @@ def iterator_native(
     columns : list of `str` or `None`
         For parquet files, the names of the columns to read.
         `None` will read all the columns
-
-    Returns
-    -------
-    start: int
-        Data start index
-    stop: int
-        Data ending index
-    data : `TableLike`
-        The data in the native type for that file, from [start:stop]
-
-
     """
     fType = file_type(filepath, fmt)
     funcDict = {
@@ -210,7 +211,7 @@ def get_input_data_length(filepath: str, fmt: Optional[str] = None, **kwargs):
 
     Returns
     -------
-    data : `TableLike`
+    data : `Table-like`
         The data
 
     Notes
@@ -288,12 +289,12 @@ def iter_HDF5_to_dict(
         The input filepath
     groupname: str
         The group name where the data is, by default None.
-    chunk_size: int
-        The size of data chunk to iterate over, by default 100,000
-    rank: int
-        The rank of this process under MPI, by default 0
-    parallel_size: int
-        The number of processes under MPI, by default 1
+    chunk_size: int, by default 100,000
+        The size of data chunk to iterate over
+    rank: int, by default 0
+        The rank of this process under MPI
+    parallel_size: int, by default 1
+        The number of processes under MPI
 
     Yields
     -------
@@ -373,8 +374,8 @@ def iter_pq_to_dataframe(
     ----------
     filepath: str
         path to input file
-    chunk_size: int
-        The maximum chunk size of the data, by default = 100,000
+    chunk_size: int, by default = 100,000
+        The maximum chunk size of the data
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
     **kwargs : additional arguments to pass to the parquet read_table function
