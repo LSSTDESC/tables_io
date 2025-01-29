@@ -74,4 +74,3 @@ sliceObj = slice_utils.slice_obj
 sliceObjs = slice_utils.slice_objs
 """This function is being deprecated, please see `slice_table` instead"""
 slice = slice_utils.slice_objs
-# TODO: Should this even exist?

@@ -8,19 +8,10 @@ from typing import Optional, Union, Mapping, List
 import numpy as np
 
 from .read import read_HDF5_group, read_HDF5_dataset_to_array
-from ..utils.array_utils import get_group_input_data_length, force_to_pandables
+from ..utils.array_utils import get_group_input_data_length
 from ..convert.conv_tabledict import convert
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
 from ..types import (
-    AP_TABLE,
-    ASTROPY_FITS,
-    ASTROPY_HDF5,
-    DEFAULT_TABLE_KEY,
-    FILE_FORMAT_SUFFIX_MAP,
-    FILE_FORMAT_SUFFIXS,
-    NATIVE_FORMAT,
-    NATIVE_TABLE_TYPE,
-    NUMPY_FITS,
     NUMPY_HDF5,
     PA_TABLE,
     PANDAS_HDF5,
@@ -30,9 +21,6 @@ from ..types import (
     PD_DATAFRAME,
     tType_to_int,
     file_type,
-    is_tabledict_like,
-    is_table_like,
-    table_type,
 )
 
 
@@ -285,24 +273,24 @@ def iter_HDF5_to_dict(
 
     Parameters
     ----------
-    filepath: str
+    filepath: `str`
         The input filepath
-    groupname: str
+    groupname: `str`
         The group name where the data is, by default None.
-    chunk_size: int, by default 100,000
+    chunk_size: `int`, by default 100,000
         The size of data chunk to iterate over
-    rank: int, by default 0
+    rank: `int`, by default 0
         The rank of this process under MPI
-    parallel_size: int, by default 1
+    parallel_size: `int`, by default 1
         The number of processes under MPI
 
     Yields
     -------
-    start: int
+    start: `int`
         Data start index
-    end: int
+    end: `int`
         Data ending index
-    data: dict
+    data: `dict`
         `OrderedDict` of `np.array` of all data from start:end
     """
     if rank >= parallel_size:
@@ -333,9 +321,9 @@ def iter_HDF5_to_dataframe(
 
     Parameters
     ----------
-    filepath: str
+    filepath: `str`
         input file name
-    chunk_size: int
+    chunk_size: `int`
         size of chunk to iterate over
 
     Returns
@@ -372,9 +360,9 @@ def iter_pq_to_dataframe(
 
     Parameters
     ----------
-    filepath: str
+    filepath: `str`
         path to input file
-    chunk_size: int, by default = 100,000
+    chunk_size: `int`, by default = 100,000
         The maximum chunk size of the data
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
@@ -382,9 +370,9 @@ def iter_pq_to_dataframe(
 
     Yields
     ------
-    start: int
+    start: `int`
         Data start index
-    end: int
+    end: `int`
         Data ending index
     data: `pandas.DataFrame`
         DataFrame of all data from start:end
@@ -454,19 +442,19 @@ def iter_ds_to_table(
 
     Parameters
     ----------
-    source: str
+    source: `str`
         input file name
-    columns: List[str], default None
+    columns: `List[str]`, default `None`
         The list of columns to use
-    chunk_size: int
+    chunk_size: `int`
         The maximum size of the batches to be read in
     **kwargs : additional arguments to pass to the pyarrow.dataset.to_batches() function
 
     Yields
     ------
-    start: int
+    start: `int`
         Data start index
-    end: int
+    end: `int`
         Data ending index
     data: `pyarrow.Table`
         table of all data from start:end
@@ -518,14 +506,14 @@ def split_tasks_by_rank(
     ----------
     tasks: iterator
         Tasks to split up
-    parallel_size: int
+    parallel_size: `int`
         The number of processes under MPI
-    rank: int
+    rank: `int`
         The rank of this process under MPI
 
     Yields
     -------
-    task: int
+    task: `int`
         The number of the first task for this process
     """
     for i, task in enumerate(tasks):
@@ -543,20 +531,20 @@ def data_ranges_by_rank(
 
     Parameters
     ----------
-    n_rows: int
+    n_rows: `int`
         Total number of rows to split up
-    chunk_rows: int
+    chunk_rows: `int`
         Size of each chunk to be read
-    parallel_size: int
+    parallel_size: `int`
         The number of processes under MPI
-    rank: int
+    rank: `int`
         The rank of this process under MPI
 
     Yields
     ------
-    start: int
+    start: `int`
         Data start index
-    end: int
+    end: `int`
         Data ending index
     """
     n_chunks = n_rows // chunk_rows

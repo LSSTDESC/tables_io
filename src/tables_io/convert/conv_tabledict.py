@@ -33,9 +33,11 @@ from ..types import (
 def convert(obj, tType: Union[str, int]):
     """
     Converts `Table-like` or `TableDict-like` objects to a specific tabular format.
-    The given table format type must be one of the supported types. If given a
-    `TableDict-like` object, each of the `Table-like` objects in it are converted to
-    the desired format. `convert_obj` is used to convert the `Table-like` objects.
+    The given table format type must be one of the supported types listed below.
+
+    If given a `TableDict-like` object, each of the `Table-like` objects in it are
+    converted to the desired format. `convert_obj` is used to convert the `Table-like`
+    objects.
 
     Accepted table formats:
 
@@ -55,12 +57,30 @@ def convert(obj, tType: Union[str, int]):
         The input object.
 
     tType : `int` or `str`
-        One of `TABULAR_FORMAT_NAMES.keys()`
+        The table format to convert to.
 
     Returns
     -------
     out :  `Table-like` or `TableDict-like`
-        The converted data
+        The converted data.
+
+    Example
+    -------
+
+    Converting a `Table-like` object, in this case an `astropy.table.Table` object,
+    to a `pyarrow.Table` object:
+
+    >>> import tables_io
+    >>> from astropy.table import Table
+    >>> tab = Table([[1,2], [3,4]],names=('x','y'))
+    >>> tables_io.convert(tab,'pyarrowTable')
+    pyarrow.Table
+    x: int64
+    y: int64
+    ----
+    x: [[1,2]]
+    y: [[3,4]]
+
     """
     if is_table_like(obj):
         return convert_obj(obj, tType)

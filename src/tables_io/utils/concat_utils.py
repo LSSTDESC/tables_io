@@ -112,7 +112,7 @@ def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
 
     Parameters
     ----------
-    odictlist :  `list`, 'TableDict-like'
+    odictlist :  `list` of 'TableDict-like'
         The input objects
     tType: `str` or `int`
         The tabular format of the tables given.

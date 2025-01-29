@@ -46,7 +46,7 @@ def convert_obj(obj, tType: Union[str, int]):
     obj : `Table-like`
        The object being converted
     tType : `int` or `str`
-       The type of object to convert to, one of `TABULAR_FORMAT_NAMES.keys()`
+       The type of object to convert to
 
     Returns
     -------
@@ -379,6 +379,18 @@ def ap_table_to_dataframe(tab):
 
 
 def pa_table_to_dataframe(table):
+    """Converts `pyarrow.Table` object to a `pandas.DataFrame` object.
+
+    Parameters
+    ----------
+    table : `pyarrow.Table`
+        Input table
+
+    Returns
+    -------
+    df : `pandas.DataFrame`
+        The converted dataframe.
+    """
     df = table.to_pandas()
     return df
 

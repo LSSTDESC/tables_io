@@ -317,7 +317,7 @@ def check_columns(
     the columns specified in a provided list. If not, an error will be raised.
 
     * For FITS files, columns across all extensions will be checked at one time.
-    * For HDF files, columns only within a single level of the specified parent_groupname
+    * For HDF5 files, only columns within a single level of the specified parent_groupname
     will be checked.
 
     Note: If more columns are available in the file than specified in the list,
@@ -334,8 +334,6 @@ def check_columns(
     parent_groupname: `str` or `None`
         For hdf5 files, the groupname for the data
     """
-
-    # TODO: Figure out if this function is working the way it's expected to
 
     fType = file_type(filepath, fmt)
 
