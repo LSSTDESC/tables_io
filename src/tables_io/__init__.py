@@ -62,8 +62,8 @@ concat_table = concat_utils.concat_table
 concatObjs = concat_utils.concat_table
 """This function is being deprecated, please see `concat_table` instead"""
 concat = concat_utils.concat_tabledict
-concat_tabledict = concat_utils.concat_tabledict
 """This function is being deprecated, please see `concat_tabledict` instead"""
+concat_tabledict = concat_utils.concat_tabledict
 
 
 #

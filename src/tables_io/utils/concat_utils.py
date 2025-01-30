@@ -161,7 +161,7 @@ def concat_tabledict(odictlist: List[Mapping], tType: Union[str, int]) -> Mappin
             else:
                 odict_in[key].append(val)
 
-    return OrderedDict([(k, concat_objs(v, tType)) for k, v in odict_in.items()])
+    return OrderedDict([(k, concat_table(v, tType)) for k, v in odict_in.items()])
 
 
 ### II. Concatenating specific data tables

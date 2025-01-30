@@ -87,4 +87,4 @@ def slice_tabledict(odict: Mapping, the_slice: slice) -> Mapping:
                   4     7)])
 
     """
-    return OrderedDict([(k, slice_obj(v, the_slice)) for k, v in odict.items()])
+    return OrderedDict([(k, slice_table(v, the_slice)) for k, v in odict.items()])
