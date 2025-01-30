@@ -7,23 +7,23 @@ from tables_io import types, convert, convertObj
 from tests.testUtils import compare_table_dicts, check_deps
 from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
+# Moved to test_lazy_modules
+# @pytest.mark.parametrize(
+#     "mod",
+#     [tables, apTable, apDiffUtils, fits, h5py, pd, pq],
+# )
+# def test_deps(mod):
+#     assert check_deps([mod])
 
-@pytest.mark.parametrize(
-    "mod",
-    [tables, apTable, apDiffUtils, fits, h5py, pd, pq],
-)
-def test_deps(mod):
-    assert check_deps([mod])
+# Moved to test_lazy_modules
+# @pytest.mark.skipif(not check_deps([jnp]), reason="Failed to load jax.numpy")
+# def test_deps_jnp():
+#     assert check_deps([jnp])
 
-
-@pytest.mark.skipif(not check_deps([jnp]), reason="Failed to load jax.numpy")
-def test_deps_jnp():
-    assert check_deps([jnp])
-
-
-def test_bad_deps():
-    dummy = 0
-    assert not check_deps([dummy])
+# Moved to test_lazy_modules
+# def test_bad_deps():
+#     dummy = 0
+#     assert not check_deps([dummy])
 
 
 @pytest.mark.skipif(
