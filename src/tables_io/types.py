@@ -158,8 +158,7 @@ def table_type(obj) -> int:
         return NUMPY_RECARRAY
     if not isinstance(obj, Mapping):
         raise TypeError(
-            f"Object of type {type(obj)} is not one of the supported types"
-            f"Must be one of {list(TABULAR_FORMAT_NAMES.keys())}"
+            f"Object of type {type(obj)} is not one of the supported types. \n Must be one of {list(TABULAR_FORMAT_NAMES.keys())}"
         )
 
     nRow = None

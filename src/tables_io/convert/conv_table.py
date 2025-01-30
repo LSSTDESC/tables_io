@@ -58,17 +58,42 @@ def convert_obj(obj, tType: Union[str, int]):
     int_tType = tType_to_int(tType)
 
     if int_tType == AP_TABLE:
-        return convert_to_ap_table(obj)
+        try:
+            return convert_to_ap_table(obj)
+        except Exception as e:
+            raise RuntimeError(
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} . \n Object to convert: {obj}"
+            ) from e
     if int_tType == NUMPY_DICT:
-        return convert_to_dict(obj)
+        try:
+            return convert_to_dict(obj)
+        except Exception as e:
+            raise RuntimeError(
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} . \n Object to convert: {obj}"
+            ) from e
     if int_tType == NUMPY_RECARRAY:
-        return convert_to_recarray(obj)
+        try:
+            return convert_to_recarray(obj)
+        except Exception as e:
+            raise RuntimeError(
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} . \n Object to convert: {obj}"
+            ) from e
     if int_tType == PA_TABLE:
-        return convert_to_pa_table(obj)
+        try:
+            return convert_to_pa_table(obj)
+        except Exception as e:
+            raise RuntimeError(
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} . \n Object to convert: {obj}"
+            ) from e
     if int_tType == PD_DATAFRAME:
-        return convert_to_dataframe(obj)
+        try:
+            return convert_to_dataframe(obj)
+        except Exception as e:
+            raise RuntimeError(
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} . \n Object to convert: {obj}"
+            ) from e
     raise TypeError(
-        f"Unsupported tableType {int_tType} ({TABULAR_FORMATS[int_tType]})"
+        f"Cannot convert to unsupported tableType {TABULAR_FORMATS[int_tType]} ({int_tType})"
     )  # pragma: no cover
 
 
@@ -147,7 +172,7 @@ def convert_to_ap_table(obj):
         # try this: apTable.from_pandas(obj)
         return data_frame_to_ap_table(obj)
     raise TypeError(
-        f"Unsupported Table Type {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
+        f"Table is an unsupported Table Type {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )  # pragma: no cover
 
 
@@ -280,7 +305,7 @@ def convert_to_dict(obj):
     if tType == PD_DATAFRAME:
         return dataframe_to_dict(obj)
     raise TypeError(
-        f"Unsupported TableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
+        f"Could not convert table because it is an unsupported TableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )  # pragma: no cover
 
 
@@ -347,7 +372,7 @@ def convert_to_recarray(obj):
     if tType == PA_TABLE:
         return ap_table_to_recarray(pa_table_to_ap_table(obj))
     raise TypeError(
-        f"Unsupported TableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
+        f"Could not convert table because it is an unsupported TableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )  # pragma: no cover
 
 
@@ -449,7 +474,7 @@ def convert_to_dataframe(obj):
     if tType == PD_DATAFRAME:
         return obj
     raise TypeError(
-        f"Unsupported tableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
+        f"Could not convert table because it is an unsupported tableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )  # pragma: no cover
 
 
@@ -556,5 +581,5 @@ def convert_to_pa_table(obj):
     if tType == PA_TABLE:
         return obj
     raise TypeError(
-        f"Unsupported tableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
+        f"Could not convert table because it is an unsupported tableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )  # pragma: no cover
