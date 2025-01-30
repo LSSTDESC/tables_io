@@ -9,7 +9,7 @@ from ..types import NUMPY_DICT, PD_DATAFRAME, table_type
 
 
 # I F. Generic `slice`
-def slice_obj(obj, the_slice: slice):
+def slice_table(obj, the_slice: slice):
     """
     Slice a `Table-like` object. The slice may be supplied as a single integer,
     or as a python `slice(start,stop,step)` object.
@@ -47,7 +47,7 @@ def slice_obj(obj, the_slice: slice):
     return obj[the_slice]
 
 
-def slice_objs(odict: Mapping, the_slice: slice) -> Mapping:
+def slice_tabledict(odict: Mapping, the_slice: slice) -> Mapping:
     """Slice many `Table-like` objects inside a `TableDict-like` object.
     This will take the same slice from each of the `Table-like` objects,
     and return a `TableDict-like` object with those slices.

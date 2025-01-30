@@ -58,19 +58,21 @@ iterator = io_utils.iterator.iterator
 # Concatenation Functions
 #
 
-concat_table = concat_utils.concat_objs
-concatObjs = concat_utils.concat_objs
+concat_table = concat_utils.concat_table
+concatObjs = concat_utils.concat_table
 """This function is being deprecated, please see `concat_table` instead"""
-concat = concat_utils.concat
+concat = concat_utils.concat_tabledict
+concat_tabledict = concat_utils.concat_tabledict
+"""This function is being deprecated, please see `concat_tabledict` instead"""
 
 
 #
 # Slicing Functions
 #
 
-slice_table = slice_utils.slice_obj
-sliceObj = slice_utils.slice_obj
+slice_table = slice_utils.slice_table
+sliceObj = slice_utils.slice_table
 """This function is being deprecated, please see `slice_table` instead"""
-sliceObjs = slice_utils.slice_objs
+sliceObjs = slice_utils.slice_tabledict
 """This function is being deprecated, please see `slice_table` instead"""
-slice = slice_utils.slice_objs
+slice_tabldict = slice_utils.slice_tabledict

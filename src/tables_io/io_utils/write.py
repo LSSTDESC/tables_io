@@ -103,22 +103,33 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
         else:
             fullpath = f"{filepath}.{fmt}"
 
-        return write_native(forcedOdict, fullpath)
+        try:
+            return write_native(forcedOdict, fullpath)
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to write table to '{fullpath}' as  {FILE_FORMATS[fType]}."
+            ) from e
 
     if not os.path.splitext(filepath)[1]:
         filepath = filepath + "." + fmt
-    if fType == ASTROPY_FITS:
-        forcedOdict = convert(odict, AP_TABLE)
-        write_ap_tables_to_fits(forcedOdict, filepath)
-        return filepath
-    if fType == PANDAS_HDF5:
-        forcedOdict = convert(odict, PD_DATAFRAME)
-        write_dataframes_to_HDF5(forcedOdict, filepath)
-        return filepath
-    if fType == PYARROW_HDF5:
-        forcedPaTables = convert(odict, PA_TABLE)
-        write_tables_to_HDF5(forcedPaTables, filepath)
-        return filepath
+
+    try:
+        if fType == ASTROPY_FITS:
+            forcedOdict = convert(odict, AP_TABLE)
+            write_ap_tables_to_fits(forcedOdict, filepath)
+            return filepath
+        if fType == PANDAS_HDF5:
+            forcedOdict = convert(odict, PD_DATAFRAME)
+            write_dataframes_to_HDF5(forcedOdict, filepath)
+            return filepath
+        if fType == PYARROW_HDF5:
+            forcedPaTables = convert(odict, PA_TABLE)
+            write_tables_to_HDF5(forcedPaTables, filepath)
+            return filepath
+    except Exception as e:
+        raise RuntimeError(
+            f"Failed to write table to '{filepath}' as {FILE_FORMATS[fType]}."
+        ) from e
 
     raise TypeError(
         f"Unsupported File type {fType}. Supported types are: {list(FILE_FORMATS.values())}"
@@ -166,7 +177,7 @@ def write_native(odict, filepath: str) -> Optional[str]:
     elif not odict:  # pragma: no cover
         return None
     else:  # pragma: no cover
-        raise TypeError(f"Can not write object of type {type(odict)}")
+        raise TypeError(f"Cannot write object of type {type(odict)}")
 
     try:
         fType = NATIVE_FORMAT[tType]

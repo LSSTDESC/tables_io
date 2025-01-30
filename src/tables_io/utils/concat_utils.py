@@ -22,7 +22,7 @@ from ..types import (
 
 
 # I A. Generic `concat`
-def concat_objs(tableList: List, tType: Union[str, int]):
+def concat_table(tableList: List, tType: Union[str, int]):
     """
     Vertically concatenates a list of `Table-like` objects. The concatenation
     is performed as an `outer` join, where no data is lost.
@@ -94,7 +94,7 @@ def concat_objs(tableList: List, tType: Union[str, int]):
 ### I B.  Multi-table concatenating
 
 
-def concat(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
+def concat_tabledict(odictlist: List[Mapping], tType: Union[str, int]) -> Mapping:
     """
     Vertically concatenates a list of `TableDict-like` objects. Each `Table-like` object
     in a `TableDict-like` object will be concatenated with any matching `Table-like` objects
