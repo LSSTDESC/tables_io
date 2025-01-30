@@ -9,7 +9,7 @@ from .convert.conv_tabledict import convert
 from .types import table_type
 
 
-@deprecated("This class is deprecated, use the relevant functions instead")
+@deprecated("This class is deprecated as it is not currently being used by tables_io.")
 class TableDict(OrderedDict):
     """Object to collect various types of table-like objects
 
