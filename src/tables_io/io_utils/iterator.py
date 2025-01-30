@@ -29,7 +29,7 @@ from ..types import (
 
 def iterator(
     filepath: str,
-    tType: Union[str, int, None] = None,
+    tType: Union[str, int],
     fmt: Optional[str] = None,
     chunk_size: Optional[int] = 100_000,
     rank: Optional[int] = 0,
@@ -37,12 +37,11 @@ def iterator(
     **kwargs,
 ):
     """Iterates through the data in a given file. The data is yielded (along with
-    the start and stop index) as a `Table-like` object. If no `tType` is given,
-    the tabular format will be the default for that file type. If `tType` is given,
-    the tabular format will be converted to that table type.
+    the start and stop index) as a `Table-like` object. The data will be read in as
+    the tabular format given by `tType`.
 
     For a given file type, there are additional arguments that can be supplied to
-    the native file reader. The main arguments that are needed are `groupname` for
+    the native file reader. The main arguments that can be supplied are `groupname` for
     HDF5 files, and `columns` for parquet files. Other arguments for reading parquet
     files can be found in the documentation of `pyarrow.parquet.read_table` or
     `pyarrow.dataset.dataset`.
@@ -87,11 +86,11 @@ def iterator(
 
     Optional **kwargs
     -----------------
-    groupname : `str` or `None`
-        For HDF5 files, the group name where the data is
-    columns : list of `str` or `None`
+    groupname : `str` or `None`, by default `None`
+        For HDF5 files, the group name where the data is.
+    columns : list of `str` or `None`, by default `None`
         For parquet files, the names of the columns to read.
-        `None` will read all the columns
+        `None` will read all the columns.
 
 
     """
@@ -152,7 +151,7 @@ def iterator_native(
     fType = file_type(filepath, fmt)
     funcDict = {
         NUMPY_HDF5: iter_HDF5_to_dict,
-        PANDAS_HDF5: iter_HDF5_to_dataframe,
+        PANDAS_HDF5: iter_H5_to_dataframe,
         PANDAS_PARQUET: iter_pq_to_dataframe,
         PYARROW_PARQUET: iter_ds_to_table,
         PYARROW_HDF5: iter_ds_to_table,
@@ -169,7 +168,7 @@ def iterator_native(
     kwargs["chunk_size"] = chunk_size
 
     # only add MPI arguments if using MPI-capable function
-    if theFunc == iter_HDF5_to_dataframe or theFunc == iter_HDF5_to_dict:
+    if theFunc == iter_H5_to_dataframe or theFunc == iter_HDF5_to_dict:
         kwargs["parallel_size"] = parallel_size
         kwargs["rank"] = rank
     else:
@@ -309,7 +308,7 @@ def iter_HDF5_to_dict(
     infp.close()
 
 
-def iter_HDF5_to_dataframe(
+def iter_H5_to_dataframe(
     filepath: str,
     chunk_size: Optional[int] = 100_000,
     groupname=None,

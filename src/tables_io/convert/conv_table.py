@@ -25,7 +25,7 @@ from ..types import (
 # I A. Generic `convert`
 
 
-def convert_obj(obj, tType: Union[str, int]):
+def convert_table(obj, tType: Union[str, int]):
     """
     Convert a `Table-like` object to a specific tabular format.
 

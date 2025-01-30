@@ -19,8 +19,8 @@ from .utils import slice_utils
 # Conversion Functions
 #
 
-convert_table = conv.conv_table.convert_obj
-convertObj = conv.conv_table.convert_obj
+convert_table = conv.conv_table.convert_table
+convertObj = conv.conv_table.convert_table
 """This function is being deprecated, please see `convert_table` instead"""
 convert = conv.conv_tabledict.convert
 

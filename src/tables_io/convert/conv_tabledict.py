@@ -6,7 +6,7 @@ import numpy as np
 from typing import Mapping, Union
 
 from .conv_table import (
-    convert_obj,
+    convert_table,
     convert_to_ap_table,
     convert_to_dataframe,
     convert_to_dict,
@@ -83,7 +83,7 @@ def convert(obj, tType: Union[str, int]):
 
     """
     if is_table_like(obj):
-        return convert_obj(obj, tType)
+        return convert_table(obj, tType)
 
     funcMap = {
         AP_TABLE: convert_to_ap_tables,

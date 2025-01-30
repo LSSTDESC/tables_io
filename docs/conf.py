@@ -38,7 +38,7 @@ extensions = [
 
 myst_enable_extensions = ["colon_fence"]
 myst_heading_anchors = 3
-copybutton_exclude = ".linenos, .gp"
+copybutton_exclude = ".linenos, .gp, .go"
 
 
 # autoapi set up
