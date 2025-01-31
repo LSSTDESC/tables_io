@@ -19,6 +19,7 @@ dynamic = ["version"]
 dependencies = [
     "numpy>=1.21.0",
     "click",
+    "deprecated"
 ]
 
 # On a mac, install optional dependencies with `pip install '.[dev]'` (include the single quotes)

@@ -1,7 +1,7 @@
 """Functions to store analysis results as astropy data tables  """
 
 from collections import OrderedDict
-from warnings import deprecated
+from deprecated.sphinx import deprecated
 
 from .io_utils.write import write
 from .io_utils.read import read
@@ -9,7 +9,10 @@ from .convert.conv_tabledict import convert
 from .types import table_type
 
 
-@deprecated("This class is deprecated as it is not currently being used by tables_io.")
+@deprecated(
+    reason="This class is deprecated as it is not currently being used by tables_io.",
+    version="0.2.0",
+)
 class TableDict(OrderedDict):
     """Object to collect various types of table-like objects
 

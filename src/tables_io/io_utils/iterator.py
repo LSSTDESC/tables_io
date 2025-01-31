@@ -4,6 +4,7 @@ import os
 from collections import OrderedDict
 from collections.abc import Iterator, Iterable
 from typing import Optional, Union, Mapping, List
+import warnings
 
 import numpy as np
 
@@ -161,7 +162,7 @@ def iterator_native(
         theFunc = funcDict[fType]
     except KeyError as msg:
         raise NotImplementedError(
-            f"Unsupported FileType for iterateNative {fType}"
+            f"Unsupported FileType for iterate_native {fType}"
         ) from msg  # pragma: no cover
 
     # add relevant arguments to kwargs
@@ -173,11 +174,10 @@ def iterator_native(
         kwargs["rank"] = rank
     else:
         if parallel_size != 1 or rank != 0:
-            raise Warning(
+            warnings.warn(
                 f"MPI arguments were provided for this function, but it will run in series as it cannot be run in parallel."
             )
 
-    # TODO: add try except here?
     return theFunc(
         filepath,
         **kwargs,
