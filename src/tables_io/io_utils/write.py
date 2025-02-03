@@ -449,9 +449,9 @@ def write_dict_to_HDF5_chunk(groups, odict: Mapping, start: int, end: int, **kwd
 
 
 def finalize_HDF5_write(fout, groupname: Optional[str] = None, **kwds):
-    """Write any last data and closes an hdf5 file. If `groupname` is given,
-    will create a group with that name before writing the data. If not,
-    no new group will be created.
+    """Writes any last data given as keyword arguments, and closes an hdf5 file.
+    If `groupname` is given, will create a group with that name before writing the data.
+    If not, no new group will be created.
 
     Parameters
     ----------
@@ -463,7 +463,7 @@ def finalize_HDF5_write(fout, groupname: Optional[str] = None, **kwds):
 
     Notes
     -----
-    The keywords can be used to write additional data
+    The keywords can be used to write additional data, where `key` is the name of the dataset and `value` should be the dataset to write.
     """
     if groupname is None:  # pragma: no cover
         group = fout

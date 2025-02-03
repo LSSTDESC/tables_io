@@ -10,7 +10,7 @@ This is what you should do
 
 ### Building the Documentation Locally
 
-To build the documentation locally, for instance, for preview or to manually upload to a specified location, run the following from the `docs/` directory with the appropriate conda environment activated: 
+To build the documentation locally, for instance, for preview or to manually upload to a specified location, run the following from the `docs/` directory with the appropriate conda environment activated:
 
 ```bash
 
@@ -22,16 +22,20 @@ make html
 
 ```
 
-The HTML rendered documentation will live in the `_readthedocs/html` directory. 
+The HTML rendered documentation will live in the `_readthedocs/html` directory.
 
 ## Understanding the code
 
-- diagram of how the code works
+- diagram of how the code works goes here
+  - essentially diagram showing the ways that you can read in information, what you get out of that, and then what you can do with those objects (i.e. convert, concat, write functions and which ones correspond to which object type).
 - short description of how code is organized, etc
 
 ## Expectations
 
 - naming conventions etc
+
+  - objects that are single tables (i.e. a pandas DataFrame, numpy OrderedDict of arrays) is referred to as `Table-like`.
+  - objects that are `OrderedDict` objects of tables are referred to as `TableDict-like` objects
 
 - test coverage etc
 

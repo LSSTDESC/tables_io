@@ -202,12 +202,12 @@ OrderedDict([('tab_1',
 
 To iterate through an `HDF5` file, yielding only a section of data at a time, we can use the `iterator` or `iterator_native` functions as shown below. You can provide the size of the data section you would like as an `int` to `chunk_size`, size here meaning the number of rows (or length of the `numpy.arrays` in the case of `numpyDict` tables). The default `chunk_size` is 100,000.
 
-To determine the number of rows of data in the file, and therefore what an appropriate chunk size would be, you can use the `get_input_data_length` function from the `iterator` module as follows:
+To determine the number of rows of data in the file, and therefore what an appropriate chunk size would be, you can use the `get_input_data_length` function from the `hdf5` module as follows:
 
 ```{doctest}
 
->>> from tables_io.io_utils import iterator
->>> iterator.get_input_data_length('datafile.hdf5')
+>>> from tables_io.io_utils import hdf5
+>>> hdf5.get_input_data_length('datafile.hdf5')
 7
 
 ```
@@ -258,28 +258,28 @@ If you want to use MPI, it is currently only supported for `HDF5` files. You can
 
 ### Writing an HDF5 file from multiple places with MPI
 
-To write data to an `HDF5` file using MPI, where multiple threads write to the same file, you would first initialize the file as follows:
+To write data to an `HDF5` file using MPI, where multiple processes write to the same file, you need to make sure that your installation of `h5py` and `hdf5` are built with MPI support. This should be the case if you installed the `tables_io` conda environment from `environment.yml` (link here to instructions).
 
-```{doctest}
+Here's an example python file that writes out some `astropyTable`s to the file `test_mpi_write.hdf5`:
 
->>> from tables_io import hdf5
->>> from collections import OrderedDict
->>> from mpi4py import MPI
->>> dout = {'data': OrderedDict({'scalar': ((10000,), 'float64'), 'vect': ((10000, 20), 'float64'), 'matrix': ((10000, 5, 5), 'float64')})}
->>> groups, fout = hdf5.initialize_HDF5_write('test_mpi_write.hdf5', comm=MPI.COMM_WORLD, **dout)
+```{literalinclude} mpi.py
 
 ```
 
-You can then write data to the file using this function in parallel, where `groups` is the `groups` output from the block above:
+Generally, the file must be initialized using `initialize_HDF5_write`. The data structure that will be written to the file is supplied via a dictionary of the tables. Here, we have a dictionary of dictionaries, where the outer dictionary becomes a group called `data`, and the inner dictionary supplies the names for each dataset (which correspond to columns in the `astropyTable` objects). The values for each dataset key should be `(size, dtype)`.
+
+Once the file has been initialized, each process writes rows `start:end` to the file using `write_dict_to_HDF5_chunk`. The file can then be closed with `finalize_HDF5_write`. This is also an opportunity to write any additional data to the file that doesn't match the structure of the rest of the data, for example some metadata.
+
+Here's an example output when running this file using `mpiexec`:
 
 ```{doctest}
->>> hdf5.write_dict_to_HDF5_chunk(groups, data, start, end)
+
+>>> mpiexec -n 4 python mpi.py
+rank: 0, size: 4, start: 0, end: 25
+rank: 2, size: 4, start: 50, end: 75
+rank: 1, size: 4, start: 25, end: 50
+rank: 3, size: 4, start: 75, end: 100
+
 ```
 
-Here `data` is the data to write, `start` is the starting index of the data in the file, and`end` is the ending index. Finally, to complete the writing and close the file, use the `fout` output from the `initialize_HDF5_write` function:
-
-```{doctest}
->>> hdf5.finalize_HDF5_write(fout, groupname='md', metadata)
-```
-
-Here `metadata` is some metadata to write to the file, and the `groupname` is the name of the group that will be created for it. `groupname` and and data that comes after it are optional, however, and you can simply close the file by just supplying `fout` to the function.
+This creates an `HDF5` file with two groups, `data` and `metadata`.

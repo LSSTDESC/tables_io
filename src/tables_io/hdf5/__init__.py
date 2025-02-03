@@ -24,6 +24,8 @@ read_HDF5_dataset_to_array = io_utils.read.read_HDF5_dataset_to_array
 
 get_group_input_data_length = array_utils.get_group_input_data_length
 
+get_input_data_length = io_utils.iterator.get_input_data_length
+
 # Convenience Functions for MPI
 
 data_ranges_by_rank = io_utils.iterator.data_ranges_by_rank
