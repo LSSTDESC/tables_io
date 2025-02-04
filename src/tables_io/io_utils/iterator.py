@@ -39,13 +39,16 @@ def iterator(
 ):
     """Iterates through the data in a given file. The data is yielded (along with
     the start and stop index) as a `Table-like` object. The data will be read in as
-    the tabular format given by `tType`.
+    the tabular format given by `tType`. Uses :py:func:`iterator_native` to iterate
+    through data, and converts it as it is yielded.
 
     For a given file type, there are additional arguments that can be supplied to
     the native file reader. The main arguments that can be supplied are `groupname` for
     HDF5 files, and `columns` for parquet files. Other arguments for reading parquet
     files can be found in the documentation of `pyarrow.parquet.read_table` or
     `pyarrow.dataset.dataset`.
+
+    This function currently only works for the following file types: `numpyHDF5`, `pandasParquet`, `pyarrowParquet`, `pyarrowHDF5`
 
     Accepted tabular types:
 
@@ -80,7 +83,7 @@ def iterator(
         The starting index for the data.
     stop: int
         The end index for the data.
-    data : Table-like
+    data: Table-like
         The data from [start:stop]. The format will be the native tabular format for the file
         if no `tType` is given. Otherwise, the data will be in the tabular format `tType`.
 
@@ -115,6 +118,8 @@ def iterator_native(
     """Iterates through the data in a given file. The data is yielded (along with
     the start and stop index) as a `Table-like` object that has the default format
     for the given file type.
+
+    This function currently only works for the following file types: `numpyHDF5`, `pandasParquet`, `pyarrowParquet`, `pyarrowHDF5`
 
     Any **kwargs are passed to the specific iterator function for the file type.
 

@@ -1,10 +1,12 @@
 # Cookbook
 
+(basic-table-operations)=
+
 ## Basic table operations
 
 ### Read in a file to a specific format
 
-To read in a `Table-like` or `TableDict-like` object from a file to a specific tabular type, use the `read` function. You can supply the type via the `tType` argument, either as a string or as an integer. The allowed tabular types are listed in this table (link).
+To read in a `Table-like` or `TableDict-like` object from a file to a specific tabular type, use the [`read`](#tables_io.io_utils.read.read) function. You can supply the type via the `tType` argument, either as a string or as an integer. The allowed tabular types are listed in this table (link).
 
 For example, to read in tables from an `HDF5` file as `astropyTable` objects:
 
@@ -28,7 +30,7 @@ int64 int64
 
 ### Write out a file to a specific file format
 
-To write out a `Table-like` or `TableDict-like` object to a specific file format, use the `write` function.
+To write out a `Table-like` or `TableDict-like` object to a specific file format, use the [`write`](#tables_io.io_utils.write.write) function.
 
 In this example, we write out a `pandasDataFrame` object to an `HDF5` file in two different ways. The first is by using the `fmt` argument to specify the file type. The second is using the suffix of the file name.
 
@@ -46,7 +48,7 @@ In this example, we write out a `pandasDataFrame` object to an `HDF5` file in tw
 
 ### Get a file object
 
-To access a file object directly instead of just reading in the data tables, use `io_open`. In the case of `HDF5` files, this allows you to get metadata from the file without reading in all of the data.
+To access a file object directly instead of just reading in the data tables, use [`io_open`](#tables_io.io_utils.read.io_open). In the case of `HDF5` files, this allows you to get metadata from the file without reading in all of the data.
 
 For example, to open a `fits` file and return a summary of the contents:
 
@@ -63,7 +65,7 @@ For example, to open a `fits` file and return a summary of the contents:
 
 ### Converting tables to different formats
 
-To convert a `Table-like` object, use the `convert` function. Here we convert an `astropyTable` to a `pyarrowTable`.
+To convert a `Table-like` object, use the [`convert`](#tables_io.convert.conv_tabledict.convert) function. Here we convert an `astropyTable` to a `pyarrowTable`.
 
 ```{doctest}
 
@@ -102,7 +104,7 @@ OrderedDict([('tab_1',
 
 ### Concatenating Table-like objects
 
-To concatenate two or more `Table-like` objects, you use the `concat_table` function. This function can only concatenate objects that have the same tabular type. So for example, they must both be `pandasDataFrame` objects, as in the example below. The tables must be passed as a list, and it requires the tabular type of the tables to be concatenated as an argument.
+To concatenate two or more `Table-like` objects, you use the [`concat_table`](#tables_io.utils.concat_utils.concat_table) function. This function can only concatenate objects that have the same tabular type. So for example, they must both be `pandasDataFrame` objects, as in the example below. The tables must be passed as a list, and it requires the tabular type of the tables to be concatenated as an argument.
 
 ```{doctest}
 
@@ -122,7 +124,7 @@ To concatenate two or more `Table-like` objects, you use the `concat_table` func
 
 ### Concatenating TableDict-like objects
 
-To concatenate two or more `TableDict-like` objects, use the `concat` function. Similar to the `concat_table` function, the `TableDict-like` objects must have the same tabular type to be concatenated. They also must be passed in as a list, along with the tabular type of the `TableDict-like` objects.
+To concatenate two or more `TableDict-like` objects, use the [`concat_tabledict`](#tables_io.utils.concat_utils.concat_tabledict) function. Similar to the [`concat_table`](#tables_io.utils.concat_utils.concat_table) function, the `TableDict-like` objects must have the same tabular type to be concatenated. They also must be passed in as a list, along with the tabular type of the `TableDict-like` objects.
 
 ```{doctest}
 
@@ -158,7 +160,7 @@ OrderedDict([('tab_1',
 
 ### Slicing a Table-like object
 
-To get a slice from a `Table-like` object, use the `slice_table` function as shown here:
+To get a slice from a `Table-like` object, use the [`slice_table`](#tables_io.utils.slice_utils.slice_table) function as shown here:
 
 ```{doctest}
 
@@ -175,7 +177,7 @@ Here we used a Python [slice(start, stop, step)](https://docs.python.org/3/libra
 
 ### Slicing a TableDict-like object
 
-To get a slice from all `Table-like` objects in a `TableDict-like` object, use the `slice_tabledict` function as shown below:
+To get a slice from all `Table-like` objects in a `TableDict-like` object, use the [`slice_tabledict`](#tables_io.utils.slice_utils.slice_tabledict) function as shown below:
 
 ```{doctest}
 
@@ -202,15 +204,17 @@ As with `slice_table`, the `slice_tabledict` function takes either an integer or
 
 ## Handling HDF5 files
 
+(iteration-example)=
+
 ### Iterating through data in an HDF5 file
 
-To iterate through an `HDF5` file, yielding only a section of data at a time, we can use the `iterator` or `iterator_native` functions as shown below. You can provide the size of the data section you would like as an `int` to `chunk_size`, size here meaning the number of rows (or length of the `numpy.arrays` in the case of `numpyDict` tables). The default `chunk_size` is 100,000.
+To iterate through an `HDF5` file, yielding only a section of data at a time, we can use the [`iterator`](#tables_io.io_utils.iterator.iterator) or [`iterator_native`](#tables_io.io_utils.iterator.iterator) functions as shown below. You can provide the size of the data section you would like as an `int` to `chunk_size`, size here meaning the number of rows (or length of the `numpy.arrays` in the case of `numpyDict` tables). The default `chunk_size` is 100,000.
 
 To determine the number of rows of data in the file, and therefore what an appropriate chunk size would be, you can use the `get_input_data_length` function from the `hdf5` module as follows:
 
 ```{doctest}
 
->>> from tables_io.io_utils import hdf5
+>>> from tables_io import hdf5
 >>> hdf5.get_input_data_length('datafile.hdf5')
 7
 
@@ -218,7 +222,7 @@ To determine the number of rows of data in the file, and therefore what an appro
 
 Here we did not supply the `groupname` of the data, since the default was appropriate.
 
-Since the length of our file is 7, we will choose a chunk size smaller than that, say `3`. To output the data to a `pandasDataFrame`, we use the `iterator` function as shown below:
+Since the length of our file is 7, we will choose a chunk size smaller than that, say 3. To output the data to a `pandasDataFrame`, we use the `iterator` function as shown below:
 
 ```{doctest}
 

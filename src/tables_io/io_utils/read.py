@@ -48,7 +48,7 @@ def read(
     **kwargs,
 ):
     """Reads in a given file to either a `Table-like` format if there is one table within the file,
-    or a `TableDict-like` format if there are multiple tables or files. Uses `read_native` to read the file.
+    or a `TableDict-like` format if there are multiple tables or files. Uses :py:func:`read_native` to read the file.
 
     The `TableDict-like` format is an `OrderedDict` of `Table-like` objects. The `Table-like` objects
     currently supported are: astropy Table, numpy recarray, `OrderedDict` of numpy arrays, pandas DataFrame,

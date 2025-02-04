@@ -26,9 +26,13 @@ The HTML rendered documentation will live in the `_readthedocs/html` directory.
 
 ## Understanding the code
 
+`tables_io` is organized such that the main functionalities are made available in the main `__init__.py`, and additionally `HDF5` functionalities are made available in the `hdf5` module. The diagram below displays the main functions available and some of the most relevant `HDF5` functions.
+
 ![code diagram](assets/tables_io_model.svg)
 
-- short description of how code is organized, etc
+The code itself is split into three main components: `io_utils`, `convert`, and `utils`. `io_utils` contains all of the read and write functions. `convert` contains all conversion functions, and `utils` contains all functions related to `slice` and `concat` functionality, as well as code array utilities. `types.py` contains all the dictionaries relating table types and formats, as well as the functions that get information about what type a file or object falls into. `lazy_modules.py` handles loading in the necessary packages.
+
+Generally, the code files are formatted such that there are interface functions at the top of a given file. These interface functions then identify the input object types and call more specific functions, which are found further down in the file.
 
 ## Expectations
 
@@ -36,6 +40,8 @@ The HTML rendered documentation will live in the `_readthedocs/html` directory.
 
   - objects that are single tables (i.e. a pandas DataFrame, numpy OrderedDict of arrays) are referred to as `Table-like`.
   - objects that are `OrderedDict` objects of `Table-like` objects are referred to as `TableDict-like` objects
+  - functions are snake case (like_this)
+  - classes use pascal case (LikeThis)
 
 - test coverage etc
 
