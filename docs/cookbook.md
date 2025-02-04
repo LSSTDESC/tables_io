@@ -160,7 +160,7 @@ OrderedDict([('tab_1',
 
 To get a slice from a `Table-like` object, use the `slice_table` function as shown here:
 
-```{docstring}
+```{doctest}
 
 >>> import tables_io
 >>> import pandas as pd
@@ -171,9 +171,11 @@ To get a slice from a `Table-like` object, use the `slice_table` function as sho
 
 ```
 
-Here we used a [`slice(start, stop, step)`](https://docs.python.org/3/library/functions.html#slice) object to identify the slice. You can also use an integer, though it's important to note that the slice you get with an integer will be different in across different table types.
+Here we used a Python [slice(start, stop, step)](https://docs.python.org/3/library/functions.html#slice) object to identify the slice. You can also use an integer, though it's important to note that the slice you get with an integer will be different across different table types.
 
 ### Slicing a TableDict-like object
+
+To get a slice from all `Table-like` objects in a `TableDict-like` object, use the `slice_tabledict` function as shown below:
 
 ```{doctest}
 
@@ -195,6 +197,8 @@ OrderedDict([('tab_1',
             4     7)])
 
 ```
+
+As with `slice_table`, the `slice_tabledict` function takes either an integer or the Python [slice(start, stop, step)](https://docs.python.org/3/library/functions.html#slice) object to identify the slice.
 
 ## Handling HDF5 files
 
@@ -258,17 +262,17 @@ If you want to use MPI, it is currently only supported for `HDF5` files. You can
 
 ### Writing an HDF5 file from multiple places with MPI
 
-To write data to an `HDF5` file using MPI, where multiple processes write to the same file, you need to make sure that your installation of `h5py` and `hdf5` are built with MPI support. This should be the case if you installed the `tables_io` conda environment from `environment.yml` (link here to instructions).
+To write data to an `HDF5` file using MPI, where multiple processes write to the same file, you need to make sure that your installation of `h5py` and `hdf5` are built with MPI support. This should be the case if you installed the `tables_io` conda environment from `environment.yml` as described in the <project:./quickstart.md#parallel-installation> section.
 
-Here's an example python file that writes out some `astropyTable`s to the file `test_mpi_write.hdf5`:
+Here's an example python file that writes out some `astropyTables` to the file `test_mpi_write.hdf5`:
 
-```{literalinclude} mpi.py
+```{literalinclude} assets/mpi.py
 
 ```
 
 Generally, the file must be initialized using `initialize_HDF5_write`. The data structure that will be written to the file is supplied via a dictionary of the tables. Here, we have a dictionary of dictionaries, where the outer dictionary becomes a group called `data`, and the inner dictionary supplies the names for each dataset (which correspond to columns in the `astropyTable` objects). The values for each dataset key should be `(size, dtype)`.
 
-Once the file has been initialized, each process writes rows `start:end` to the file using `write_dict_to_HDF5_chunk`. The file can then be closed with `finalize_HDF5_write`. This is also an opportunity to write any additional data to the file that doesn't match the structure of the rest of the data, for example some metadata.
+Once the file has been initialized, each process writes rows `start:end` to the file using `write_dict_to_HDF5_chunk`. The file is then be closed with `finalize_HDF5_write`. This is also an opportunity to write any additional data to the file that doesn't match the structure of the rest of the data, for example some metadata.
 
 Here's an example output when running this file using `mpiexec`:
 

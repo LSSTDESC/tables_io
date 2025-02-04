@@ -2,14 +2,23 @@
 
 ## Installation
 
-- basic installation
+### Basic installation
 
-- parallel installation
+```bash
+pip install tables_io
+```
+
+(parallel-installation)=
+
+### Parallel installation
+
+- should this be done by creating the conda environment? Or is that too much?
+- installing from source (?)
 
 ## Read/write
 
 - how to read in tables
-  - two options: multi read/write gives ordered dict, single read/write gives just the table format
+  - two options: read gives table-like or tabledict-like, read_native gives default table type as tabledict-like
 - recommended usage:
   - provide a format key when reading in a file to make sure you get the memory format you want
   - keep in mind this could result in more memory usage due to conversions

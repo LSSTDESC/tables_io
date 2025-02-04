@@ -19,10 +19,6 @@ conda activate tables_io_dev
 pip install -e '.[dev]'
 ```
 
-### Setting up Parallel HDF5
-
-**TODO: CHECK IF ANYTHING ELSE NEEDS TO BE DONE**
-
 ## Running Tests
 
 All tests are coordinated via `pytest`...

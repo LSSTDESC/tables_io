@@ -26,16 +26,16 @@ The HTML rendered documentation will live in the `_readthedocs/html` directory.
 
 ## Understanding the code
 
-- diagram of how the code works goes here
-  - essentially diagram showing the ways that you can read in information, what you get out of that, and then what you can do with those objects (i.e. convert, concat, write functions and which ones correspond to which object type).
+![code diagram](assets/tables_io_model.svg)
+
 - short description of how code is organized, etc
 
 ## Expectations
 
 - naming conventions etc
 
-  - objects that are single tables (i.e. a pandas DataFrame, numpy OrderedDict of arrays) is referred to as `Table-like`.
-  - objects that are `OrderedDict` objects of tables are referred to as `TableDict-like` objects
+  - objects that are single tables (i.e. a pandas DataFrame, numpy OrderedDict of arrays) are referred to as `Table-like`.
+  - objects that are `OrderedDict` objects of `Table-like` objects are referred to as `TableDict-like` objects
 
 - test coverage etc
 
