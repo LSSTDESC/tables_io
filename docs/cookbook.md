@@ -12,6 +12,7 @@ For example, to read in tables from an `HDF5` file as `astropyTable` objects:
 
 ```{doctest}
 
+>>> import tables_io
 >>> table_dict = tables_io.read('filename.hdf5', tType='astropyTable')
 >>> table_dict
 OrderedDict({'tab_1': <Table length=2>
@@ -200,17 +201,15 @@ OrderedDict([('tab_1',
 
 ```
 
-As with `slice_table`, the `slice_tabledict` function takes either an integer or the Python [slice(start, stop, step)](https://docs.python.org/3/library/functions.html#slice) object to identify the slice.
+As with [`slice_table`](#tables_io.utils.slice_utils.slice_table), the [`slice_tabledict`](#tables_io.utils.slice_utils.slice_tabledict) function takes either an integer or the Python [slice(start, stop, step)](https://docs.python.org/3/library/functions.html#slice) object to identify the slice.
 
 ## Handling HDF5 files
-
-(iteration-example)=
 
 ### Iterating through data in an HDF5 file
 
 To iterate through an `HDF5` file, yielding only a section of data at a time, we can use the [`iterator`](#tables_io.io_utils.iterator.iterator) or [`iterator_native`](#tables_io.io_utils.iterator.iterator) functions as shown below. You can provide the size of the data section you would like as an `int` to `chunk_size`, size here meaning the number of rows (or length of the `numpy.arrays` in the case of `numpyDict` tables). The default `chunk_size` is 100,000.
 
-To determine the number of rows of data in the file, and therefore what an appropriate chunk size would be, you can use the `get_input_data_length` function from the `hdf5` module as follows:
+To determine the number of rows of data in the file, and therefore what an appropriate chunk size would be, you can use the [`get_input_data_length`](#tables_io.io_utils.iterator.get_input_data_length) function from the `hdf5` module as follows:
 
 ```{doctest}
 
@@ -222,7 +221,7 @@ To determine the number of rows of data in the file, and therefore what an appro
 
 Here we did not supply the `groupname` of the data, since the default was appropriate.
 
-Since the length of our file is 7, we will choose a chunk size smaller than that, say 3. To output the data to a `pandasDataFrame`, we use the `iterator` function as shown below:
+Since the length of our file is 7, we will choose a chunk size smaller than that, say 3. To output the data to a `pandasDataFrame`, we use the [`iterator`](#tables_io.io_utils.iterator.iterator) function as shown below:
 
 ```{doctest}
 
@@ -242,7 +241,7 @@ Since the length of our file is 7, we will choose a chunk size smaller than that
 
 ```
 
-To iterate through the file and output the data in its native tabular type instead, we use `iterator_native` as below:
+To iterate through the file and output the data in its native tabular type instead, we use [`iterator_native`](#tables_io.io_utils.iterator.iterator) as below:
 
 ```{doctest}
 
@@ -274,9 +273,9 @@ Here's an example python file that writes out some `astropyTables` to the file `
 
 ```
 
-Generally, the file must be initialized using `initialize_HDF5_write`. The data structure that will be written to the file is supplied via a dictionary of the tables. Here, we have a dictionary of dictionaries, where the outer dictionary becomes a group called `data`, and the inner dictionary supplies the names for each dataset (which correspond to columns in the `astropyTable` objects). The values for each dataset key should be `(size, dtype)`.
+Generally, the file must be initialized using [`initialize_HDF5_write`](#tables_io.io_utils.write.initialize_HDF5_write). The data structure that will be written to the file is supplied via a dictionary of the tables. Here, we have a dictionary of dictionaries, where the outer dictionary becomes a group called `data`, and the inner dictionary supplies the names for each dataset (which correspond to columns in the `astropyTable` objects). The values for each dataset key should be `(size, dtype)`.
 
-Once the file has been initialized, each process writes rows `start:end` to the file using `write_dict_to_HDF5_chunk`. The file is then be closed with `finalize_HDF5_write`. This is also an opportunity to write any additional data to the file that doesn't match the structure of the rest of the data, for example some metadata.
+Once the file has been initialized, each process writes rows `start:end` to the file using [`write_dict_to_HDF5_chunk`](#tables_io.io_utils.write.write_dict_to_HDF5_chunk). The file is then be closed with [`finalize_HDF5_write`](#tables_io.io_utils.write.finalize_HDF5_write). This is also an opportunity to write any additional data to the file that doesn't match the structure of the rest of the data, for example some metadata.
 
 Here's an example output when running this file using `mpiexec`:
 

@@ -139,7 +139,7 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
 def write_native(odict, filepath: str) -> Optional[str]:
     """Writes `Table-like` or `TableDict-like` objects to a file or files. The file type will be determined
     by the default file type given the tabular format. The supported file types are:
-    ASTROPY_HDF5 (".hf5"), NUMPY_HDF5 (".hdf5"), NUMPY_FITS (".fit"), PANDAS_PARQUET (".parq"), PYARROW_PARQUET (".parquet").
+    astropyHDF5 (".hf5"), numpyHDF5 (".hdf5"), numpyFits (".fit"), pandasParquet (".parq"), pyarrowParquet (".parquet").
 
     To write to a specific file format, use :py:func:`write` instead.
 

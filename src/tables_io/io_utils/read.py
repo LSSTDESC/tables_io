@@ -87,7 +87,7 @@ def read(
         The keys should be the unique identifiers for each dataset or file.
     allow_missing_keys : `bool`, by default False
         If False will raise FileNotFoundError if a key is missing from the given file.
-    **kwargs : additional arguments to pass to the native file reader
+    kwargs : additional arguments to pass to the native file reader
 
     Returns
     -------
@@ -169,7 +169,7 @@ def read_native(
         The keys should be the unique identifiers for each dataset or file.
     allow_missing_keys : `bool`, by default False.
         If False will raise FileNotFoundError if a key is missing from the given file.
-    **kwargs : additional arguments to pass to the native file reader
+    kwargs : additional arguments to pass to the native file reader
 
     Returns
     -------
