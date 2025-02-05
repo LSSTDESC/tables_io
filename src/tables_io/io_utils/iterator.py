@@ -203,8 +203,8 @@ def get_input_data_length(filepath: str, fmt: Optional[str] = None, **kwargs):
 
     Returns
     -------
-    data : `Table-like`
-        The data
+    nrows : `int`
+        The length of the data
 
     Notes
     -----

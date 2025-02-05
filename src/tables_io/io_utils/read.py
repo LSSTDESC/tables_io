@@ -503,7 +503,7 @@ def read_HDF5_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> M
 
 
 def read_HDF5_group(filepath: str, groupname: Optional[str] = None):
-    """Read and return the requested group from an hdf5 file. If no group is provided, returns the `h5py.File` object twice.
+    """Read and return the requested group and file object from an hdf5 file. If no group is provided, returns the `h5py.File` object twice.
 
     Parameters
     ----------
