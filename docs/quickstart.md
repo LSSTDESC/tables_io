@@ -57,11 +57,15 @@ The main functionality of `tables_io` is its ability to read and write tables of
 - a `Table-like` object: data with named columns, including `astropy` Tables, `numpy` recarrays, or `pandas` DataFrames (see <project:#supported-file-formats> for the full list of tabular formats).
 - a `TableDict-like` object: an ordered dictionary of `Table-like` objects.
 
+![table-vs-tabledict](assets/table_vs_tabledict_diagram.svg)
+
 The main functions will take either of these objects as arguments, though some functions will only take one type of object. This is often specified in the function name itself.
+
+The `Table-like` objects exist in memory as one of the multiple supported tabular formats. For example, they could be an `astropy` Table, or a dictionary of `numpy` arrays. `TableDict-like` objects also have a tabular format, which means that the `Table-like` objects they contain are all of that tabular format type. <project:#supported-tabular-formats> lists the available tabular formats.
 
 ### Read
 
-A file can be read in using the [`read`](#tables_io.io_utils.read.read) function. Here's an example of a command to read in a table or tables from a `fits` file:
+A file can be read in using the [`read`](#tables_io.io_utils.read.read) function. Here's an example of reading a table or tables from a `fits` file:
 
 ```{doctest}
 
@@ -70,11 +74,13 @@ A file can be read in using the [`read`](#tables_io.io_utils.read.read) function
 
 ```
 
-This command will read in the data from the file to the default tabular format, which in this case is an `astropy` Table. If there were multiple tables in the file, this returns a `TableDict-like` object, which contains `astropy` Tables. If there was only one table in the file, then the function just returns an `astropy` Table.
+This reads the data to the default tabular format for the file type, which in this case is an `astropy` Table.
 
-You can also specify a desired tabular format, in which case `read` will read the file to its native tabular format, then [`convert`](#tables_io.convert.conv_tabledict.convert) the `Table-like` or `TableDict-like` object to the desired format. You can see [an example of this command here](cookbook.md#read-in-a-file-to-a-specific-format), and <project:#supported-tabular-formats> lists the default tabular formats as they correspond to the file types.
+You can also specify a desired tabular format, in which case `read` will read the file to its native tabular format, then [`convert`](#tables_io.convert.conv_tabledict.convert) the `Table-like` or `TableDict-like` object to the desired format. You can see [an example here](cookbook.md#read-in-a-file-to-a-specific-format). <project:#supported-tabular-formats> lists the default tabular formats as they correspond to the file types.
 
+```{note}
 In order to receive a consistent output when reading in objects, you can use [`read_native`](#tables_io.io_utils.read.read_native), which will always read in a `TableDict-like` object. That object will also always have the default tabular format for that file type.
+```
 
 To read in a file a chunk of data at a time, you can use the [`iterator`](#tables_io.io_utils.iterator.iterator) function. This currently only works with a subset of the available file formats, which are listed in the function's documentation. You can [see an iteration example here](cookbook.md#iterating-through-data-in-an-hdf5-file).
 
@@ -91,7 +97,7 @@ The `Table-like` and `TableDict-like` objects can also be converted to different
 
 Here we convert the `astropy` table we converted earlier to a `pandas` DataFrame.
 
-Additionally, `tables_io` functions exist to concatenate and to take a slice of objects. More details on these functions and some examples can be found in the section <project:cookbook.md#basic-table-operations>.
+Additionally, `tables_io` functions exist to concatenate and to take a slice of objects. More details on these functions and some examples can be found in the Cookbook section on [basic table operations](cookbook.md#basic-table-operations).
 
 ### Write
 
@@ -105,7 +111,7 @@ The [`write`](#tables_io.io_utils.write.write) function will accept both `Table-
 
 ```
 
-Here, the type of file to write to is specified by the file name suffix, 'hdf5'. If necessary, [`write`](#tables_io.io_utils.write.write) will convert the object to the related tabular type, then write to the specified file type. Otherwise, `tables_io` has a native file type for each of the tabular formats, which are listed in <project:#supported-tabular-formats>. You can write files to their native format by using [`write_native`](#tables_io.io_utils.write.write_native) directly.
+Here, the type of file to write to is specified by the file name suffix, `hdf5`. If necessary, [`write`](#tables_io.io_utils.write.write) will convert the object to the related tabular type, then write to the specified file type. Otherwise, `tables_io` has a native file type for each of the tabular formats, which are listed in <project:#supported-tabular-formats>. You can write files to their native format by using [`write_native`](#tables_io.io_utils.write.write_native) directly.
 
 ### Supported file formats
 
@@ -113,14 +119,14 @@ Here, the type of file to write to is specified by the file name suffix, 'hdf5'.
 
 | File format name | File suffix    | Produced by                                                                            |
 | ---------------- | -------------- | -------------------------------------------------------------------------------------- |
-| astropyFits      | 'fits'         | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             |
-| astropyHDF5      | 'hf5'          | [`astropy`](https://docs.astropy.org/en/stable/io/unified.html#hdf5)                   |
-| numpyHDF5        | 'hdf5'         | [`h5py`](https://docs.h5py.org/en/stable/quick.html#appendix-creating-a-file)          |
-| numpyFits        | 'fit'          | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             |
-| pyarrowHDF5      | 'hd5'          | [`pyarrow`](https://arrow.apache.org/docs/python/getstarted.html)                      |
-| pandasHDF5       | 'h5'           | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-hdf5)    |
-| pandaParquet     | 'parq' or 'pq' | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html#parquet) |
-| pyarrowParquet   | 'parquet'      | [`pyarrow`](https://arrow.apache.org/docs/python/parquet.html)                         |
+| astropyFits      | `fits`         | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             |
+| astropyHDF5      | `hf5`          | [`astropy`](https://docs.astropy.org/en/stable/io/unified.html#hdf5)                   |
+| numpyHDF5        | `hdf5`         | [`h5py`](https://docs.h5py.org/en/stable/quick.html#appendix-creating-a-file)          |
+| numpyFits        | `fit`          | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             |
+| pyarrowHDF5      | `hd5`          | [`pyarrow`](https://arrow.apache.org/docs/python/getstarted.html)                      |
+| pandasHDF5       | `h5`           | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-hdf5)    |
+| pandaParquet     | `parq` or `pq` | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html#parquet) |
+| pyarrowParquet   | `parquet`      | [`pyarrow`](https://arrow.apache.org/docs/python/parquet.html)                         |
 
 ```{note}
 `tables_io` does not require all of the above packages to function. If you do not have one of these packages installed, you will not be able to create tables of that type (i.e. if you do not have `pandas` installed, you cannot convert objects to 'pandasDataFrame' or read in 'pandasParquet' files.)
@@ -132,13 +138,13 @@ Here, the type of file to write to is specified by the file name suffix, 'hdf5'.
 
 `tables_io` currently supports the following tabular formats in memory for `Table-like` or `TableDict-like` objects:
 
-| Tabular format name | Actual format type            |
-| ------------------- | ----------------------------- |
-| astropyTable        | `astropy.table.Table`         |
-| numpyDict           | `OrderedDict (str, np.array)` |
-| numpyRecarray       | `np.recarray`                 |
-| pandasDataFrame     | `pd.DataFrame`                |
-| pyarrowTable        | `pyarrow.Table`               |
+| Tabular format name | Actual format type                                                                                          |
+| ------------------- | ----------------------------------------------------------------------------------------------------------- |
+| astropyTable        | [`astropy.table.Table`](https://docs.astropy.org/en/stable/table/index.html)                                |
+| numpyDict           | [`OrderedDict (str, np.array)`](https://docs.python.org/3/library/collections.html#collections.OrderedDict) |
+| numpyRecarray       | [`np.recarray`]https://numpy.org/doc/stable/reference/generated/numpy.recarray.html                         |
+| pandasDataFrame     | [`pd.DataFrame`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html)          |
+| pyarrowTable        | [`pyarrow.Table`](https://arrow.apache.org/docs/python/generated/pyarrow.Table.html)                        |
 
 The table below shows which tabular formats are available for `Table-like` or `TableDict-like` objects, and how they are associated with the available file types. File types in the 'File format for native read' column will be read in to the associated 'Tabular format in memory'. The default file that these tabular formats will be written to is given in the 'Native written file' column.
 
