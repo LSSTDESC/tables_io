@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 
 from tables_io import io_utils
-from tests.testUtils import check_deps
+from tests.helpers.utilities import check_deps
 from tables_io.lazy_modules import h5py, pq
 
 

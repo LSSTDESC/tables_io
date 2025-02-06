@@ -4,7 +4,7 @@ Unit tests for concatanation tools
 
 import pytest
 from tables_io import types, convert, concat, sliceObj, sliceObjs
-from tests.testUtils import compare_tables, check_deps
+from tests.helpers.utilities import compare_tables, check_deps
 from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
 

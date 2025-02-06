@@ -1,6 +1,6 @@
 import pytest
 
-from tests.testUtils import compare_table_dicts, check_deps
+from tests.helpers.utilities import compare_table_dicts, check_deps
 from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
 # TODO: Docstrings for all of these functions

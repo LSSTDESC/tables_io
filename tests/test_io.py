@@ -7,7 +7,7 @@ import pytest
 
 import unittest
 from tables_io import types, convert, io_open, read, write, iterator, check_columns
-from tests.testUtils import (
+from tests.helpers.utilities import (
     compare_table_dicts,
     compare_tables,
     make_test_data,
