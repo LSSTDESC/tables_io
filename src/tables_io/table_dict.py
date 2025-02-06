@@ -40,7 +40,7 @@ class TableDict(OrderedDict):
         fmt : `str` or `None`
             The output file format, If `None` this will use `write_native`
         """
-        return write(self, basepath, fmt)
+        return write.write(self, basepath, fmt)
 
     def convert(self, tType):
         """Build a new TableDict by converting all the table in the object to a different type
@@ -77,4 +77,4 @@ class TableDict(OrderedDict):
         tableDict : `TableDict`
             The data
         """
-        return cls(read(filepath, tType, fmt, keys))
+        return cls(read.read(filepath, tType, fmt, keys))

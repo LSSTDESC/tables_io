@@ -4,7 +4,8 @@ Unit tests for io_layer module
 
 import pytest
 
-from tables_io import types, convert, TableDict
+from tables_io import types, TableDict
+from tables_io.conv.conv_tabledict import convert
 from tests.testUtils import compare_table_dicts, check_deps
 from tables_io.lazy_modules import apTable, jnp, h5py, pq
 
