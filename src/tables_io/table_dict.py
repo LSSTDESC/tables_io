@@ -4,7 +4,7 @@ from collections import OrderedDict
 from deprecated.sphinx import deprecated
 
 from .io_utils import write, read
-from .convert.conv_tabledict import convert
+from .conv.conv_tabledict import convert
 from .types import table_type
 
 

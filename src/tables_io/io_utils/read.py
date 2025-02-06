@@ -7,8 +7,8 @@ import numpy as np
 from typing import List, Mapping, Optional, Union
 
 from ..utils.array_utils import force_to_pandables
-from ..convert.conv_tabledict import convert
-from ..convert.conv_table import dataframe_to_dict, hdf5_group_to_dict
+from ..conv.conv_tabledict import convert
+from ..conv.conv_table import dataframe_to_dict, hdf5_group_to_dict
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
 from ..types import (
     AP_TABLE,

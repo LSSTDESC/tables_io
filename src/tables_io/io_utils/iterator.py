@@ -10,7 +10,7 @@ import numpy as np
 
 from .read import read_HDF5_group, read_HDF5_dataset_to_array
 from ..utils.array_utils import get_group_input_data_length
-from ..convert.conv_tabledict import convert
+from ..conv.conv_tabledict import convert
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
 from ..types import (
     NUMPY_HDF5,

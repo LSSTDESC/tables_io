@@ -3,7 +3,7 @@
 import pytest
 
 from tables_io import types
-from tables_io.convert.conv_tabledict import convert
+from tables_io.conv.conv_tabledict import convert
 from ..testUtils import compare_table_dicts, check_deps
 from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 

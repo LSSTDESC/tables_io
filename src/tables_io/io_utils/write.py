@@ -6,7 +6,7 @@ from typing import Mapping, Optional, Union, List
 
 import numpy as np
 
-from ..convert.conv_tabledict import convert
+from ..conv.conv_tabledict import convert
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
 from ..types import (
     AP_TABLE,
