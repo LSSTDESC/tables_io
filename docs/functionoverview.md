@@ -24,14 +24,16 @@
 
 | Function                                                             | Description                                                                     |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| [`convert`](#tables_io.convert.conv_tabledict.convert)               | Convert a `Table-like` or `TableDict-like` object to a specified tabular format |
-| [`convert_table`](#tables_io.convert.conv_table.convert_table)       | Convert a `Table-like` object to a specified tabular format                     |
+| [`convert`](#tables_io.conv.conv_tabledict.convert)                  | Convert a `Table-like` or `TableDict-like` object to a specified tabular format |
+| [`convert_table`](#tables_io.conv.conv_table.convert_table)          | Convert a `Table-like` object to a specified tabular format                     |
 | [`concat_tabledict`](#tables_io.utils.concat_utils.concat_tabledict) | Concatenate multiple `TableDict-like` objects                                   |
 | [`concat_table`](#tables_io.utils.concat_utils.concat_table)         | Concatenate multiple `Table-like` objects                                       |
 | [`slice_tabledict`](#tables_io.utils.slice_utils.slice_tabledict)    | Slice a `TableDict-like` object                                                 |
 | [`slice_table`](#tables_io.utils.slice_utils.slice_table)            | Slice a `Table-like` object                                                     |
 
 ## HDF5 module
+
+The HDF5 module exists to allow users easier access to manually do chunked operations with `HDF5` files. While [`iterator`](#tables_io.io_utils.iterator.iterator) provides a way to do chunked reads of `HDF5` files, this is the only way to do chunked writes of `HDF5` files.
 
 ### Functions that read in data
 

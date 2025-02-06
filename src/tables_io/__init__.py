@@ -21,7 +21,7 @@ from .utils import slice_utils
 
 convert_table = conv.conv_table.convert_table
 convertObj = conv.conv_table.convert_table
-"""This function is being deprecated, please see `convert_table` instead"""
+"""This function is being deprecated, please see :py:func:`convert_table` instead"""
 convert = conv.conv_tabledict.convert
 
 #
@@ -29,7 +29,7 @@ convert = conv.conv_tabledict.convert
 #
 
 writeNative = io_utils.write.write_native
-"""This function is being deprecated, please see `write_native` instead"""
+"""This function is being deprecated, please see :py:func:`write_native` instead"""
 write_native = io_utils.write.write_native
 write = io_utils.write.write
 
@@ -39,7 +39,7 @@ write = io_utils.write.write
 #
 
 readNative = io_utils.read.read_native
-"""This function is being deprecated, please see `read_native` instead"""
+"""This function is being deprecated, please see :py:func:`read_native` instead"""
 read_native = io_utils.read.read_native
 read = io_utils.read.read
 io_open = io_utils.read.io_open
@@ -51,7 +51,7 @@ check_columns = io_utils.read.check_columns
 
 iterator_native = io_utils.iterator.iterator_native
 iteratorNative = io_utils.iterator.iterator_native
-"""This function is being deprecated, please see `iterator_native` instead"""
+"""This function is being deprecated, please see :py:func:`iterator_native` instead"""
 iterator = io_utils.iterator.iterator
 
 #
@@ -60,9 +60,9 @@ iterator = io_utils.iterator.iterator
 
 concat_table = concat_utils.concat_table
 concatObjs = concat_utils.concat_table
-"""This function is being deprecated, please see `concat_table` instead"""
+"""This function is being deprecated, please see :py:func:`concat_table` instead"""
 concat = concat_utils.concat_tabledict
-"""This function is being deprecated, please see `concat_tabledict` instead"""
+"""This function is being deprecated, please see :py:func:`concat_tabledict` instead"""
 concat_tabledict = concat_utils.concat_tabledict
 
 
@@ -72,7 +72,7 @@ concat_tabledict = concat_utils.concat_tabledict
 
 slice_table = slice_utils.slice_table
 sliceObj = slice_utils.slice_table
-"""This function is being deprecated, please see `slice_table` instead"""
+"""This function is being deprecated, please see :py:func:`slice_table` instead"""
 sliceObjs = slice_utils.slice_tabledict
-"""This function is being deprecated, please see `slice_table` instead"""
+"""This function is being deprecated, please see :py:func:`slice_table` instead"""
 slice_tabledict = slice_utils.slice_tabledict

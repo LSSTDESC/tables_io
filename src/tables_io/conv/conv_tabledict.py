@@ -1,4 +1,4 @@
-"""Multi-table Convert Functions for tables_io"""
+"""Multi-Table Convert Functions for tables_io"""
 
 from collections import OrderedDict
 

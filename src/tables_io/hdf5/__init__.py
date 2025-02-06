@@ -1,3 +1,5 @@
+"""A module for manually manipulating HDF5 files in tables_io"""
+
 from .. import io_utils
 from ..utils import array_utils
 

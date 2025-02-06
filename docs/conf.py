@@ -60,11 +60,11 @@ autoapi_add_toc_tree_entry = False
 autoapi_member_order = "bysource"
 autoapi_options = [
     "members",
-    "undoc-members",
     "private-members",
     "show-inheritance",
     "show-module-summary",
     "special-members",
+    "inherited-members",
 ]
 
 html_theme = "sphinx_rtd_theme"

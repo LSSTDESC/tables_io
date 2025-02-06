@@ -66,7 +66,7 @@ For example, to open a `fits` file and return a summary of the contents:
 
 ### Converting tables to different formats
 
-To convert a `Table-like` object, use the [`convert`](#tables_io.convert.conv_tabledict.convert) function. Here we convert an `astropyTable` to a `pyarrowTable`.
+To convert a `Table-like` object, use the [`convert`](#tables_io.conv.conv_tabledict.convert) function. Here we convert an `astropyTable` to a `pyarrowTable`.
 
 ```{doctest}
 

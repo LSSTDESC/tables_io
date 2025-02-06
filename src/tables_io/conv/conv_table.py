@@ -1,4 +1,4 @@
-"""Single-table Conversion Functions for tables_io"""
+"""Single-Table Conversion Functions for tables_io"""
 
 from collections import OrderedDict
 from typing import Union, Mapping, Optional

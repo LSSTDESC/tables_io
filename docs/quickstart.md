@@ -76,7 +76,7 @@ A file can be read in using the [`read`](#tables_io.io_utils.read.read) function
 
 This reads the data to the default tabular format for the file type, which in this case is an `astropy` Table.
 
-You can also specify a desired tabular format, in which case `read` will read the file to its native tabular format, then [`convert`](#tables_io.convert.conv_tabledict.convert) the `Table-like` or `TableDict-like` object to the desired format. You can see [an example here](cookbook.md#read-in-a-file-to-a-specific-format). <project:#supported-tabular-formats> lists the default tabular formats as they correspond to the file types.
+You can also specify a desired tabular format, in which case `read` will read the file to its native tabular format, then [`convert`](#tables_io.conv.conv_tabledict.convert) the `Table-like` or `TableDict-like` object to the desired format. You can see [an example here](cookbook.md#read-in-a-file-to-a-specific-format). <project:#supported-tabular-formats> lists the default tabular formats as they correspond to the file types.
 
 ```{note}
 In order to receive a consistent output when reading in objects, you can use [`read_native`](#tables_io.io_utils.read.read_native), which will always read in a `TableDict-like` object. That object will also always have the default tabular format for that file type.
@@ -86,7 +86,7 @@ To read in a file a chunk of data at a time, you can use the [`iterator`](#table
 
 ### Conversion and other functionality
 
-The `Table-like` and `TableDict-like` objects can also be converted to different tabular formats separately, using the [`convert`](#tables_io.convert.conv_tabledict.convert) function. For example:
+The `Table-like` and `TableDict-like` objects can also be converted to different tabular formats separately, using the [`convert`](#tables_io.conv.conv_tabledict.convert) function. For example:
 
 ```{doctest}
 
@@ -142,7 +142,7 @@ Here, the type of file to write to is specified by the file name suffix, `hdf5`.
 | ------------------- | ----------------------------------------------------------------------------------------------------------- |
 | astropyTable        | [`astropy.table.Table`](https://docs.astropy.org/en/stable/table/index.html)                                |
 | numpyDict           | [`OrderedDict (str, np.array)`](https://docs.python.org/3/library/collections.html#collections.OrderedDict) |
-| numpyRecarray       | [`np.recarray`]https://numpy.org/doc/stable/reference/generated/numpy.recarray.html                         |
+| numpyRecarray       | [`np.recarray`](https://numpy.org/doc/stable/reference/generated/numpy.recarray.html)                       |
 | pandasDataFrame     | [`pd.DataFrame`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html)          |
 | pyarrowTable        | [`pyarrow.Table`](https://arrow.apache.org/docs/python/generated/pyarrow.Table.html)                        |
 
