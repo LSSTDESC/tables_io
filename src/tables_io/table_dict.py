@@ -3,18 +3,19 @@
 from collections import OrderedDict
 from deprecated.sphinx import deprecated
 
-from .io_utils.write import write
-from .io_utils.read import read
+from .io_utils import write, read
 from .convert.conv_tabledict import convert
 from .types import table_type
 
 
 @deprecated(
     reason="This class is deprecated as it is not currently being used by tables_io.",
-    version="0.2.0",
+    version="1.0.0",
 )
 class TableDict(OrderedDict):
-    """Object to collect various types of table-like objects
+    """Warning: This class is being deprecated as of version 1.0.0.
+
+    Object to collect various types of table-like objects
 
     This class is a dictionary mapping name to table-like
     and a few helper functions, e.g., to add new tables to the dictionary

@@ -75,4 +75,4 @@ sliceObj = slice_utils.slice_table
 """This function is being deprecated, please see `slice_table` instead"""
 sliceObjs = slice_utils.slice_tabledict
 """This function is being deprecated, please see `slice_table` instead"""
-slice_tabldict = slice_utils.slice_tabledict
+slice_tabledict = slice_utils.slice_tabledict

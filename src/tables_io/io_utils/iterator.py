@@ -39,13 +39,16 @@ def iterator(
 ):
     """Iterates through the data in a given file. The data is yielded (along with
     the start and stop index) as a `Table-like` object. The data will be read in as
-    the tabular format given by `tType`.
+    the tabular format given by `tType`. Uses :py:func:`iterator_native` to iterate
+    through data, and converts it as it is yielded.
 
     For a given file type, there are additional arguments that can be supplied to
     the native file reader. The main arguments that can be supplied are `groupname` for
     HDF5 files, and `columns` for parquet files. Other arguments for reading parquet
     files can be found in the documentation of `pyarrow.parquet.read_table` or
     `pyarrow.dataset.dataset`.
+
+    This function currently only works for the following file types: `numpyHDF5`, `pandasParquet`, `pyarrowParquet`, `pyarrowHDF5`
 
     Accepted tabular types:
 
@@ -80,12 +83,12 @@ def iterator(
         The starting index for the data.
     stop: int
         The end index for the data.
-    data : Table-like
+    data: Table-like
         The data from [start:stop]. The format will be the native tabular format for the file
         if no `tType` is given. Otherwise, the data will be in the tabular format `tType`.
 
 
-    Optional **kwargs
+    Optional kwargs
     -----------------
     groupname : `str` or `None`, by default `None`
         For HDF5 files, the group name where the data is.
@@ -116,7 +119,9 @@ def iterator_native(
     the start and stop index) as a `Table-like` object that has the default format
     for the given file type.
 
-    Any **kwargs are passed to the specific iterator function for the file type.
+    This function currently only works for the following file types: `numpyHDF5`, `pandasParquet`, `pyarrowParquet`, `pyarrowHDF5`
+
+    Any kwargs are passed to the specific iterator function for the file type.
 
     Parameters
     ----------
@@ -141,7 +146,7 @@ def iterator_native(
         The data in the native type for that file, from [start:stop]
 
 
-    Optional **kwargs
+    Optional kwargs
     -----------------
     groupname : `str` or `None`
         For HDF5 files, the group name where the data is
@@ -198,8 +203,8 @@ def get_input_data_length(filepath: str, fmt: Optional[str] = None, **kwargs):
 
     Returns
     -------
-    data : `Table-like`
-        The data
+    nrows : `int`
+        The length of the data
 
     Notes
     -----
@@ -365,7 +370,7 @@ def iter_pq_to_dataframe(
         The maximum chunk size of the data
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
-    **kwargs : additional arguments to pass to the parquet read_table function
+    kwargs : additional arguments to pass to the parquet read_table function
 
     Yields
     ------
@@ -410,7 +415,7 @@ def get_input_data_length_pq(
         Path to input file
     columns : `List[str]` or `None`
         The groupname for the data
-    **kwargs: additional arguments to pass to the pyarrow.parquet.read_table function
+    kwargs: additional arguments to pass to the pyarrow.parquet.read_table function
 
 
     Returns
@@ -447,7 +452,7 @@ def iter_ds_to_table(
         The list of columns to use
     chunk_size: `int`
         The maximum size of the batches to be read in
-    **kwargs : additional arguments to pass to the pyarrow.dataset.to_batches() function
+    kwargs : additional arguments to pass to the pyarrow.dataset.to_batches() function
 
     Yields
     ------
@@ -477,8 +482,8 @@ def get_input_data_length_ds(source, **kwargs) -> int:
     ----------
     source: `str`
         Path to input file or directory
-    **kwargs:
-        **kwargs are passed to pyarrow.dataset.dataset()
+    kwargs:
+        kwargs are passed to pyarrow.dataset.dataset()
 
     Returns
     -------

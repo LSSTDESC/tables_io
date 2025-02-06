@@ -39,7 +39,7 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
     """Writes `Table-like` or `TableDict-like` objects to a file or files. If the format (`fmt`) is given,
     or the file has a suffix, the function will convert the given data to the associated tabular type,
     and then write out the file as the requested type. If no file type is requested, the function will
-    use `write_native` to write the file to the default file type for the tabular type.
+    use :py:func:`write_native` to write the file to the default file type for the tabular type.
 
     Note: This function will automatically overwrite any previously existing files at the given filepath.
 
@@ -139,9 +139,9 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
 def write_native(odict, filepath: str) -> Optional[str]:
     """Writes `Table-like` or `TableDict-like` objects to a file or files. The file type will be determined
     by the default file type given the tabular format. The supported file types are:
-    [ASTROPY_HDF5 (".hf5"), NUMPY_HDF5 (".hdf5"), NUMPY_FITS (".fit"), PANDAS_PARQUET (".parq"), PYARROW_PARQUET (".parquet")].
+    astropyHDF5 (".hf5"), numpyHDF5 (".hdf5"), numpyFits (".fit"), pandasParquet (".parq"), pyarrowParquet (".parquet").
 
-    To write to a specific file format, use `write` instead.
+    To write to a specific file format, use :py:func:`write` instead.
 
     Note: This function will automatically overwrite any previously existing files at the given filepath.
 
@@ -449,9 +449,9 @@ def write_dict_to_HDF5_chunk(groups, odict: Mapping, start: int, end: int, **kwd
 
 
 def finalize_HDF5_write(fout, groupname: Optional[str] = None, **kwds):
-    """Write any last data and closes an hdf5 file. If `groupname` is given,
-    will create a group with that name before writing the data. If not,
-    no new group will be created.
+    """Writes any last data given as keyword arguments, and closes an hdf5 file.
+    If `groupname` is given, will create a group with that name before writing the data.
+    If not, no new group will be created.
 
     Parameters
     ----------
@@ -463,7 +463,7 @@ def finalize_HDF5_write(fout, groupname: Optional[str] = None, **kwds):
 
     Notes
     -----
-    The keywords can be used to write additional data
+    The keywords can be used to write additional data, where `key` is the name of the dataset and `value` should be the dataset to write.
     """
     if groupname is None:  # pragma: no cover
         group = fout

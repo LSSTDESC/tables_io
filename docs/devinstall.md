@@ -9,6 +9,10 @@ In this guide, we will name this developer environment `tables_io_dev` and we wi
 To install the developer environment:
 
 ```bash
+# Clone the repo and enter it
+git clone https://github.com/LSSTDESC/tables_io.git
+cd tables_io
+
 # Creating the environment from the YAML
 conda env create -n tables_io_dev -f environment.yml
 
@@ -18,10 +22,6 @@ conda activate tables_io_dev
 # Install tables_io in editable mode with dev dependencies
 pip install -e '.[dev]'
 ```
-
-### Setting up Parallel HDF5
-
-**TODO: CHECK IF ANYTHING ELSE NEEDS TO BE DONE**
 
 ## Running Tests
 

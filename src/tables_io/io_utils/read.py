@@ -48,7 +48,7 @@ def read(
     **kwargs,
 ):
     """Reads in a given file to either a `Table-like` format if there is one table within the file,
-    or a `TableDict-like` format if there are multiple tables or files. Uses `read_native` to read the file.
+    or a `TableDict-like` format if there are multiple tables or files. Uses :py:func:`read_native` to read the file.
 
     The `TableDict-like` format is an `OrderedDict` of `Table-like` objects. The `Table-like` objects
     currently supported are: astropy Table, numpy recarray, `OrderedDict` of numpy arrays, pandas DataFrame,
@@ -87,7 +87,7 @@ def read(
         The keys should be the unique identifiers for each dataset or file.
     allow_missing_keys : `bool`, by default False
         If False will raise FileNotFoundError if a key is missing from the given file.
-    **kwargs : additional arguments to pass to the native file reader
+    kwargs : additional arguments to pass to the native file reader
 
     Returns
     -------
@@ -169,7 +169,7 @@ def read_native(
         The keys should be the unique identifiers for each dataset or file.
     allow_missing_keys : `bool`, by default False.
         If False will raise FileNotFoundError if a key is missing from the given file.
-    **kwargs : additional arguments to pass to the native file reader
+    kwargs : additional arguments to pass to the native file reader
 
     Returns
     -------
@@ -503,7 +503,7 @@ def read_HDF5_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> M
 
 
 def read_HDF5_group(filepath: str, groupname: Optional[str] = None):
-    """Read and return the requested group from an hdf5 file. If no group is provided, returns the `h5py.File` object twice.
+    """Read and return the requested group and file object from an hdf5 file. If no group is provided, returns the `h5py.File` object twice.
 
     Parameters
     ----------
