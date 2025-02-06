@@ -6,7 +6,6 @@ import unittest
 import numpy as np
 import pytest
 
-from tables_io import types
 from tables_io.utils import array_utils
 from tables_io.lazy_modules import apTable, lazyImport, pd
 from tests.helpers.utilities import check_deps
@@ -73,7 +72,7 @@ def test_print_dict_shape():
     array_utils.print_dict_shape(test_data)
 
 
-def test_concatenateDicts():
+def test_concatenate_dicts():
     """Test the print_dict_shape method"""
     test_data = dict(
         scalar=np.random.uniform(size=10),
@@ -89,7 +88,8 @@ def test_concatenateDicts():
     assert np.allclose(od["mat"][10:], test_data["mat"])
 
 
-def test_getInit():
+def test_get_initialization_for_ODict():
+    """Testing the initialization of the Ordered Dictionary"""
     test_data = dict(
         scalar=np.random.uniform(size=10),
         vector=np.random.uniform(size=100).reshape(10, 10),
@@ -104,79 +104,3 @@ def test_getInit():
     assert dd["scalar"][0] == (12,)
     assert dd["vector"][0] == (12, 10)
     assert dd["mat"][0] == (12, 10, 10)
-
-
-def test_types():
-    """Test the typing functions"""
-    assert not types.is_table_like(4)
-    assert types.is_table_like(dict(a=np.ones(4)))
-    assert not types.is_table_like(dict(a=np.ones(4), b=np.ones(5)))
-    assert not types.is_tabledict_like(4)
-    assert not types.is_tabledict_like(dict(a=np.ones(4)))
-    assert types.is_tabledict_like(dict(data=dict(a=np.ones(4))))
-    try:
-        types.file_type("xx.out")
-    except KeyError:
-        pass
-    else:
-        raise KeyError("Failed to catch unknown fileType")
-
-
-@pytest.mark.skipif(not check_deps([apTable, pd]), reason="Missing an IO package")
-def test_type_finders():
-    """Test the utils that identify apTables and data frames"""
-    import pandas as pd
-    from astropy.table import Table
-
-    class DataFrameSub(pd.DataFrame):
-        pass
-
-    class TableSub(Table):
-        pass
-
-    d1 = pd.DataFrame()
-    d2 = DataFrameSub()
-    t1 = Table()
-    t2 = TableSub()
-
-    assert types.is_dataframe(d1)
-    assert types.is_dataframe(d2)
-    assert not types.is_dataframe(t1)
-    assert not types.is_dataframe(t2)
-    assert not types.is_dataframe({})
-    assert not types.is_dataframe(77)
-
-    assert not types.is_ap_table(d1)
-    assert not types.is_ap_table(d2)
-    assert types.is_ap_table(t1)
-    assert types.is_ap_table(t2)
-    assert not types.is_ap_table({})
-    assert not types.is_ap_table(77)
-
-
-def test_lazy_load():
-    """Test that the lazy import works"""
-    noModule = lazyImport("thisModuleDoesnotExist")
-    try:
-        noModule.d
-    except ImportError:
-        pass
-    else:
-        raise ImportError("lazyImport failed")
-
-
-@unittest.skipIf("wave" in sys.modules, "Wave module already imported")
-def test_lazy_load2():
-    """A second test that the lazy import works"""
-    # I picked an obscure python module that is unlikely
-    # to be loaded by anything else.
-
-    wave = lazyImport("wave")
-    # should not be loaded yet
-    assert "wave" not in sys.modules
-
-    # should trigger load
-    assert "WAVE_FORMAT_PCM" in dir(wave)
-    assert wave.sys == sys
-
-    assert "wave" in sys.modules
