@@ -47,3 +47,9 @@ def test_convert_table_dicts(data_tables, tType1, tType2):
     odict_2 = convert(odict_1, tType2)
     tables_r = convert(odict_2, types.AP_TABLE)
     assert compare_table_dicts(data_tables, tables_r)
+
+
+def test_bad_conversion(data_table):
+    """Tests that the conversion fails as expected when given an incorrect table type."""
+    with pytest.raises(TypeError) as e:
+        bad = convert(data_table, "astropytable")

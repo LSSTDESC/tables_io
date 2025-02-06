@@ -46,5 +46,5 @@ def data_keys(data_tables):
 
 @pytest.fixture
 def data_table(data_tables):
-    """Make and return some test data"""
+    """Make and return some test data as an astropy table"""
     return data_tables["data"]
