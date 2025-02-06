@@ -4,7 +4,7 @@ import pytest
 
 from tables_io import types
 from tables_io.conv.conv_tabledict import convert
-from ..testUtils import compare_table_dicts, check_deps
+from ..helpers.utilities import compare_table_dicts, check_deps
 from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
 # TODO: Docstrings for all these functions
@@ -49,7 +49,19 @@ def test_convert_table_dicts(data_tables, tType1, tType2):
     assert compare_table_dicts(data_tables, tables_r)
 
 
-def test_bad_conversion(data_table):
-    """Tests that the conversion fails as expected when given an incorrect table type."""
-    with pytest.raises(TypeError) as e:
-        bad = convert(data_table, "astropytable")
+@pytest.mark.skipif(
+    not check_deps([apTable, pd]), reason="Missing panda or astropy.table"
+)
+def test_conversion_strings(data_tables, data_table):
+    """Tests that the conversion functions work when given table types as strings."""
+
+    # test convert works with a string
+    tType = types.TABULAR_FORMATS[0]
+    odict_1 = convert(data_tables, tType)
+    assert compare_table_dicts(odict_1, data_tables)
+
+    # test it still works without a string
+    odict_2 = convert(data_tables, types.PD_DATAFRAME)
+
+    # test it works on just one table
+    tab = convert(data_table, tType)

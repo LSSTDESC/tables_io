@@ -9,12 +9,7 @@ import pytest
 from tables_io import types
 from tables_io.utils import array_utils
 from tables_io.lazy_modules import apTable, lazyImport, pd
-from tests.testUtils import check_deps
-
-
-def test_check_deps():
-    bad_module = lazyImport("this_does_not_exist")
-    assert not check_deps([bad_module])
+from tests.helpers.utilities import check_deps
 
 
 def test_array_length():

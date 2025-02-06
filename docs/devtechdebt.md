@@ -7,6 +7,7 @@ good first contributions for new contributors to the project.
 
 - [`iter_H5_to_dataframe`](#tables_io.io_utils.iterator.iter_H5_to_dataframe) is not implemented, iterator cannot iterate over `h5` files
 - [`pa_table_to_recarray`](#tables_io.conv.conv_table.pa_table_to_recarray) is not implemented, but the functionality is being accomplished via converting to astropy Table first
+- Migrate `tests/io_utils/test_io_classic.py` to pytest fully, and remove `unittest` import.
 
 ## Organizational Debt
 
