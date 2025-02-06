@@ -1,4 +1,4 @@
-"""tables_io is a library of functions for input, output and conversion of tabular data formats"""
+"""tables_io is a library of functions for input, output and conversion of tabular data formats. Functions imported here are documented in their respective modules."""
 
 try:
     from ._version import version

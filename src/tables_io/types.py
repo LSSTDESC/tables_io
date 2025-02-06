@@ -172,7 +172,7 @@ def table_type(obj) -> int:
         else:
             if array_length(val) != nRow:
                 raise IndexError(
-                    f"Column {key} length {array_length(val)} != {nRow}"
+                    f"Column {key} length {array_length(val)} != {nRow}. \n Column lengths are not equal, this is not a valid {TABULAR_FORMATS[NUMPY_DICT]} object"
                 )  # pylint: disable=bad-string-format-type
     return NUMPY_DICT
 
@@ -282,3 +282,55 @@ def tType_to_int(tType: Union[str, int]) -> int:
         int_tType = tType
 
     return int_tType
+
+
+def get_table_type(obj) -> str:
+    """Gets the table type of a Table-like or TableDict-like object, and returns the name of that type.
+    If the object is a TableDict-like object, it will check that all Table-like objects have the same type.
+    Will raise an error if the object is not of a supported type.
+
+    Parameters
+    ----------
+    obj : `Table-like` or `TableDict-like` object
+        The object to determine the type of.
+
+    Returns
+    -------
+    str
+        Name of the tabular type
+
+    Raises
+    ------
+    TypeError
+        Raises a TypeError if the table is not of a supported type
+    """
+
+    # check if object is TableDict-like
+    is_td = is_tabledict_like(obj)
+
+    if is_td:
+        # get the table type of the tables in the TableDict
+        tab_types = []
+        for value in obj.items():
+            tab_types.append(table_type(value))
+
+        # if there is more than one table type raise an error
+        if len(np.unique(tab_types)) > 1:
+            raise TypeError(
+                f"Object contains Table-like objects of multiple types (obj: {obj})"
+            )
+        int_tType = tab_types[0]
+
+    else:
+
+        try:
+            # get the table type of the Table
+            int_tType = table_type(obj)
+        except Exception as e:
+            raise TypeError(
+                f"Object of type {type(obj)} is not one of the supported types. \n Must be one of {list(TABULAR_FORMAT_NAMES.keys())}"
+            ) from e
+
+    tType = TABULAR_FORMATS[int_tType]
+
+    return tType

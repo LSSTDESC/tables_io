@@ -2,14 +2,22 @@
 tables_io: Tabular data read/write interface
 ============================================
 
-* quick intro to tables_io
-* code intended to allow for the reading and writing of multiple different file formats using a single package 
-* most file formats are those that are meant for large datasets, widely used in astronomy
-* allows easy conversions between file formats and in memory table formats
 
-* used in these codes (with links):
-    * RAIL
-    * qp 
+``tables_io`` provides an interface for a variety of non-ASCII file formats that are commonly used within the `LSST DESC collaboration <https://lsstdesc.org/>`_. It allows users to read in data from multiple types of files through one convenient interface. 
+
+Features:
+---------
+
+* reads and writes files that have single or multiple tables 
+* supports a variety of file types and formats (see :ref:`supported-file-formats`)
+* allows easy conversions between file formats and in memory tabular formats
+* ability to do chunked reads and writes of ``HDF5`` and ``parquet`` files
+
+
+``tables_io`` is currently being used in the following packages:
+
+    * `qp <https://github.com/LSSTDESC/qp>`_ 
+    * `RAIL <https://github.com/LSSTDESC/rail>`_
 
 .. _cards-clickable: 
 

@@ -2,7 +2,7 @@
 
 ## Documentation
 
-All documentation is created using Sphinx. This lives in the `docs` folder, and the output is created in the `_readthedocs` folder in the main package. Documentation files are written in Markdown.
+All documentation is created using Sphinx. This lives in the `docs/` folder, and the output is created in the `_readthedocs/` folder in the main package. Documentation files are written in Markdown, and any images or other assets are in the `assets/` folder.
 
 ### Writing Documentation Pages
 
