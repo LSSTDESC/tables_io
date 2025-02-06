@@ -30,6 +30,7 @@
 | [`concat_table` {octicon}`link;0.9em`](#tables_io.utils.concat_utils.concat_table)         | Concatenate multiple `Table-like` objects                                       |
 | [`slice_tabledict` {octicon}`link;0.9em`](#tables_io.utils.slice_utils.slice_tabledict)    | Slice a `TableDict-like` object                                                 |
 | [`slice_table` {octicon}`link;0.9em`](#tables_io.utils.slice_utils.slice_table)            | Slice a `Table-like` object                                                     |
+| [`get_table_type` {octicon}`link;0.9em`](#tables_io.types.get_table_type)                  | Returns the tabular type of a `Table-like` or `TableDict-like` object           |
 
 ## HDF5 module
 
