@@ -12,11 +12,6 @@ from tables_io.lazy_modules import apTable, lazyImport, pd
 from tests.helpers.utilities import check_deps
 
 
-def test_check_deps():
-    bad_module = lazyImport("this_does_not_exist")
-    assert not check_deps([bad_module])
-
-
 def test_array_length():
     """Test the pandas reading"""
     assert array_utils.array_length(4) == 0

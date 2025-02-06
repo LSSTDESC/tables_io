@@ -1,5 +1,5 @@
 """
-Unit tests for concatanation tools
+Unit tests for concatenation tools
 """
 
 import pytest
