@@ -1,4 +1,4 @@
-"""tables_io is a library of functions for input, output and conversion of tabular data formats"""
+"""tables_io is a library of functions for input, output and conversion of tabular data formats. Functions imported here are documented in their respective modules."""
 
 try:
     from ._version import version
@@ -11,6 +11,7 @@ from . import conv
 from . import io_utils
 from .utils import concat_utils
 from .utils import slice_utils
+from .types import get_table_type
 
 # Exposing the primary functions and interfaces for tables_io
 

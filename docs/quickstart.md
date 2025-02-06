@@ -65,7 +65,7 @@ The `Table-like` objects exist in memory as one of the multiple supported tabula
 
 ### Read
 
-A file can be read in using the [`read`](#tables_io.io_utils.read.read) function. Here's an example of reading a table or tables from a `fits` file:
+A file can be read in using the {py:func}`read <tables_io.io_utils.read.read>` function. Here's an example of reading a table or tables from a `fits` file:
 
 ```{doctest}
 
@@ -76,7 +76,7 @@ A file can be read in using the [`read`](#tables_io.io_utils.read.read) function
 
 This reads the data to the default tabular format for the file type, which in this case is an `astropy` Table.
 
-You can also specify a desired tabular format, in which case `read` will read the file to its native tabular format, then [`convert`](#tables_io.conv.conv_tabledict.convert) the `Table-like` or `TableDict-like` object to the desired format. You can see [an example here](cookbook.md#read-in-a-file-to-a-specific-format). <project:#supported-tabular-formats> lists the default tabular formats as they correspond to the file types.
+You can also specify a desired tabular format, in which case `read` will read the file to its native tabular format, then {py:func}`convert <tables_io.conv.conv_tabledict.convert>` the `Table-like` or `TableDict-like` object to the desired format. You can see [an example here](cookbook.md#read-in-a-file-to-a-specific-format). <project:#supported-tabular-formats> lists the default tabular formats as they correspond to the file types.
 
 ```{note}
 In order to receive a consistent output when reading in objects, you can use [`read_native`](#tables_io.io_utils.read.read_native), which will always read in a `TableDict-like` object. That object will also always have the default tabular format for that file type.
@@ -111,7 +111,9 @@ The [`write`](#tables_io.io_utils.write.write) function will accept both `Table-
 
 ```
 
-Here, the type of file to write to is specified by the file name suffix, `hdf5`. If necessary, [`write`](#tables_io.io_utils.write.write) will convert the object to the related tabular type, then write to the specified file type. Otherwise, `tables_io` has a native file type for each of the tabular formats, which are listed in <project:#supported-tabular-formats>. You can write files to their native format by using [`write_native`](#tables_io.io_utils.write.write_native) directly.
+Here, the type of file to write to is specified by the file name suffix, `hdf5`. If necessary, [`write` (docs)](#tables_io.io_utils.write.write) will convert the object to the related tabular type, then write to the specified file type. Otherwise, `tables_io` has a native file type for each of the tabular formats, which are listed in <project:#supported-tabular-formats>. You can write files to their native format by using [`write_native`](#tables_io.io_utils.write.write_native) directly.
+
+(supported-file-formats)=
 
 ### Supported file formats
 
