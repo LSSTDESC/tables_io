@@ -74,7 +74,7 @@ A file can be read in using the {py:func}`read <tables_io.io_utils.read.read>` f
 
 ```
 
-This reads the data to the default tabular format for the file type, which in this case is an `astropy` Table.
+This reads the data to the default tabular format for the file type, which in this case is an `astropyTable`.
 
 You can also specify a desired tabular format, in which case `read` will read the file to its native tabular format, then [`convert`](#tables_io.conv.conv_tabledict.convert) the `Table-like` or `TableDict-like` object to the desired format. You can see [an example here](cookbook.md#read-in-a-file-to-a-specific-format). <project:#supported-tabular-formats> lists the default tabular formats as they correspond to the file types.
 
@@ -95,7 +95,7 @@ The `Table-like` and `TableDict-like` objects can also be converted to different
 
 ```
 
-Here we convert the `astropy` table we converted earlier to a `pandas` DataFrame.
+Here we convert the `astropyTable` we converted earlier to a `pandasDataFrame`.
 
 Additionally, `tables_io` functions exist to concatenate and to take a slice of objects. More details on these functions and some examples can be found in the Cookbook section on [basic table operations](cookbook.md#basic-table-operations).
 
@@ -131,7 +131,7 @@ Here, the type of file to write to is specified by the file name suffix, `hdf5`.
 | pyarrowParquet   | `parquet`      | [`pyarrow`](https://arrow.apache.org/docs/python/parquet.html)                         |
 
 ```{note}
-`tables_io` does not require all of the above packages to function. If you do not have one of these packages installed, you will not be able to create tables of that type (i.e. if you do not have `pandas` installed, you cannot convert objects to 'pandasDataFrame' or read in 'pandasParquet' files.)
+`tables_io` does not require all of the above packages to function. If you do not have one of these packages installed, you will not be able to create tables of that type (i.e. if you do not have `pandas` installed, you cannot convert objects to `pandasDataFrame` or read in `pandasParquet` files.)
 ```
 
 (tabular-formats)=
