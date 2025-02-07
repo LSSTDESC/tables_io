@@ -1,4 +1,4 @@
-"""Type definitions for tables_io"""
+"""Type definitions and related functions for tables_io"""
 
 import os
 from collections import OrderedDict

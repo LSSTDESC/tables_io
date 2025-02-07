@@ -290,3 +290,63 @@ rank: 3, size: 4, start: 75, end: 100
 ```
 
 This creates an `HDF5` file with two groups, `data` and `metadata`.
+
+## Iterating through a parquet file
+
+### Iterating through data in a parquet file
+
+To iterate through a `parquet` file, yielding only a section of data at a time, we can use the [`iterator`](#tables_io.io_utils.iterator.iterator) or [`iterator_native`](#tables_io.io_utils.iterator.iterator) functions as shown below. You can provide the size of the data section you would like as an `int` to `chunk_size`, size here meaning the number of rows (or length of the `numpy.arrays` in the case of `numpyDict` tables). The default `chunk_size` is 100,000.
+
+To determine the number of rows of data in the file, and therefore what an appropriate chunk size would be, you can use the [`get_input_data_length`](#tables_io.io_utils.iterator.get_input_data_length) function from the `hdf5` module as follows:
+
+```{doctest}
+
+>>> from tables_io import hdf5
+>>> hdf5.get_input_data_length('datafile.parquet')
+7
+
+```
+
+Here we did not supply the `keys` of the data, since we want all the columns.
+
+Since the length of our file is 7, we will choose a chunk size smaller than that, say 3. To output the data to a `pandasDataFrame`, we use the [`iterator`](#tables_io.io_utils.iterator.iterator) function as shown below:
+
+```{doctest}
+
+>>> import tables_io
+>>> for start, stop, data in tables_io.iterator('datafile.parquet','pandasDataFrame',chunk_size=3):
+>>>    print(start,stop,data)
+0 3    col1  col2
+0     1     5
+1     2    10
+2     3    15
+3 6    col1  col2
+0     4    20
+1     5    25
+2     6    30
+6 7    col1  col2
+0     7    35
+
+```
+
+To iterate through the file and output the data in its native tabular type instead, we use [`iterator_native`](#tables_io.io_utils.iterator.iterator) as below:
+
+```{doctest}
+
+>>> for start, stop, data in tables_io.iterator_native('datafile.parquet',chunk_size=3):
+>>>     print(start, stop, data)
+0 3 OrderedDict({'col1': array([1, 2, 3]), 'col2': array([ 5, 10, 15])})
+3 6 OrderedDict({'col1': array([4, 5, 6]), 'col2': array([20, 25, 30])})
+6 7 OrderedDict({'col1': array([7]), 'col2': array([35])})
+
+```
+
+If you want to use MPI, it is currently only supported for `HDF5` files. You can specify the rank and MPI size to only iterate through the data chunks that correspond to the current node (rank), as shown below:
+
+```{doctest}
+
+>>> for start, stop, data in tables_io.iterator_native('datafile.hdf5', chunk_size=3, rank=0, parallel_size=3):
+>>>     print(start, stop, data)
+0 3 OrderedDict({'col1': array([1, 2, 3]), 'col2': array([ 5, 10, 15])})
+
+```
