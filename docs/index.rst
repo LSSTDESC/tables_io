@@ -8,8 +8,8 @@ tables_io: Tabular data read/write interface
 Features:
 ---------
 
-* reads and writes files that have single or multiple tables 
-* supports a variety of file types and formats (see :ref:`supported-file-formats`)
+* reads and writes files that contain one or more data tables 
+* supports a variety of file types (``fits``, ``hdf5``, ``parquet``) and tabular formats (``astropy``, ``pandas``, ``pyarrow``, ``numpy``) (see :ref:`supported-file-formats`)
 * allows easy conversions between file formats and in memory tabular formats
 * ability to do chunked reads and writes of ``HDF5`` and ``parquet`` files
 

@@ -291,7 +291,7 @@ rank: 3, size: 4, start: 75, end: 100
 
 This creates an `HDF5` file with two groups, `data` and `metadata`.
 
-## Iterating through a parquet file
+## Other examples
 
 ### Iterating through data in a parquet file
 
@@ -335,18 +335,23 @@ To iterate through the file and output the data in its native tabular type inste
 
 >>> for start, stop, data in tables_io.iterator_native('datafile.parquet',chunk_size=3):
 >>>     print(start, stop, data)
-0 3 OrderedDict({'col1': array([1, 2, 3]), 'col2': array([ 5, 10, 15])})
-3 6 OrderedDict({'col1': array([4, 5, 6]), 'col2': array([20, 25, 30])})
-6 7 OrderedDict({'col1': array([7]), 'col2': array([35])})
-
-```
-
-If you want to use MPI, it is currently only supported for `HDF5` files. You can specify the rank and MPI size to only iterate through the data chunks that correspond to the current node (rank), as shown below:
-
-```{doctest}
-
->>> for start, stop, data in tables_io.iterator_native('datafile.hdf5', chunk_size=3, rank=0, parallel_size=3):
->>>     print(start, stop, data)
-0 3 OrderedDict({'col1': array([1, 2, 3]), 'col2': array([ 5, 10, 15])})
+0 3 pyarrow.Table
+col1: int64
+col2: int64
+----
+col1: [[1,2,3]]
+col2: [[5,10,15]]
+3 6 pyarrow.Table
+col1: int64
+col2: int64
+----
+col1: [[4,5,6]]
+col2: [[20,25,30]]
+6 7 pyarrow.Table
+col1: int64
+col2: int64
+----
+col1: [[7]]
+col2: [[35]]
 
 ```
