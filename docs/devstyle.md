@@ -62,6 +62,8 @@ Generally, the code files are formatted such that there are interface functions 
 
 ## Expectations
 
+Generally, the code should follow the guidelines given in the [LSTT DM Developer Guide](https://developer.lsst.io/index.html). This section lays out some project-specific guidelines.
+
 ### Naming conventions
 
 - Single table objects (i.e. a `pandasDataFrame`, `numpyDict` of arrays) are referred to as `Table-like`.
@@ -124,7 +126,7 @@ It is also considered good practice to make suggestions for optional improvement
 
 ### Publishing Package on PyPi
 
-There is a github action that will publish the package on PyPi after a new release is created
+There is a github action that will publish the package on PyPi after a new release is created.
 
 ### Making the Documentation on "Read The Docs"
 
@@ -136,4 +138,7 @@ This is how you do that
 
 - [`qp`](https://github.com/LSSTDESC/qp)
 - [`rail_base`](https://github.com/LSSTDESC/rail_base)
-- ...
+- [`rail_pipelines`](https://github.com/LSSTDESC/rail_pipelines)
+- [`rail_astro_tools`](https://github.com/LSSTDESC/rail_astro_tools)
+- [`rail_bpz`](https://github.com/LSSTDESC/rail_bpz)
+- [`rail_pzflow`](https://github.com/LSSTDESC/rail_pzflow)
