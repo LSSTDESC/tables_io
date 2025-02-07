@@ -6,7 +6,7 @@ All documentation is created using Sphinx. This lives in the `docs/` folder, and
 
 ### Writing Documentation Pages
 
-This is what you should do
+When writing new documentation pages, make sure to add them to the relevant `toctree` in `index.rst`. Tutorial `jupyter notebooks` can be placed directly in the `notebooks` directory, and they will be automatically evaluated and turned into a webpage via the [`myst-nb`](https://myst-nb.readthedocs.io/en/v0.13.2/index.html) extension.
 
 ### Building the Documentation Locally
 
@@ -62,12 +62,12 @@ Generally, the code files are formatted such that there are interface functions 
 
 ## Expectations
 
-- naming conventions etc
+### Naming conventions
 
-  - objects that are single tables (i.e. a pandas DataFrame, numpy OrderedDict of arrays) are referred to as `Table-like`.
-  - objects that are `OrderedDict` objects of `Table-like` objects are referred to as `TableDict-like` objects
-  - functions are snake case (like_this)
-  - classes use pascal case (LikeThis)
+- Single table objects (i.e. a `pandasDataFrame`, `numpyDict` of arrays) are referred to as `Table-like`.
+- Objects that are `OrderedDict` objects of `Table-like` objects are referred to as `TableDict-like` objects
+- Function names should be in snake case (like_this)
+- Class names use pascal case (LikeThis)
 
 - test coverage etc
 
@@ -77,7 +77,8 @@ Generally, the code files are formatted such that there are interface functions 
 
 ### Typing Recommendations:
 
-When referring to a generic `TableDict` or `TableDict-like` object, use the `Mapping` type hint.
+- When referring to a generic `TableDict` or `TableDict-like` object, use the `Mapping` type hint.
+- Currently there is no good way to type hint `Table-like` objects other than the `numpyDict` object.
 
 ## Version Release and Deployment Procedures
 

@@ -51,8 +51,8 @@ def read(
     or a `TableDict-like` format if there are multiple tables or files. Uses :py:func:`read_native` to read the file.
 
     The `TableDict-like` format is an `OrderedDict` of `Table-like` objects. The `Table-like` objects
-    currently supported are: astropy Table, numpy recarray, `OrderedDict` of numpy arrays, pandas DataFrame,
-    and pyarrow table.
+    currently supported are: `astropyTable`, `numpyRecarray`, `numpyDict` (dict of `numpy` arrays), `pandasDataFrame`,
+    and `pyarrowTable`.
 
     If given just the filepath, the function will read any tables in the file to its default `Table-like`
     format in memory. If given a specific tabular type, the function will read in the file to the default
@@ -87,7 +87,8 @@ def read(
         The keys should be the unique identifiers for each dataset or file.
     allow_missing_keys : `bool`, by default False
         If False will raise FileNotFoundError if a key is missing from the given file.
-    kwargs : additional arguments to pass to the native file reader
+    kwargs :
+        Additional arguments to pass to the native file reader
 
     Returns
     -------
@@ -107,7 +108,7 @@ def read(
         1     2     4
 
         Notice that it has been automatically read in as the default tabular type for `h5` files,
-        a `pandas.DataFrame`.
+        a `pandasDataFrame`.
 
         For a `TableDict-like` object, we read it in as follows:
 
@@ -125,7 +126,7 @@ def read(
             5     3
             7     4})
 
-        Notice that the resulting `OrderedDict` has `astropy.Table` objects as the values.
+        Notice that the resulting `OrderedDict` has `astropyTable` objects as the values.
 
 
     """
@@ -155,8 +156,9 @@ def read_native(
     The format of the file is either given by `fmt`, or determined based on the `suffix` of
     the file path. This determines what tabular format the file is read in as. In all cases,
     the data from the file is returned as an `OrderedDict` or `TableDict-like` object, with
-    `str` keys and `Table-like` values. The `Table-like` values can either be astropy Tables,
-    numpy recarrays, an `OrderedDict` of numpy arrays, a pandas dataframe, or a pyarrow table.
+    `str` keys and `Table-like` values. The `Table-like` values can be `astropyTable`,
+    `numpyRecarray`, `numpyDict` (dict of `numpy` arrays), `pandasDataFrame`, and
+    `pyarrowTable`.
 
     Parameters
     ----------
@@ -169,7 +171,8 @@ def read_native(
         The keys should be the unique identifiers for each dataset or file.
     allow_missing_keys : `bool`, by default False.
         If False will raise FileNotFoundError if a key is missing from the given file.
-    kwargs : additional arguments to pass to the native file reader
+    kwargs :
+        Additional arguments to pass to the native file reader
 
     Returns
     -------
@@ -329,8 +332,7 @@ def check_columns(
     the columns specified in a provided list. If not, an error will be raised.
 
     * For FITS files, columns across all extensions will be checked at one time.
-    * For HDF5 files, only columns within a single level of the specified parent_groupname
-    will be checked.
+    * For HDF5 files, only columns within a single level of the specified parent_groupname will be checked.
 
     Note: If more columns are available in the file than specified in the list,
     the file will still pass the check.

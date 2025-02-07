@@ -76,7 +76,7 @@ A file can be read in using the {py:func}`read <tables_io.io_utils.read.read>` f
 
 This reads the data to the default tabular format for the file type, which in this case is an `astropy` Table.
 
-You can also specify a desired tabular format, in which case `read` will read the file to its native tabular format, then {py:func}`convert <tables_io.conv.conv_tabledict.convert>` the `Table-like` or `TableDict-like` object to the desired format. You can see [an example here](cookbook.md#read-in-a-file-to-a-specific-format). <project:#supported-tabular-formats> lists the default tabular formats as they correspond to the file types.
+You can also specify a desired tabular format, in which case `read` will read the file to its native tabular format, then [`convert`](#tables_io.conv.conv_tabledict.convert) the `Table-like` or `TableDict-like` object to the desired format. You can see [an example here](cookbook.md#read-in-a-file-to-a-specific-format). <project:#supported-tabular-formats> lists the default tabular formats as they correspond to the file types.
 
 ```{note}
 In order to receive a consistent output when reading in objects, you can use [`read_native`](#tables_io.io_utils.read.read_native), which will always read in a `TableDict-like` object. That object will also always have the default tabular format for that file type.
