@@ -49,12 +49,22 @@ def lazyImport(modulename):
 
 
 tables = lazyImport("tables")
+"""The Tables Module"""
 apTable = lazyImport("astropy.table")
+"""The Astropy Tables Module"""
 apDiffUtils = lazyImport("astropy.utils.diff")
+"""The Astropy Utils Diff Module"""
 fits = lazyImport("astropy.io.fits")
+"""The Astropy FITS module"""
 h5py = lazyImport("h5py")
+"""The H5PY Module"""
 pa = lazyImport("pyarrow")
+"""The PyArrow Module"""
 pd = lazyImport("pandas")
+"""The Pandas Module"""
 pq = lazyImport("pyarrow.parquet")
+"""The PyArrow Parquet Module"""
 ds = lazyImport("pyarrow.dataset")
+"""The PyArrow Dataset Module"""
 jnp = lazyImport("jax.numpy")
+"""The JAX Numpy Module"""

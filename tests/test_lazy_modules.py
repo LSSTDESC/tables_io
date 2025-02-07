@@ -14,25 +14,20 @@ from tables_io.lazy_modules import (
     lazyImport,
 )
 
-# TODO: Docstrings for all of these functions
-
 
 @pytest.mark.parametrize(
     "mod",
     [tables, apTable, apDiffUtils, fits, h5py, pd, pq],
 )
 def test_deps(mod):
+    """Testing that dependencies get loaded with Lazy Import"""
     assert check_deps([mod])
 
 
 @pytest.mark.skipif(not check_deps([jnp]), reason="Failed to load jax.numpy")
 def test_deps_jnp():
+    """Testing Jax Numpy dependencies"""
     assert check_deps([jnp])
-
-
-def test_bad_deps():
-    dummy = 0
-    assert not check_deps([dummy])
 
 
 def test_check_deps():

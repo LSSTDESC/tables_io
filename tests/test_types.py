@@ -1,4 +1,5 @@
 import pytest
+from tables_io import convert, convert_table
 from tables_io.lazy_modules import apTable, lazyImport, pd
 from tests.helpers.utilities import check_deps
 from tables_io import types
@@ -51,3 +52,20 @@ def test_type_finders():
     assert types.is_ap_table(t2)
     assert not types.is_ap_table({})
     assert not types.is_ap_table(77)
+
+
+def test_get_table_type(data_tables):
+    """Testing the Getting the Table Type Functionality"""
+
+    conv_tabledict = convert(data_tables, "astropyTable")
+    testing_type = types.get_table_type(conv_tabledict)
+    assert testing_type == "astropyTable"
+
+    # Failing Multiple Types in Same TableDict
+    with pytest.raises(TypeError):
+        conv_tabledict["md"] = convert_table(conv_tabledict["md"], "pyarrowTable")
+        _ = types.get_table_type(conv_tabledict)
+
+    # Failing Type that Shouldn't Work
+    with pytest.raises(TypeError):
+        types.get_table_type({1, 2, 3})

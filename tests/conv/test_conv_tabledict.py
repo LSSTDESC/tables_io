@@ -7,8 +7,6 @@ from tables_io.conv.conv_tabledict import convert
 from ..helpers.utilities import compare_table_dicts, check_deps
 from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
-# TODO: Docstrings for all these functions
-
 
 @pytest.mark.parametrize(
     "mod",

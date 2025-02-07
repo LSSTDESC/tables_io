@@ -1,5 +1,7 @@
 """
 Unit tests for io_layer module
+
+Future refactor should migrate this to pytest.
 """
 
 import os
@@ -38,11 +40,18 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
 
     def _do_loopback(self, tType, basepath, fmt, **kwargs):
         """Utility function to do loopback tests"""
+
         odict_c = convert(self._tables, tType)
         filepath = write(odict_c, basepath, fmt)
         self._files.append(filepath)
         odict_r = read(filepath, tType=tType, fmt=fmt, **kwargs)
         tables_r = convert(odict_r, types.AP_TABLE)
+
+        # Testing to raise errors on read (i.e., trying with invalid key)
+
+        with pytest.raises(RuntimeError) as e:
+            obj_r = read(filepath, tType=tType, fmt=fmt, keys=100)
+
         return compare_table_dicts(self._tables, tables_r, **kwargs)
 
     def _do_loopback_with_keys(
@@ -90,6 +99,11 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
                     **kwargs,
                 )
 
+        # Testing to raise errors on read (i.e., trying with invalid key)
+
+        with pytest.raises(RuntimeError) as e:
+            obj_r = read(filepath, tType=tType, fmt=fmt, keys=100)
+
     def _do_loopback_jax(self, basepath, fmt, keys=None, **kwargs):
         """Utility function to do loopback tests writing data as a jax array"""
         odict_c = convert(self._tables, types.NUMPY_DICT)
@@ -133,6 +147,11 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         obj_r_native = read(filepath_native, tType=tType, keys=keys)
         table_r_native = convert(obj_r_native, types.AP_TABLE)
         assert compare_tables(self._table, table_r_native, **kwargs)
+
+        # Testing to raise errors on read (i.e., trying with invalid key)
+
+        with pytest.raises(RuntimeError) as e:
+            obj_r = read(filepath, tType=tType, fmt=fmt, keys=100)
 
     def _do_iterator(self, filepath, tType, expectFail=False, chunk_size=50, **kwargs):
         """Test the chunk iterator"""
@@ -241,6 +260,7 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
 
     def testPQLoopback(self):
         """Test writing / reading pandas dataframes to parquet"""
+
         self._do_loopback_with_keys(
             types.PD_DATAFRAME, "test_out", "pq", list(self._tables.keys())
         )

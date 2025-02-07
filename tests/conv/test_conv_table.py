@@ -37,6 +37,13 @@ def test_convert_table(data_table, tType1, tType2):
     t2 = convert_table(t1, tType2)
     _ = convert_table(t2, types.AP_TABLE)
 
+    # Testing against raising errors for failed conversion:
+
+    bad_object = ["a", "b", ["c", "d"]]
+
+    with pytest.raises(RuntimeError) as e:
+        _ = convert_table(bad_object, tType1)
+
 
 def test_bad_conversion(data_table):
     """Tests that the conversion fails as expected when given an incorrect table type."""
