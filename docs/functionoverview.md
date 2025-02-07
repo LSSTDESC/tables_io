@@ -34,7 +34,7 @@
 
 ## HDF5 module
 
-The HDF5 module exists to allow users easier access to manually do chunked operations with `HDF5` files. While [`iterator`](#tables_io.io_utils.iterator.iterator) provides a way to do chunked reads of `HDF5` files, this is the only way to do chunked writes of `HDF5` files.
+The HDF5 module exists to allow users easier access to manually do chunked operations with `HDF5` files. While [`iterator`](#tables_io.io_utils.iterator.iterator) provides a way to do chunked reads of `HDF5` files, this is the only way to do chunked writes of `HDF5` files. To use the `hdf5` module run `from tables_io import hdf5`.
 
 ### Functions that read in data
 
