@@ -36,7 +36,6 @@ Features:
 
         **Getting Started**
 
-        description
 
     .. grid-item-card::
         :link: autoapi/index
@@ -47,8 +46,7 @@ Features:
         :fas:`fa-solid fa-terminal; fa-5x`
 
         **API Reference**
-
-        description 
+ 
 
 .. toctree::
     :hidden:

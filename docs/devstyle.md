@@ -62,7 +62,7 @@ Generally, the code files are formatted such that there are interface functions 
 
 ## Expectations
 
-Generally, the code should follow the guidelines given in the [LSTT DM Developer Guide](https://developer.lsst.io/index.html). This section lays out some project-specific guidelines.
+Generally, the code should follow the guidelines given in the [LSST DM Developer Guide](https://developer.lsst.io/index.html). This section lays out some project-specific guidelines.
 
 ### Naming conventions
 
