@@ -6,7 +6,7 @@ All documentation is created using Sphinx. This lives in the `docs/` folder, and
 
 ### Writing Documentation Pages
 
-When writing new documentation pages, make sure to add them to the relevant `toctree` in `index.rst`. Tutorial `jupyter notebooks` can be placed directly in the `notebooks` directory, and they will be automatically evaluated and turned into a webpage via the [`myst-nb`](https://myst-nb.readthedocs.io/en/v0.13.2/index.html) extension.
+When writing new documentation pages, make sure to add them to the relevant `toctree` in `index.rst`. Tutorial `jupyter notebooks` can be placed directly in the `notebooks/` directory, and they will be automatically evaluated and turned into a webpage via the [`myst-nb`](https://myst-nb.readthedocs.io/en/v0.13.2/index.html) extension.
 
 ### Building the Documentation Locally
 
@@ -67,24 +67,64 @@ Generally, the code files are formatted such that there are interface functions 
 - Single table objects (i.e. a `pandasDataFrame`, `numpyDict` of arrays) are referred to as `Table-like`.
 - Objects that are `OrderedDict` objects of `Table-like` objects are referred to as `TableDict-like` objects
 - Function names should be in snake case (like_this)
-- Class names use pascal case (LikeThis)
-
-- test coverage etc
-
-- expectations for updating documentation
-
-- PR procedure
+- Class names should use pascal case (LikeThis)
 
 ### Typing Recommendations:
 
+It is recommended to use type hints for the arguments and outputs of functions to improve the ability to develop and understand code. For some tips on how to get started see this [cheat sheet](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html).
+
+Some tips for this project:
+
 - When referring to a generic `TableDict` or `TableDict-like` object, use the `Mapping` type hint.
 - Currently there is no good way to type hint `Table-like` objects other than the `numpyDict` object.
+
+## Contribution workflow
+
+The contribution workflow described here is pulled from the [RAIL contribution workflow](https://rail-hub.readthedocs.io/en/latest/source/contributing.html).
+
+### Issue
+
+When you identify something that should be done, [make an issue](https://github.com/LSSTDESC/tables_io/issues/new/choose) for it.
+
+### Branch
+
+Install the code following the [developer installation](devinstall.md#developer-environment-setup) instructions.
+
+While developing in a branch, don’t forget to pull from main regularly (at least daily) to make sure your work is compatible with other recent changes.
+
+Make sure that if the issue solves one of the items listed in <project:devtechdebt.md>, you remove that item from the documentation page.
+
+When you’re ready to merge your branch into the main branch, create a pull request (“PR”) in `tables_io` repository. GitHub has instructions [here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request).
+
+Several continuous integration checks will be performed for new pull requests. If any of these automatic processes find issues with the code, you should address them in the branch before sending for review. These include tests (does the code function correctly), pylint (code style), and coverage (how much code is exercised in unit tests).
+
+Once you are satisfied with your PR, request that other team members review and approve it. You could send the request to someone whom you’ve worked with on the topic, or one of the core maintainers of `tables_io`.
+
+### Merge
+
+Once the changes in your PR have been approved, these are your next steps:
+
+- the author merges the change by selecting “Squash and merge” on the approved pull request
+- enter `closes #[#]` in the comment field to close the resolved issue
+- delete your branch using the button on the merged pull request.
+
+### Reviewing a PR
+
+To review a pull request, it’s a good idea to start by pulling the changes and running the tests locally (see <project:devinstall.md#running-tests> for instructions).
+
+Check the code for complete and accurate docstrings, sufficient comments, and ensure any instances of `#pragma: no cover` (excluding the code from unit test coverage accounting) are extremely well-justified.
+
+Feel free to mark the PR with “Request changes” for necessary changes. e.g. writing an exception for an edge case that will break the code, updating names to adhere to the naming conventions, etc.
+
+It is also considered good practice to make suggestions for optional improvements, such as adding a one-line comment before a clever block of code or including a demonstration of new functionality in the example notebooks.
 
 ## Version Release and Deployment Procedures
 
 ### Creating a Pull Release for a Release Candidate
 
 ### Publishing Package on PyPi
+
+There is a github action that will publish the package on PyPi after a new release is created
 
 ### Making the Documentation on "Read The Docs"
 
@@ -94,6 +134,6 @@ This is how you do that
 
 `tables_io` is a core package of the LSST DESC RAIL ecosystem. Consequently, the developers of the following packages should be informed about new versions:
 
-- `qp`
-- `rail_base`
+- [`qp`](https://github.com/LSSTDESC/qp)
+- [`rail_base`](https://github.com/LSSTDESC/rail_base)
 - ...

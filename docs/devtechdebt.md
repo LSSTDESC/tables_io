@@ -1,7 +1,7 @@
 # Technical Debt
 
 On this page, current known issues and technical debt will be recorded. These issues would make
-good first contributions for new contributors to the project.
+good first contributions for new contributors to the project. Also feel free to check out the [issues](https://github.com/LSSTDESC/tables_io/issues) page for more.
 
 ## Code Debt
 

@@ -1,5 +1,7 @@
 # Developer Installation
 
+(developer-environment-setup)=
+
 ## Developer Environment Setup
 
 For the installation of `tables_io` for the purpose of development, we recommend that you use a separate [Anaconda](https://docs.anaconda.com/anaconda/install/) virtual environment with `tables_io` installed in "editable" mode with all dev optional dependencies added.
@@ -22,6 +24,8 @@ conda activate tables_io_dev
 # Install tables_io in editable mode with dev dependencies
 pip install -e '.[dev]'
 ```
+
+(running-tests)=
 
 ## Running Tests
 
