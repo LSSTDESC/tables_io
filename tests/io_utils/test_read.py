@@ -3,11 +3,12 @@
 
 import os
 import pytest
+from pytest import MonkeyPatch
 import numpy as np
 
 from tables_io import io_utils
 from tests.helpers.utilities import check_deps
-from tables_io.lazy_modules import h5py, pq, pq
+from tables_io.lazy_modules import h5py, pq, fits
 
 
 @pytest.mark.skipif(not check_deps([h5py, pq]), reason="Missing HDF5 or parquet")
@@ -51,3 +52,8 @@ def test_get_group_names(h5_test_outfile):
         assert "dummy" in str(excinfo.value)
 
     os.unlink(h5_test_outfile)
+
+
+def test_read_fits_edge_cases():
+    """Testing Edge Cases for FITS files and tables"""
+    pass

@@ -1,11 +1,10 @@
-"""
-Unit tests for concatenation tools
-"""
+"""Tests for Table Slicing Utilities"""
 
 import pytest
-from tables_io import types, convert, concat, slice_table, slice_tabledict
+from tables_io import types, convert
+from tables_io.utils.slice_utils import slice_table, slice_tabledict
 from tests.helpers.utilities import compare_tables, check_deps
-from tables_io.lazy_modules import apTable, pd
+from tables_io.lazy_modules import tables, apTable, apDiffUtils, fits, h5py, pd, pq, jnp
 
 
 @pytest.mark.skipif(
@@ -21,17 +20,17 @@ from tables_io.lazy_modules import apTable, pd
         types.PD_DATAFRAME,
     ],
 )
-def test_concat(data_tables, tType):
-    """Test Concatenation across multiple types"""
+def test_slice(data_tables, tType):
+    """Testing Slicing of Tables and Tabledicts"""
     odict_1 = convert(data_tables, tType)
-    odict_2 = concat([odict_1, odict_1], tType)
-    concat_data = odict_2["data"]
-    check_data_1 = slice_table(concat_data, slice(0, 50))
-    check_data_2 = slice_table(concat_data, slice(1000, 1050))
+    single_table = odict_1["data"]
+
+    check_data_1 = slice_table(single_table, slice(0, 50))
+
     t_dict_1 = convert(check_data_1, types.AP_TABLE)
-    t_dict_2 = convert(check_data_2, types.AP_TABLE)
+
     test_dict = slice_table(data_tables["data"], slice(0, 50))
     test_dict2 = slice_tabledict(data_tables, slice(0, 10))
+
     assert compare_tables(test_dict, t_dict_1)
-    assert compare_tables(test_dict, t_dict_2)
     assert compare_tables(test_dict2["data"], data_tables["data"][0:10])

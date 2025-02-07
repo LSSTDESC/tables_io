@@ -1,5 +1,7 @@
 """
-Unit tests for io_layer module
+Tests for the TableDict Class
+
+To Be Deprecated in future version.
 """
 
 import pytest

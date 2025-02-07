@@ -629,7 +629,7 @@ def write_dataframes_to_HDF5(dataFrames: Mapping, filepath: str):
         Path to output file
     """
     for key, val in dataFrames.items():
-        val.to_hdf(filepath, key)
+        val.to_hdf(filepath, key=key)
 
 
 def write_dataframes_to_pq(dataFrames: Mapping, filepath: str, **kwargs):

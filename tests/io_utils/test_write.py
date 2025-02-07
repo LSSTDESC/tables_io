@@ -34,6 +34,7 @@ def test_write_output_file(h5_test_outfile):
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_parallel_file(h5_test_outfile):
+    """Testing Parallel Writing"""
     from mpi4py import MPI
 
     """ Testing parallel write """
@@ -98,6 +99,7 @@ def test_write_output_file_single(h5_test_outfile):
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_parallel_file_single(h5_test_outfile):
+    """Testing parallel writing"""
     from mpi4py import MPI
 
     comm = MPI.COMM_WORLD

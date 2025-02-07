@@ -311,8 +311,8 @@ def get_table_type(obj) -> str:
     if is_td:
         # get the table type of the tables in the TableDict
         tab_types = []
-        for value in obj.items():
-            tab_types.append(table_type(value))
+        for keys in obj.keys():
+            tab_types.append(table_type(obj[keys]))
 
         # if there is more than one table type raise an error
         if len(np.unique(tab_types)) > 1:
