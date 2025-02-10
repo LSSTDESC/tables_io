@@ -47,17 +47,17 @@ tables_io
 │   ├── __init__.py
 ├── io_utils #io functions
 │   ├── __init__.py
-│   ├── iterator.py
-│   ├── read.py
-│   └── write.py
+│   ├── iterator.py # functions related to chunked read
+│   ├── read.py # functions to read in data from files
+│   └── write.py # functions to write files
 ├── lazy_modules.py #handles loading of modules not required by installation
 ├── table_dict.py #deprecated
 ├── types.py #table types and format dictionaries and functions
-└── utils/ #array utilities and slice and concat functions
+└── utils/ # utility functions
 ├── ├── __init__.py
-├── ├── array_utils.py
-├── ├── concat_utils.py
-└── └── slice_utils.py
+├── ├── array_utils.py # functions for handling array operations
+├── ├── concat_utils.py # functions for concatenating tables and tabledicts
+└── └── slice_utils.py # functions for slicing tables and tabledicts
 ```
 
 Generally, the code files are formatted such that there are interface functions at the top of a given file. These interface functions then identify the input object types and call more specific functions, which are found further down in the file.
