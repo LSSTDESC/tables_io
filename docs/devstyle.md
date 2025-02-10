@@ -127,11 +127,9 @@ It is also considered good practice to make suggestions for optional improvement
 
 ## Version Release and Deployment Procedures
 
-### Creating a Pull Release for a Release Candidate
+### Publishing Package on PyPI
 
-### Publishing Package on PyPi
-
-There is a Github Action that will publish the package on PyPI after a new release is created.
+There is a Github Action that will publish the package to [PyPI](https://pypi.org/project/tables-io/) after a new release is created.
 
 ### Making the Documentation on "Read The Docs"
 
