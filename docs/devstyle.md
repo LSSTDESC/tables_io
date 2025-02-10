@@ -6,7 +6,9 @@ All documentation is created using Sphinx. This lives in the `docs/` folder, and
 
 ### Writing Documentation Pages
 
-When writing new documentation pages, make sure to add them to the relevant `toctree` in `index.rst`. Tutorial `jupyter notebooks` can be placed directly in the `notebooks/` directory, and they will be automatically evaluated and turned into a webpage via the [`myst-nb`](https://myst-nb.readthedocs.io/en/v0.13.2/index.html) extension.
+When writing new documentation pages, make sure to add them to the relevant `toctree` in `index.rst`.
+
+Tutorial Jupyter notebooks can be placed directly in the `notebooks/` directory, and they will be automatically evaluated and turned into a webpage via the [`myst-nb`](https://myst-nb.readthedocs.io/en/v0.13.2/index.html) extension.
 
 ### Building the Documentation Locally
 
@@ -64,6 +66,8 @@ Generally, the code files are formatted such that there are interface functions 
 
 Generally, the code should follow the guidelines given in the [LSST DM Developer Guide](https://developer.lsst.io/index.html). This section lays out some project-specific guidelines.
 
+When creating new test files, they should be in the same location within the `tests/` folder as the file that is being tested. The test file should have the name `test_[filename].py`, where `filename` is the name of the file being tested.
+
 ### Naming conventions
 
 - Single table objects (i.e. a `pandasDataFrame`, `numpyDict` of arrays) are referred to as `Table-like`.
@@ -91,6 +95,7 @@ When you identify something that should be done, [make an issue](https://github.
 ### Branch
 
 Install the code following the [developer installation](devinstall.md#developer-environment-setup) instructions.
+If your branch is addressing a specific issue, the branch name should be `issue/[issue_number]/[title]`, where the `[title]` is a short description of the issue, with `_` separating words.
 
 While developing in a branch, don’t forget to pull from main regularly (at least daily) to make sure your work is compatible with other recent changes.
 
@@ -126,7 +131,7 @@ It is also considered good practice to make suggestions for optional improvement
 
 ### Publishing Package on PyPi
 
-There is a github action that will publish the package on PyPi after a new release is created.
+There is a Github Action that will publish the package on PyPI after a new release is created.
 
 ### Making the Documentation on "Read The Docs"
 
