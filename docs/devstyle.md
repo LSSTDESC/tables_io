@@ -133,7 +133,7 @@ There is a Github Action that will publish the package to [PyPI](https://pypi.or
 
 ### Making the Documentation on "Read The Docs"
 
-Read the Docs is linked to the [github repo](https://github.com/LSSTDESC/tables_io), and will rebuild the docs when there are any changes to `main`.
+Read the Docs is linked to the [github repo](https://github.com/LSSTDESC/tables_io), and will rebuild the docs when there are any changes to `main`. If there are any issues with this process, contact the project maintainer, Eric Charles.
 
 ### Informing Developers of Downstream Packages
 
