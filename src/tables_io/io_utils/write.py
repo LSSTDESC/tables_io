@@ -250,7 +250,7 @@ def initialize_HDF5_write_single(
     Returns
     -------
     group : `h5py.File` or `h5py.Group`
-        The group to write to. Only returned if the function is not run in MPI.
+        The group to write to.
     fout : `h5py.File`
         The output file
 
@@ -327,8 +327,7 @@ def initialize_HDF5_write(filepath: str, comm=None, **kwds):
     Returns
     -------
     group : `dict` of `h5py.File` or `h5py.Group`
-        A dictionary of the groups to write to. Only returned if the file is not
-        opened in MPI.
+        A dictionary of the groups to write to.
     fout : `h5py.File`
         The output file
 
