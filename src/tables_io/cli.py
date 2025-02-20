@@ -21,18 +21,6 @@ class PartialOption:
         return self._partial(*args, **kwargs)
 
 
-class PartialArgument:
-    """Wraps click.argument with partial arguments for convenient reuse"""
-
-    def __init__(self, *param_decls: Any, **kwargs: Any) -> None:
-        self._partial = partial(
-            click.argument, *param_decls, cls=partial(click.Argument), **kwargs
-        )
-
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        return self._partial(*args, **kwargs)
-
-
 input = PartialOption(
     "--input",
     type=click.Path(),
@@ -45,23 +33,18 @@ output = PartialOption(
     help=f"output filename; suffix should be one of {list(types.FILE_FORMAT_SUFFIXS.keys())}",
 )
 
-input_args = PartialArgument(
-    "input_args",
-    nargs=-1,
-)
 
-
-@click.group()  # pragma: no cover
-@click.version_option(tables_io._version)  # pragma: no cover
+@click.group()
+@click.version_option(tables_io._version)
 def cli() -> None:
     """tables_io utility scripts"""
 
 
-@cli.command()  # pragma: no cover
-@input()  # pragma: no cover
-@output()  # pragma: no cover
+@cli.command()
+@input()
+@output()
 def convert(input, output):
-    """Convet a file with tabular data from one format to another"""
+    """Convert a file with tabular data from one format to another"""
 
     input_fname = input
     output_fname = output
