@@ -159,7 +159,7 @@ def slice_dict(in_dict: Mapping, subslice: Union[int, slice]) -> Mapping:
     for key, val in in_dict.items():
         try:
             out_dict[key] = val[subslice]
-        except (KeyError, TypeError):  # pragma: no cover
+        except (KeyError, TypeError):
             out_dict[key] = val
     return out_dict
 
@@ -177,11 +177,11 @@ def check_keys(in_dicts: List[Mapping]):
     KeyError
         if keys do not match
     """
-    if not in_dicts:  # pragma: no cover
+    if not in_dicts:
         return
     master_keys = in_dicts[0].keys()
     for in_dict in in_dicts[1:]:
-        if in_dict.keys() != master_keys:  # pragma: no cover
+        if in_dict.keys() != master_keys:
             raise ValueError(
                 f"Keys do not match: {list(in_dict.keys())} != {list(master_keys)}"
             )
@@ -200,7 +200,7 @@ def concatenate_dicts(in_dicts: List[Mapping]) -> Mapping:
     out_dict : `dict`
         The stacked dictionary
     """
-    if not in_dicts:  # pragma: no cover
+    if not in_dicts:
         return OrderedDict()
     check_keys(in_dicts)
     out_dict = OrderedDict([(key, None) for key in in_dicts[0].keys()])

@@ -61,6 +61,11 @@ def test_slice_dict():
     assert np.allclose(sliced["vector"], test_data["vector"][mask])
     assert np.allclose(sliced["mat"], test_data["mat"][mask])
 
+    # Testing for subslice errors:
+
+    error_slice = array_utils.slice_dict({"temp": 3}, 5)
+    assert error_slice["temp"] == 3
+
 
 def test_print_dict_shape():
     """Test the print_dict_shape method"""
@@ -104,3 +109,21 @@ def test_get_initialization_for_ODict():
     assert dd["scalar"][0] == (12,)
     assert dd["vector"][0] == (12, 10)
     assert dd["mat"][0] == (12, 10, 10)
+
+
+def test_check_keys_errors():
+    """Testing Check Keys Errors"""
+
+    assert isinstance(array_utils.check_keys([]), type(None))
+
+    # Ensure that it fails on keys that don't exist in non-0 dictionary
+    with pytest.raises(ValueError):
+        array_utils.check_keys([{"test_key": 4}, dict()])
+
+
+def test_concatenate_dicts_errors():
+    """Testing Against Errors in Concatenate Dicts"""
+
+    new_dict = array_utils.concatenate_dicts([])
+
+    assert len(new_dict) == 0
