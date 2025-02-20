@@ -165,7 +165,7 @@ def table_type(obj) -> int:
     for key, val in obj.items():
         if is_table_like(val):
             raise TypeError(f"Column {key} is a table of type {type(val)}")
-        if not isinstance(val, Iterable):  # pragma: no cover
+        if not isinstance(val, Iterable):
             raise TypeError(f"Column {key} of type {type(val)} is not iterable")
         if nRow is None:
             nRow = array_length(val)

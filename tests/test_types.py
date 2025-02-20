@@ -69,3 +69,9 @@ def test_get_table_type(data_tables):
     # Failing Type that Shouldn't Work
     with pytest.raises(TypeError):
         types.get_table_type({1, 2, 3})
+
+
+def test_table_types_error():
+    """Testing for Tables Types Errors"""
+    with pytest.raises(TypeError):
+        types.table_type({"tab1": 5})
