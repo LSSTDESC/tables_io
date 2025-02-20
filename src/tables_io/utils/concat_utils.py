@@ -85,10 +85,10 @@ def concat_table(tableList: List, tType: Union[str, int]):
     try:
         theFunc = funcDict[int_tType]
         return theFunc(tableList)
-    except KeyError as msg:  # pragma: no cover
+    except KeyError as msg:
         raise NotImplementedError(
             f"Unsupported FileType for concatObjs {tType}"
-        ) from msg  # pragma: no cover
+        ) from msg
 
 
 ### I B.  Multi-table concatenating

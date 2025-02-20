@@ -6,6 +6,7 @@ import pytest
 from tables_io import types, convert, concat, slice_table, slice_tabledict
 from tests.helpers.utilities import compare_tables, check_deps
 from tables_io.lazy_modules import apTable, pd
+from tables_io.utils import concat_utils
 
 
 @pytest.mark.skipif(
@@ -35,3 +36,9 @@ def test_concat(data_tables, tType):
     assert compare_tables(test_dict, t_dict_1)
     assert compare_tables(test_dict, t_dict_2)
     assert compare_tables(test_dict2["data"], data_tables["data"][0:10])
+
+
+def test_concat_table(data_tables):
+    """Testing Error on Table Type in Concatenate"""
+    with pytest.raises(NotImplementedError):
+        concat_utils.concat_table([data_tables, data_tables], 10)
