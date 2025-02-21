@@ -11,7 +11,7 @@ from tables_io.lazy_modules import h5py
 
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
-def test_write_output_file(h5_test_outfile):
+def test_write_output_file(h5_test_outfile, tmp_path):
     """Test writing an HDF5 output file"""
     n_pdf = 40
     n_bins = 21
@@ -30,6 +30,14 @@ def test_write_output_file(h5_test_outfile):
     )
     io_utils.write.finalize_HDF5_write(outf, "md", zgrid=z_grid)
     os.unlink(h5_test_outfile)
+
+    # Testing failed writes
+
+    with pytest.raises(RuntimeError):
+        io_utils.write.write(data_dict, tmp_path / "nonexistent_dir/tmp.fits")
+
+    with pytest.raises(RuntimeError):
+        io_utils.write.write(data_dict, tmp_path / "nonexistent_dir/tmp.hdf5")
 
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
