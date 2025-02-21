@@ -98,7 +98,7 @@ def convert(obj, tType: Union[str, int]):
 
     try:
         theFunc = funcMap[int_tType]
-    except KeyError as msg:  # pragma: no cover
+    except KeyError as msg:
         raise KeyError(
             f"Unsupported tabular type {int_tType} ({TABULAR_FORMATS[int_tType]}, must be one of {TABULAR_FORMAT_NAMES})"
         ) from msg

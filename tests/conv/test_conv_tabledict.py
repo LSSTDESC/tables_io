@@ -63,3 +63,10 @@ def test_conversion_strings(data_tables, data_table):
 
     # test it works on just one table
     tab = convert(data_table, tType)
+
+
+def test_bad_table_type(data_table):
+    """Testing for correct exception for bad table type"""
+
+    with pytest.raises(KeyError):
+        _ = convert([data_table], tType=500)
