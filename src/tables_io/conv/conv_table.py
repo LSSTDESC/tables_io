@@ -93,8 +93,8 @@ def convert_table(obj, tType: Union[str, int]):
                 f"Could not convert object to {TABULAR_FORMATS[int_tType]} . \n Object to convert: {obj}"
             ) from e
     raise TypeError(
-        f"Cannot convert to unsupported tableType {TABULAR_FORMATS[int_tType]} ({int_tType})"
-    )  # pragma: no cover
+        f"Cannot convert to unsupported tableType {int_tType} ({int_tType})"
+    )
 
 
 ### I B. Converting to `astropy.table.Table`
@@ -141,7 +141,7 @@ def data_frame_to_ap_table(df):
             o_dict[colname] = col.to_numpy()
     tab = apTable.Table(o_dict)
     for k, v in df.attrs.items():
-        tab.meta[k] = v  # pragma: no cover
+        tab.meta[k] = v
     return tab
 
 
@@ -173,7 +173,7 @@ def convert_to_ap_table(obj):
         return data_frame_to_ap_table(obj)
     raise TypeError(
         f"Table is an unsupported Table Type {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
-    )  # pragma: no cover
+    )
 
 
 ### I C. Converting to `OrderedDict`, (`str`, `numpy.array`)
@@ -306,7 +306,7 @@ def convert_to_dict(obj):
         return dataframe_to_dict(obj)
     raise TypeError(
         f"Could not convert table because it is an unsupported TableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
-    )  # pragma: no cover
+    )
 
 
 ### I D. Converting to `np.recarray`
@@ -326,7 +326,7 @@ def pa_table_to_recarray(tab):
     rec : `numpy.recarray`
         The output rec array
     """
-    raise NotImplementedError()  # pragma: no cover
+    raise NotImplementedError()
 
 
 def ap_table_to_recarray(tab):
@@ -373,7 +373,7 @@ def convert_to_recarray(obj):
         return ap_table_to_recarray(pa_table_to_ap_table(obj))
     raise TypeError(
         f"Could not convert table because it is an unsupported TableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
-    )  # pragma: no cover
+    )
 
 
 ### I E. Converting to `pandas.DataFrame`
@@ -399,7 +399,7 @@ def ap_table_to_dataframe(tab):
         o_dict[colname] = force_to_pandables(col.data)
     df = pd.DataFrame(o_dict)
     for k, v in tab.meta.items():
-        df.attrs[k] = v  # pragma: no cover
+        df.attrs[k] = v
     return df
 
 
@@ -441,7 +441,7 @@ def dict_to_dataframe(odict: Mapping, meta: Optional[Mapping] = None):
     for k, v in odict.items():
         outdict[k] = force_to_pandables(v)
     df = pd.DataFrame(outdict)
-    if meta is not None:  # pragma: no cover
+    if meta is not None:
         for k, v in meta.items():
             df.attrs[k] = v
     return df
@@ -475,7 +475,7 @@ def convert_to_dataframe(obj):
         return obj
     raise TypeError(
         f"Could not convert table because it is an unsupported tableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
-    )  # pragma: no cover
+    )
 
 
 ### I F. Converting to `pa.Table`
@@ -545,7 +545,7 @@ def dict_to_pa_table(odict: Mapping, meta: Optional[Mapping] = None):
         The table
     """
     out_dict = {key: force_to_pandables(val) for key, val in odict.items()}
-    if meta is not None:  # pragma: no cover
+    if meta is not None:
         metadata = {k: str(v) for k, v in meta.items()}
     else:
         metadata = None
@@ -582,4 +582,4 @@ def convert_to_pa_table(obj):
         return obj
     raise TypeError(
         f"Could not convert table because it is an unsupported tableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
-    )  # pragma: no cover
+    )
