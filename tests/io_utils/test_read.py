@@ -54,6 +54,16 @@ def test_get_group_names(h5_test_outfile):
     os.unlink(h5_test_outfile)
 
 
-def test_read_fits_edge_cases():
+def test_read_fits_edge_cases(test_dir):
     """Testing Edge Cases for FITS files and tables"""
-    pass
+
+    noname_fits = test_dir / "data/fits_nonames.fits"
+    repeated_names_fits = test_dir / "data/fits_repeated_names.fits"
+
+    # Testing Edge Cases in read_fits_to_recarrays
+    _ = io_utils.read.read_fits_to_recarrays(noname_fits)
+    _ = io_utils.read.read_fits_to_recarrays(repeated_names_fits)
+
+    # Testing Edge Cases in read_fits_to_ap_tables
+    _ = io_utils.read.read_fits_to_ap_tables(noname_fits)
+    _ = io_utils.read.read_fits_to_ap_tables(repeated_names_fits)
