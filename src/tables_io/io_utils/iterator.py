@@ -181,7 +181,7 @@ def iterator_native(
         if parallel_size != 1 or rank != 0:
             warnings.warn(
                 f"MPI arguments were provided for this function, but it will run in series as it cannot be run in parallel."
-            )
+            )  # pragma: no cover
 
     return theFunc(
         filepath,
