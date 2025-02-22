@@ -13,6 +13,8 @@ from .utils import concat_utils
 from .utils import slice_utils
 from .types import get_table_type
 
+from . import hdf5
+
 # Exposing the primary functions and interfaces for tables_io
 
 
