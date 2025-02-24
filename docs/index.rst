@@ -66,6 +66,7 @@ Features:
     devinstall
     devstyle
     devtechdebt
+    roadmap.md
 
 .. toctree:: 
     :hidden:
