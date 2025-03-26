@@ -32,7 +32,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "flake8",
-    "jax",
+    "jax>=0.4",
     "jaxlib",
     "pre-commit",        # Used to run checks before finalizing a git commit
     "sphinx",            # Used to automatically generate documentation
