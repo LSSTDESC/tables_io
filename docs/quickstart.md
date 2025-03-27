@@ -52,6 +52,10 @@ Once you've installed the necessary dependencies, you can use the same installat
 pip install tables_io
 ```
 
+```{tip}
+If you're having difficulties installing, try using the `environment.yml` file to set up your conda environment as described in <project:devinstall.md>, and then installing `tables_io` normally as described here.
+```
+
 ### Installing from source
 
 If you prefer to install from source, use the following commands:
