@@ -16,15 +16,14 @@ classifiers = [
     "Programming Language :: Python",
 ]
 dynamic = ["version"]
-dependencies = ["numpy>=1.21.0", "click", "deprecated>=1.2.0"]
+dependencies = ["numpy>=1.21.0", "click", "deprecated>=1.2.0", "astropy", "tables>=3.0", "h5py>=2.9", "pandas>=2.0", "pyarrow"]
 
 # On a mac, install optional dependencies with `pip install '.[dev]'` (include the single quotes)
 [project.optional-dependencies]
-full = ["astropy", "tables", "h5py>=2.9", "pandas", "pyarrow"]
 dev = [
     "astropy",
     "h5py>=2.9",
-    "pandas",
+    "pandas>=2.0",
     "pyarrow",
     "mpi4py",
     "coverage",
@@ -35,11 +34,11 @@ dev = [
     "jax>=0.4",
     "jaxlib",
     "pre-commit",        # Used to run checks before finalizing a git commit
-    "sphinx",            # Used to automatically generate documentation
+    "sphinx>6.3.1",            # Used to automatically generate documentation
     "sphinx_rtd_theme",  # Used to render documentation
     "sphinx-autoapi",    # Used to automatically generate api documentation
     "sphinx_design",
-    "myst-nb",
+    "myst-nb",           # used to render notebooks in markdown and write documentation in markdown
     "sphinx-copybutton",
 ]
 
