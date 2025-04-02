@@ -57,10 +57,10 @@ For example, to open a `fits` file and return a summary of the contents:
 
 >>> import tables_io
 >>> hdul = tables_io.io_open("./data/test.fits", "fits")
-    >>> hdul.info()
-    No.    Name      Ver    Type      Cards   Dimensions   Format
-      0  PRIMARY       1 PrimaryHDU       4   ()
-      1  DF            1 BinTableHDU     37   10R x 14C   [K, E, E, E, E, E, E, E, E, E, E, E, E, D]
+>>> hdul.info()
+No.    Name      Ver    Type      Cards   Dimensions   Format
+    0  PRIMARY       1 PrimaryHDU       4   ()
+    1  DF            1 BinTableHDU     37   10R x 14C   [K, E, E, E, E, E, E, E, E, E, E, E, E, D]
 
 ```
 
@@ -257,7 +257,8 @@ If you want to use MPI, it is currently only supported for `HDF5` files. You can
 
 ```{doctest}
 
->>> for start, stop, data in tables_io.iterator_native('datafile.hdf5', chunk_size=3, rank=0, parallel_size=3):
+>>> for start, stop, data in tables_io.iterator_native('datafile.hdf5', chunk_size=3,
+.. rank=0, parallel_size=3):
 >>>     print(start, stop, data)
 0 3 OrderedDict({'col1': array([1, 2, 3]), 'col2': array([ 5, 10, 15])})
 
