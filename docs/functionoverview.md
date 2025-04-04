@@ -54,7 +54,7 @@ from tables_io import hdf5
 
 | Function &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | Description                                                                            |
 | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| {py:func}`initialize_HDF5_write <tables_io.io_utils.write.initialize_HDF5_write>                                                | Prepares an HDF5 file for output.                                                      |
+| {py:func}`initialize_HDF5_write <tables_io.io_utils.write.initialize_HDF5_write>`                                               | Prepares an HDF5 file for output.                                                      |
 | {py:func}`write_dict_to_HDF5_chunk <tables_io.io_utils.write.write_dict_to_HDF5_chunk>`                                         | Writes a chunk of data from a `TableDict-like` object to an HDF5 group or file object. |
 | {py:func}`write_dicts_to_HDF5 <tables_io.io_utils.write.write_dicts_to_HDF5>`                                                   | Writes a `Table-like` object to an HDF5 file given a filepath.                         |
 | {py:func}`finalize_HDF5_write <tables_io.io_utils.write.finalize_HDF5_write>`                                                   | Writes any last data and closes an HDF5 file object.                                   |
