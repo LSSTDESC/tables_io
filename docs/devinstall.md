@@ -6,7 +6,7 @@
 
 For the installation of `tables_io` for the purpose of development, we recommend that you use a separate [Anaconda](https://docs.anaconda.com/anaconda/install/) virtual environment with `tables_io` installed in "editable" mode with all dev optional dependencies added.
 
-In this guide, we will name this developer environment `tables_io_dev` and we will assume that an Anaconda with a minimum python version of 3.9 has been previously installed.
+In this guide, we will name this developer environment `tables_io_dev` and we will assume that an Anaconda with a minimum Python version of 3.9 has been previously installed.
 
 To install the developer environment:
 
@@ -25,7 +25,7 @@ conda activate tables_io_dev
 pip install -e '.[dev]'
 ```
 
-To install without using conda, you can create a python virtual environment:
+To install without using Anaconda, you can instead create a python virtual environment:
 
 ```bash
 # Create the virtual environment
@@ -42,4 +42,10 @@ pip install -e '.[dev]'
 
 ## Running Tests
 
-All tests are coordinated via `pytest`...
+All tests are coordinated via [pytest](https://docs.pytest.org/en/stable/). To run the tests:
+
+```bash
+
+python -m pytest tests
+
+```

@@ -2,13 +2,13 @@
 
 ## Documentation
 
-All documentation is created using [Sphinx](https://www.sphinx-doc.org/en/master/index.html). This lives in the `docs/` folder, and the output is created in the `_readthedocs/` folder in the main package. Documentation files are written in Markdown, and any images or other assets are in the `assets/` folder. When new documentation packages are added, make sure to add them to the [requirements.txt](https://github.com/LSSTDESC/tables_io/blob/main/docs/requirements.txt) file, where they will be used when Read the Docs builds the documentation.
+All documentation is created using [Sphinx](https://www.sphinx-doc.org/en/master/index.html). The source files live in the `docs/` folder, and the output is created in the `_readthedocs/` folder in the main package. Documentation files are written in Markdown, and any images or other assets are in the `assets/` folder. When new documentation packages are added, make sure to add them to the [`requirements.txt`](https://github.com/LSSTDESC/tables_io/blob/main/docs/requirements.txt) file, where they will be used when [Read the Docs](https://about.readthedocs.com/) builds the documentation.
 
 ### Writing Documentation Pages
 
-When writing new documentation pages, make sure to add them to the relevant `toctree` in `index.rst`.
+When writing new documentation pages, make sure to add them to the relevant `toctree` in [`index.rst`](https://github.com/LSSTDESC/tables_io/blob/main/docs/index.rst).
 
-Tutorial Jupyter notebooks can be placed directly in the `notebooks/` directory, and they will be automatically evaluated and turned into a webpage via the [`myst-nb`](https://myst-nb.readthedocs.io/en/v0.13.2/index.html) extension.
+Tutorial Jupyter notebooks can be placed directly in the `notebooks/` directory, and they will be automatically evaluated and turned into a webpage via the [myst-nb](https://myst-nb.readthedocs.io/en/v0.13.2/index.html) extension.
 
 ### Building the Documentation Locally
 
@@ -32,7 +32,7 @@ The HTML rendered documentation will live in the `_readthedocs/html` directory.
 
 ![code diagram](assets/tables_io_model.svg)
 
-The code itself is split into three main components: `io_utils`, `convert`, and `utils`. `io_utils` contains all of the read and write functions. `convert` contains all conversion functions, and `utils` contains all functions related to `slice` and `concat` functionality, as well as code array utilities. [types.py](https://github.com/LSSTDESC/tables_io/blob/main/src/tables_io/types.py) contains all the dictionaries relating table types and formats, as well as the functions that get information about what type a file or object falls into. [lazy_modules.py](https://github.com/LSSTDESC/tables_io/blob/main/src/tables_io/lazy_modules.py) handles loading in the necessary packages. See the diagram below to get a sense of the layout of the package.
+The code itself is split into three main components: `io_utils`, `convert`, and `utils`. `io_utils` contains all of the read and write functions. `convert` contains all conversion functions, and `utils` contains all functions related to `slice` and `concat` functionality, as well as code array utilities. [`types.py`](https://github.com/LSSTDESC/tables_io/blob/main/src/tables_io/types.py) contains all the dictionaries relating table types and formats, as well as the functions that get information about what type a file or object falls into. [`lazy_modules.py`](https://github.com/LSSTDESC/tables_io/blob/main/src/tables_io/lazy_modules.py) handles loading in the necessary packages. See the diagram below to get a sense of the layout of the package.
 
 ```bash
 tables_io

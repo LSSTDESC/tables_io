@@ -14,7 +14,7 @@ pip install tables_io
 
 ### Parallel installation
 
-To install `tables_io` with parallel functionality, first make sure that your installations of h5py and HDF5 are built with MPI support. If you are running it in a conda environment, you can do this by running the following installation command:
+To install `tables_io` with parallel functionality, first make sure that your installations of [h5py](https://docs.h5py.org/en/stable/quick.html#) and [HDF5](https://support.hdfgroup.org/documentation/index.html) are built with MPI support. If you are running it in a conda environment, you can do this by running the following installation command:
 
 ```bash
 
@@ -28,7 +28,7 @@ If you run into errors with this, try adding the "conda-forge" channel:
 conda install conda-forge::"h5py>=2.9=mpi_openmpi*"
 ```
 
-This should install HDF5 and mpi4py as well. If not, you can install HDF5 via the following:
+This should install HDF5 and [mpi4py](https://mpi4py.readthedocs.io/en/stable/install.html) as well. If not, you can install HDF5 via the following:
 
 ```bash
 conda install "hdf5=*=*mpi_openmpi*"
@@ -86,7 +86,7 @@ The `Table-like` objects exist in memory as one of the multiple supported tabula
 
 ### Read
 
-A file can be read in using the {py:func}`read <tables_io.io_utils.read.read>` function. Here's an example of reading a table or tables from a `fits` file:
+A file can be read in using the {py:func}`read <tables_io.io_utils.read.read>` function. Here's an example of reading a table or tables from a FITS file:
 
 ```{doctest}
 
@@ -97,17 +97,17 @@ A file can be read in using the {py:func}`read <tables_io.io_utils.read.read>` f
 
 This reads the data to the default tabular format for the file type, which in this case is an `astropyTable`.
 
-You can also specify a desired tabular format, in which case `read` will read the file to its native tabular format, then [`convert`](#tables_io.conv.conv_tabledict.convert) the `Table-like` or `TableDict-like` object to the desired format. You can see [an example here](cookbook.md#read-in-a-file-to-a-specific-format). <project:#supported-tabular-formats> lists the default tabular formats as they correspond to the file types.
+You can also specify a desired tabular format, in which case {py:func}`read <tables_io.io_utils.read.read>` will read the file to its native tabular format, then {py:func}`convert <tables_io.conv.conv_tabledict.convert>` the `Table-like` or `TableDict-like` object to the desired format. You can see [an example here](cookbook.md#read-in-a-file-to-a-specific-format). <project:#supported-tabular-formats> lists the default tabular formats as they correspond to the file types.
 
 ```{note}
-In order to receive a consistent output when reading in objects, you can use [`read_native`](#tables_io.io_utils.read.read_native), which will always read in a `TableDict-like` object. That object will also always have the default tabular format for that file type.
+In order to receive a consistent output when reading in objects, you can use {py:func}`read_native <tables_io.io_utils.read.read_native>`, which will always read in a `TableDict-like` object. That object will also always have the default tabular format for that file type.
 ```
 
-To read in a file a chunk of data at a time, you can use the [`iterator`](#tables_io.io_utils.iterator.iterator) function. This currently only works with a subset of the available file formats, which are listed in the function's documentation. You can [see an iteration example here](cookbook.md#iterating-through-data-in-an-hdf5-file).
+To read in a file a chunk of data at a time, you can use the {py:func}`iterator <tables_io.io_utils.iterator.iterator>` function. This currently only works with a subset of the available file formats, which are listed in the function's documentation. You can [see an iteration example here](cookbook.md#iterating-through-data-in-an-hdf5-file).
 
 ### Conversion and other functionality
 
-The `Table-like` and `TableDict-like` objects can also be converted to different tabular formats separately, using the [`convert`](#tables_io.conv.conv_tabledict.convert) function. For example:
+The `Table-like` and `TableDict-like` objects can also be converted to different tabular formats separately, using the {py:func}`convert <tables_io.conv.conv_tabledict.convert>` function. For example:
 
 ```{doctest}
 
@@ -116,13 +116,13 @@ The `Table-like` and `TableDict-like` objects can also be converted to different
 
 ```
 
-Here we convert the `astropyTable` we converted earlier to a `pandasDataFrame`.
+Here we convert the `astropyTable` we created earlier to a `pandasDataFrame`.
 
 Additionally, `tables_io` functions exist to concatenate and to take a slice of objects. More details on these functions and some examples can be found in the Cookbook section on [basic table operations](cookbook.md#basic-table-operations).
 
 ### Write
 
-The [`write`](#tables_io.io_utils.write.write) function will accept both `Table-like` and `TableDict-like` objects to write to a file.
+The {py:func}`write <tables_io.io_utils.write.write>` function will accept both `Table-like` and `TableDict-like` objects to write to a file.
 
 ```{doctest}
 
@@ -132,7 +132,7 @@ The [`write`](#tables_io.io_utils.write.write) function will accept both `Table-
 
 ```
 
-Here, the type of file to write to is specified by the file name suffix, 'hdf5'. If necessary, [`write` (docs)](#tables_io.io_utils.write.write) will convert the object to the related tabular type, then write to the specified file type. Otherwise, `tables_io` has a native file type for each of the tabular formats, which are listed in <project:#supported-tabular-formats>. You can write files to their native format by using [`write_native`](#tables_io.io_utils.write.write_native) directly.
+Here, the type of file to write to is specified by the file name suffix, 'hdf5'. If necessary, {py:func}`write <tables_io.io_utils.write.write>` will convert the object to the related tabular type, then write to the specified file type. Otherwise, `tables_io` has a native file type for each of the tabular formats, which are listed in <project:#supported-tabular-formats>. You can write files to their native format by using {py:func}`write_native <tables_io.io_utils.write.write_native>` directly.
 
 (supported-file-formats)=
 
