@@ -142,14 +142,14 @@ Here, the type of file to write to is specified by the file name suffix, `hdf5`.
 
 | File format name | File suffix    | Produced by                                                                            |
 | ---------------- | -------------- | -------------------------------------------------------------------------------------- |
-| astropyFits      | `fits`         | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             |
-| astropyHDF5      | `hf5`          | [`astropy`](https://docs.astropy.org/en/stable/io/unified.html#hdf5)                   |
-| numpyHDF5        | `hdf5`         | [`h5py`](https://docs.h5py.org/en/stable/quick.html#appendix-creating-a-file)          |
-| numpyFits        | `fit`          | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             |
-| pyarrowHDF5      | `hd5`          | [`pyarrow`](https://arrow.apache.org/docs/python/getstarted.html)                      |
-| pandasHDF5       | `h5`           | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-hdf5)    |
-| pandaParquet     | `parq` or `pq` | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html#parquet) |
-| pyarrowParquet   | `parquet`      | [`pyarrow`](https://arrow.apache.org/docs/python/parquet.html)                         |
+| astropyFits      | 'fits'         | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             |
+| astropyHDF5      | 'hf5'          | [`astropy`](https://docs.astropy.org/en/stable/io/unified.html#hdf5)                   |
+| numpyHDF5        | 'hdf5'         | [`h5py`](https://docs.h5py.org/en/stable/quick.html#appendix-creating-a-file)          |
+| numpyFits        | 'fit'          | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             |
+| pyarrowHDF5      | 'hd5'          | [`pyarrow`](https://arrow.apache.org/docs/python/getstarted.html)                      |
+| pandasHDF5       | 'h5'           | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-hdf5)    |
+| pandaParquet     | 'parq' or 'pq' | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html#parquet) |
+| pyarrowParquet   | 'parquet'      | [`pyarrow`](https://arrow.apache.org/docs/python/parquet.html)                         |
 
 ```{note}
 `tables_io` does not require all of the above packages to function. If you do not have one of these packages installed, you will not be able to create tables of that type (i.e. if you do not have `pandas` installed, you cannot convert objects to `pandasDataFrame` or read in `pandasParquet` files.)

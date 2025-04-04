@@ -80,6 +80,7 @@ Features:
     :maxdepth: 3
     :caption: More
 
+    GitHub <https://github.com/LSSTDESC/tables_io>
     license
     acknowledgements 
     

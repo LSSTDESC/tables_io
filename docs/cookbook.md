@@ -6,9 +6,9 @@
 
 ### Read in a file to a specific format
 
-To read in a `Table-like` or `TableDict-like` object from a file to a specific tabular type, use the [`read`](#tables_io.io_utils.read.read) function. You can supply the type via the `tType` argument, either as a string or as an integer. The allowed tabular types are listed in this table (link).
+To read in a `Table-like` or `TableDict-like` object from a file to a specific tabular type, use the [`read`](#tables_io.io_utils.read.read) function. You can supply the type via the `tType` argument, either as a string or as an integer. The allowed tabular types are listed in <project:./quickstart.md#supported-tabular-formats>.
 
-For example, to read in tables from an `HDF5` file as `astropyTable` objects:
+For example, to read in tables from an HDF5 file as `astropyTable` objects:
 
 ```{doctest}
 
@@ -49,9 +49,21 @@ In this example, we write out a `pandasDataFrame` object to an `HDF5` file in tw
 
 ### Get a file object
 
-To access a file object directly instead of just reading in the data tables, use [`io_open`](#tables_io.io_utils.read.io_open). In the case of `HDF5` files, this allows you to get metadata from the file without reading in all of the data.
+To access a file object directly instead of just reading in the data tables, use [`io_open`](#tables_io.io_utils.read.io_open). In the case of HDF5 files, this allows you to get metadata from the file, such as the keys etc, without reading in all of the data:
 
-For example, to open a `fits` file and return a summary of the contents:
+```{doctest}
+
+>>> import tables_io
+>>> file = tables_io.io_open("./data/test.hdf5","hdf5")
+>>> file.keys()
+<KeysViewHDF5 ['id', 'mag_err_g_lsst', 'mag_err_i_lsst', 'mag_err_r_lsst', 'mag_err_u_lsst',
+'mag_err_y_lsst', 'mag_err_z_lsst', 'mag_g_lsst', 'mag_i_lsst', 'mag_r_lsst', 'mag_u_lsst',
+'mag_y_lsst', 'mag_z_lsst', 'redshift']>
+
+```
+
+This can be done with other file types as well, though the file object will behave differently depending
+on the type of file you're opening. For example, for a `fits` file:
 
 ```{doctest}
 
@@ -105,7 +117,7 @@ OrderedDict([('tab_1',
 
 ### Concatenating Table-like objects
 
-To concatenate two or more `Table-like` objects, you use the [`concat_table`](#tables_io.utils.concat_utils.concat_table) function. This function can only concatenate objects that have the same tabular type. So for example, they must both be `pandasDataFrame` objects, as in the example below. The tables must be passed as a list, and it requires the tabular type of the tables to be concatenated as an argument.
+To concatenate two or more `Table-like` objects, you use the [`concat_table`](#tables_io.utils.concat_utils.concat_table) function. This function can only concatenate objects that have the same tabular type. So for example, they must both be `pandasDataFrame` objects, as in the example below. The tables must be passed as a collection of items (i.e. list, tuple), and it requires the tabular type of the tables to be concatenated as an argument.
 
 ```{doctest}
 
@@ -207,9 +219,9 @@ As with [`slice_table`](#tables_io.utils.slice_utils.slice_table), the [`slice_t
 
 ### Iterating through data in an HDF5 file
 
-To iterate through an `HDF5` file, yielding only a section of data at a time, we can use the [`iterator`](#tables_io.io_utils.iterator.iterator) or [`iterator_native`](#tables_io.io_utils.iterator.iterator) functions as shown below. You can provide the size of the data section you would like as an `int` to `chunk_size`, size here meaning the number of rows (or length of the `numpy.arrays` in the case of `numpyDict` tables). The default `chunk_size` is 100,000.
+To iterate through an HDF5 file, yielding only a section of data at a time, we can use the [`iterator`](#tables_io.io_utils.iterator.iterator) or [`iterator_native`](#tables_io.io_utils.iterator.iterator) functions as shown below. You can provide the size of the data section you would like as an `int` to `chunk_size`, size here meaning the number of rows (or length of the `numpy.arrays` in the case of `numpyDict` tables). The default `chunk_size` is 100,000.
 
-To determine the number of rows of data in the file, and therefore what an appropriate chunk size would be, you can use the [`get_input_data_length`](#tables_io.io_utils.iterator.get_input_data_length) function from the `hdf5` module as follows:
+To determine the number of rows of data in the file, and therefore what an appropriate chunk size would be, you can use the [`get_input_data_length`](#tables_io.io_utils.iterator.get_input_data_length) function from the HDF5 module as follows:
 
 ```{doctest}
 
@@ -253,7 +265,7 @@ To iterate through the file and output the data in its native tabular type inste
 
 ```
 
-If you want to use MPI, it is currently only supported for `HDF5` files. You can specify the rank and MPI size to only iterate through the data chunks that correspond to the current node (rank), as shown below:
+If you want to use MPI, it is currently only supported for HDF5 files. You can specify the rank and MPI size to only iterate through the data chunks that correspond to the current node (rank), as shown below:
 
 ```{doctest}
 
@@ -266,7 +278,7 @@ If you want to use MPI, it is currently only supported for `HDF5` files. You can
 
 ### Writing an HDF5 file from multiple places with MPI
 
-To write data to an `HDF5` file using MPI, where multiple processes write to the same file, you need to make sure that your installation of `h5py` and `hdf5` are built with MPI support. This should be the case if you installed the `tables_io` conda environment from `environment.yml` as described in the <project:./quickstart.md#parallel-installation> section.
+To write data to an HDF5 file using MPI, where multiple processes write to the same file, you need to make sure that your installation of `h5py` and `hdf5` are built with MPI support. This should be the case if you installed the `tables_io` conda environment from `environment.yml` as described in the <project:./quickstart.md#parallel-installation> section.
 
 Here's an example python file that writes out some `astropyTables` to the file `test_mpi_write.hdf5`:
 
@@ -290,7 +302,7 @@ rank: 3, size: 4, start: 75, end: 100
 
 ```
 
-This creates an `HDF5` file with two groups, `data` and `metadata`.
+This creates an HDF5 file with two groups, `data` and `metadata`.
 
 ## Other examples
 
