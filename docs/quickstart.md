@@ -132,7 +132,7 @@ The [`write`](#tables_io.io_utils.write.write) function will accept both `Table-
 
 ```
 
-Here, the type of file to write to is specified by the file name suffix, `hdf5`. If necessary, [`write` (docs)](#tables_io.io_utils.write.write) will convert the object to the related tabular type, then write to the specified file type. Otherwise, `tables_io` has a native file type for each of the tabular formats, which are listed in <project:#supported-tabular-formats>. You can write files to their native format by using [`write_native`](#tables_io.io_utils.write.write_native) directly.
+Here, the type of file to write to is specified by the file name suffix, 'hdf5'. If necessary, [`write` (docs)](#tables_io.io_utils.write.write) will convert the object to the related tabular type, then write to the specified file type. Otherwise, `tables_io` has a native file type for each of the tabular formats, which are listed in <project:#supported-tabular-formats>. You can write files to their native format by using [`write_native`](#tables_io.io_utils.write.write_native) directly.
 
 (supported-file-formats)=
 

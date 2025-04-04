@@ -1,7 +1,7 @@
 """Concatenation functions for tables_io"""
 
 from collections import OrderedDict
-from typing import Union, Optional, List, Mapping
+from typing import Union, Optional, List, Mapping, Iterable
 
 import numpy as np
 from numpy.lib import recfunctions as rfn
@@ -24,7 +24,7 @@ from ..types import (
 # I A. Generic `concat`
 def concat_table(tableList: List, tType: Union[str, int]):
     """
-    Vertically concatenates a list of `Table-like` objects. The concatenation
+    Vertically concatenates a sequence of `Table-like` objects. The concatenation
     is performed as an `outer` join, where no data is lost.
 
     Note: When concatenating `NUMPY_RECARRAY` objects, the output arrays will be masked

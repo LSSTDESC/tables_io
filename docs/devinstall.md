@@ -25,6 +25,19 @@ conda activate tables_io_dev
 pip install -e '.[dev]'
 ```
 
+To install without using conda, you can create a python virtual environment:
+
+```bash
+# Create the virtual environment
+python -m venv tables_io_dev
+
+# Activate the virtual environment
+source tables_io_dev/bin/activate
+
+# Install tables_io in editable mode with dev dependencies
+pip install -e '.[dev]'
+```
+
 (running-tests)=
 
 ## Running Tests

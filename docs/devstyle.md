@@ -2,7 +2,7 @@
 
 ## Documentation
 
-All documentation is created using Sphinx. This lives in the `docs/` folder, and the output is created in the `_readthedocs/` folder in the main package. Documentation files are written in Markdown, and any images or other assets are in the `assets/` folder. When new documentation packages are added, make sure to add them to the `requirements.txt` file, where they will be used when Read the Docs builds the documentation.
+All documentation is created using [Sphinx](https://www.sphinx-doc.org/en/master/index.html). This lives in the `docs/` folder, and the output is created in the `_readthedocs/` folder in the main package. Documentation files are written in Markdown, and any images or other assets are in the `assets/` folder. When new documentation packages are added, make sure to add them to the [requirements.txt](https://github.com/LSSTDESC/tables_io/blob/main/docs/requirements.txt) file, where they will be used when Read the Docs builds the documentation.
 
 ### Writing Documentation Pages
 
@@ -28,11 +28,11 @@ The HTML rendered documentation will live in the `_readthedocs/html` directory.
 
 ## Understanding the code
 
-`tables_io` is organized such that the main functionalities are made available in the main `__init__.py`, and additionally `HDF5` functionalities are made available in the `hdf5` module. The diagram below displays the main functions available and some of the most relevant `HDF5` functions. For all of the available `HDF5` functions, see the function overview of the <project:functionoverview.md#hdf5-module>.
+`tables_io` is organized such that the main functionalities are made available in the main `__init__.py`, and additionally HDF5 functionalities are made available in the `hdf5` module. The diagram below displays the main functions available and some of the most relevant HDF5 functions. For all of the available HDF5 functions, see the function overview of the <project:functionoverview.md#hdf5-module>.
 
 ![code diagram](assets/tables_io_model.svg)
 
-The code itself is split into three main components: `io_utils`, `convert`, and `utils`. `io_utils` contains all of the read and write functions. `convert` contains all conversion functions, and `utils` contains all functions related to `slice` and `concat` functionality, as well as code array utilities. `types.py` contains all the dictionaries relating table types and formats, as well as the functions that get information about what type a file or object falls into. `lazy_modules.py` handles loading in the necessary packages. See the diagram below to get a sense of the layout of the package.
+The code itself is split into three main components: `io_utils`, `convert`, and `utils`. `io_utils` contains all of the read and write functions. `convert` contains all conversion functions, and `utils` contains all functions related to `slice` and `concat` functionality, as well as code array utilities. [types.py](https://github.com/LSSTDESC/tables_io/blob/main/src/tables_io/types.py) contains all the dictionaries relating table types and formats, as well as the functions that get information about what type a file or object falls into. [lazy_modules.py](https://github.com/LSSTDESC/tables_io/blob/main/src/tables_io/lazy_modules.py) handles loading in the necessary packages. See the diagram below to get a sense of the layout of the package.
 
 ```bash
 tables_io
@@ -66,7 +66,7 @@ Generally, the code files are formatted such that there are interface functions 
 
 Generally, the code should follow the guidelines given in the [LSST DM Developer Guide](https://developer.lsst.io/index.html). This section lays out some project-specific guidelines.
 
-When creating new test files, they should be in the same location within the `tests/` folder as the file that is being tested. The test file should have the name `test_[filename].py`, where `filename` is the name of the file being tested.
+When creating new test files, they should be in the same location within the `tests/` folder as the file that is being tested. The test file should have the name `test_[filename].py`, where `filename` is the name of the file being tested. For example, a test for the `src/tables_io/conv/conv_table.py` module is called `test_conv_table.py` and located in the `tests/conv/` folder.
 
 ### Naming conventions
 
@@ -111,7 +111,7 @@ Once you are satisfied with your PR, request that other team members review and 
 
 Once the changes in your PR have been approved, these are your next steps:
 
-- the author merges the change by selecting “Squash and merge” on the approved pull request
+- merge the change by selecting “Squash and merge” on the approved pull request
 - enter `closes #[#]` in the comment field to close the resolved issue
 - delete your branch using the button on the merged pull request.
 
