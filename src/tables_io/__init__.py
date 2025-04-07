@@ -11,6 +11,7 @@ from . import conv
 from . import io_utils
 from .utils import concat_utils
 from .utils import slice_utils
+from .utils import array_utils
 from .types import get_table_type
 
 from . import hdf5

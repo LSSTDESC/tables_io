@@ -8,7 +8,11 @@ from ..utils import array_utils
 
 initialize_HDF5_write = io_utils.write.initialize_HDF5_write
 
+initialize_HDF5_write_single = io_utils.write.initialize_HDF5_write_single
+
 write_dict_to_HDF5_chunk = io_utils.write.write_dict_to_HDF5_chunk
+
+write_dict_to_HDF5_chunk_single = io_utils.write.write_dict_to_HDF5_chunk_single
 
 write_dicts_to_HDF5 = io_utils.write.write_dicts_to_HDF5
 
