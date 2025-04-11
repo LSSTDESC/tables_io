@@ -101,9 +101,9 @@ While developing in a branch, don’t forget to pull from main regularly (at lea
 
 Make sure that if the issue solves one of the items listed in <project:devtechdebt.md>, you remove that item from the documentation page.
 
-When you’re ready to merge your branch into the main branch, create a pull request (“PR”) in `tables_io` repository. GitHub has instructions [here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request).
+When you’re ready to merge your branch into the main branch, create a pull request (PR) in the `tables_io` repository. GitHub has instructions [here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request).
 
-Several continuous integration checks will be performed for new pull requests. If any of these automatic processes find issues with the code, you should address them in the branch before sending for review. These include tests (does the code function correctly), pylint (code style), and coverage (how much code is exercised in unit tests).
+Several continuous integration checks will be performed for new pull requests. If any of these automatic processes find issues with the code, you should address them in the branch before sending for review. These include tests (does the code function correctly), [Pylint](https://docs.pylint.org/) (code style), and coverage (how much code is exercised in unit tests).
 
 Once you are satisfied with your PR, request that other team members review and approve it. You could send the request to someone whom you’ve worked with on the topic, or one of the core maintainers of `tables_io`.
 
