@@ -3,7 +3,8 @@ tables_io: Tabular data read/write interface
 ============================================
 
 
-``tables_io`` provides an interface for a variety of non-ASCII file formats that are commonly used within the `LSST DESC collaboration <https://lsstdesc.org/>`_. It allows users to read in data from multiple types of files through one convenient interface. 
+``tables_io`` provides an interface for a variety of non-ASCII file formats that are commonly used within the `LSST DESC collaboration <https://lsstdesc.org/>`_. It allows users to read in data from multiple types of files through one convenient interface.
+The code can be found on `Github <https://github.com/LSSTDESC/tables_io>`_. 
 
 Features:
 ---------

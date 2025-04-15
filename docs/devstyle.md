@@ -66,7 +66,7 @@ Generally, the code files are formatted such that there are interface functions 
 
 Generally, the code should follow the guidelines given in the [LSST DM Developer Guide](https://developer.lsst.io/index.html). This section lays out some project-specific guidelines.
 
-When creating new test files, they should be in the same location within the `tests/` folder as the file that is being tested. The test file should have the name `test_[filename].py`, where `filename` is the name of the file being tested. For example, a test for the `src/tables_io/conv/conv_table.py` module is called `test_conv_table.py` and located in the `tests/conv/` folder.
+When creating new test files, they should be in the same location within the `tests/` folder as the file that is being tested. The test file should have the name `test_[filename].py`, where `filename` is the name of the file being tested. For example, a test for the `tables_io/conv/conv_table.py` module is called `test_conv_table.py` and located in the `tests/conv/` folder.
 
 ### Naming conventions
 

@@ -36,7 +36,7 @@ extensions = [
     "sphinx_copybutton",
 ]
 
-myst_enable_extensions = ["colon_fence"]
+myst_enable_extensions = ["colon_fence", "tasklist"]
 myst_heading_anchors = 3
 copybutton_exclude = ".linenos, .gp, .go"
 
