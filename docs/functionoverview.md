@@ -47,7 +47,7 @@ from tables_io import hdf5
 | {py:func}`read_HDF5_group <tables_io.io_utils.read.read_HDF5_group>`                                                                          | Read and return the requested group and file object from an HDF5 file.       |
 | {py:func}`read_HDF5_group_names <tables_io.io_utils.read.read_HDF5_group_names`                                                               | Read and return the list of group names from one level of an HDF5 file       |
 | {py:func}`read_HDF5_to_dict <tables_io.io_utils.read.read_HDF5_to_dict>`                                                                      | Reads in data from an HDF5 file to a dictionary                              |
-| {py:funct}`read_HDF5_group_to_dict <tables_io.io_utils.read.read_HDF5_group_to_dict>`                                                         | Reads in data from an open HDF5 file object to a dictionary or `numpy.array` |
+| {py:func}`read_HDF5_group_to_dict <tables_io.io_utils.read.read_HDF5_group_to_dict>`                                                          | Reads in data from an open HDF5 file object to a dictionary or `numpy.array` |
 | {py:func}`read_HDF5_dataset_to_array <tables_io.io_utils.read.read_HDF5_dataset_to_array>`                                                    | Reads in all or part of an HDF5 dataset                                      |
 
 ### Functions that write data

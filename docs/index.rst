@@ -73,7 +73,7 @@ Features:
 .. toctree:: 
     :hidden:
     :maxdepth: 4
-    :caption: Demo Notebooks
+    :caption: Legacy Notebooks
 
     notebooks/index.rst
 
