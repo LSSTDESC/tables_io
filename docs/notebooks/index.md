@@ -1,6 +1,6 @@
-# Legacy Demo Notebooks
+# Legacy Notebooks
 
-These notebooks work for `tables_io` version $< 1$, and are made available here for reference purposes only.
+These notebooks work for `tables_io` version < 1, and are made available here for reference purposes only.
 
 | Notebook                                                        | Description                                                         | Download                                    |
 | --------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------- |
