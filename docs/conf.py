@@ -17,8 +17,8 @@ sys.path.insert(0, os.path.abspath("../src/"))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "tables_io"
-copyright = "2023, Eric Charles"
-author = "Eric Charles"
+author = "DESC RAIL Team"
+copyright = "2025, " + author
 release = version("tables_io")
 # for example take major/minor
 version = ".".join(release.split(".")[:2])
