@@ -19,8 +19,8 @@ See [read the docs](https://tables-io.readthedocs.io/en/latest/index.html) for d
 
 `tables_io` is currently being used in the following packages:
 
-    * [`qp`](https://github.com/LSSTDESC/qp)
-    * [`RAIL`](https://github.com/LSSTDESC/rail)
+- [`qp`](https://github.com/LSSTDESC/qp)
+- [`RAIL`](https://github.com/LSSTDESC/rail)
 
 ## People
 

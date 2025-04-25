@@ -10,6 +10,29 @@ In this guide, we will name this developer environment `tables_io_dev` and we wi
 
 To install the developer environment:
 
+::::{tab-set}
+
+:::{tab-item} bash
+
+```bash
+# Clone the repo and enter it
+git clone https://github.com/LSSTDESC/tables_io.git
+cd tables_io
+
+# Creating the environment from the YAML
+conda env create -n tables_io_dev -f environment.yml
+
+# Activate the environment
+conda activate tables_io_dev
+
+# Install tables_io in editable mode with dev dependencies
+pip install -e .[dev]
+```
+
+:::
+
+:::{tab-item} zsh
+
 ```bash
 # Clone the repo and enter it
 git clone https://github.com/LSSTDESC/tables_io.git
@@ -25,7 +48,30 @@ conda activate tables_io_dev
 pip install -e '.[dev]'
 ```
 
+:::
+
+::::
+
 To install without using Anaconda, you can instead create a python virtual environment:
+
+::::{tab-set}
+
+:::{tab-item} bash
+
+```bash
+# Create the virtual environment
+python -m venv tables_io_dev
+
+# Activate the virtual environment
+source tables_io_dev/bin/activate
+
+# Install tables_io in editable mode with dev dependencies
+pip install -e .[dev]
+```
+
+:::
+
+:::{tab-item} zsh
 
 ```bash
 # Create the virtual environment
@@ -37,6 +83,10 @@ source tables_io_dev/bin/activate
 # Install tables_io in editable mode with dev dependencies
 pip install -e '.[dev]'
 ```
+
+:::
+
+::::
 
 (running-tests)=
 
