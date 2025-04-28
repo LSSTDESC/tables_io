@@ -16,10 +16,11 @@ classifiers = [
     "Programming Language :: Python",
 ]
 dynamic = ["version"]
-dependencies = ["numpy>=1.21.0", "click", "deprecated>=1.2.0", "astropy", "tables>=3.0", "h5py>=2.9", "pandas>=2.0", "pyarrow"]
+dependencies = ["numpy>=1.21.0", "click", "deprecated>=1.2.0", "tables>=3.0", "h5py>=2.9", "pandas>=2.0"]
 
 # On a mac, install optional dependencies with `pip install '.[dev]'` (include the single quotes)
 [project.optional-dependencies]
+full = ["astropy", "pyarrow"]
 dev = [
     "astropy",
     "h5py>=2.9",

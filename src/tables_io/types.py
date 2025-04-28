@@ -128,6 +128,13 @@ def is_ap_table(obj):
     return False
 
 
+def is_pa_table(obj):
+    for c in obj.__class__.__mro__:
+        if c.__name__ == "Table" and c.__module__ == "pyarrow.lib":
+            return True
+    return False
+
+
 def table_type(obj) -> int:
     """Identify the type of table we have
 
@@ -152,7 +159,7 @@ def table_type(obj) -> int:
         return PD_DATAFRAME
     if is_ap_table(obj):
         return AP_TABLE
-    if isinstance(obj, pa.Table):
+    if is_pa_table(obj):
         return PA_TABLE
     if isinstance(obj, (np.recarray, np.ma.core.MaskedArray)):
         return NUMPY_RECARRAY
