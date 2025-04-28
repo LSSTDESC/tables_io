@@ -107,7 +107,7 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
             return write_native(forcedOdict, fullpath)
         except Exception as e:
             raise RuntimeError(
-                f"Failed to write table to '{fullpath}' as  {FILE_FORMATS[fType]}."
+                f"Failed to write table to '{fullpath}' as  {FILE_FORMATS[fType]} because of error: \n {e}"
             ) from e
 
     if not os.path.splitext(filepath)[1]:
@@ -128,7 +128,7 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
             return filepath
     except Exception as e:
         raise RuntimeError(
-            f"Failed to write table to '{filepath}' as {FILE_FORMATS[fType]}."
+            f"Failed to write table to '{filepath}' as {FILE_FORMATS[fType]} because of error: \n {e}"
         ) from e
 
     raise TypeError(
