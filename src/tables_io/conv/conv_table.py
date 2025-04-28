@@ -62,35 +62,35 @@ def convert_table(obj, tType: Union[str, int]):
             return convert_to_ap_table(obj)
         except Exception as e:
             raise RuntimeError(
-                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n Object to convert: {obj}"
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n \n Object to convert: {obj}"
             ) from e
     if int_tType == NUMPY_DICT:
         try:
             return convert_to_dict(obj)
         except Exception as e:
             raise RuntimeError(
-                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n Object to convert: {obj}"
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n \n Object to convert: {obj}"
             ) from e
     if int_tType == NUMPY_RECARRAY:
         try:
             return convert_to_recarray(obj)
         except Exception as e:
             raise RuntimeError(
-                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n Object to convert: {obj}"
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n \n Object to convert: {obj}"
             ) from e
     if int_tType == PA_TABLE:
         try:
             return convert_to_pa_table(obj)
         except Exception as e:
             raise RuntimeError(
-                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n Object to convert: {obj}"
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n \n Object to convert: {obj}"
             ) from e
     if int_tType == PD_DATAFRAME:
         try:
             return convert_to_dataframe(obj)
         except Exception as e:
             raise RuntimeError(
-                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n Object to convert: {obj}"
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n \n Object to convert: {obj}"
             ) from e
     raise TypeError(
         f"Cannot convert to unsupported tableType {int_tType} ({int_tType})"
