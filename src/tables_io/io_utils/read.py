@@ -201,6 +201,7 @@ def read_native(
                 read_native_error_message(
                     filepath, fType, fmt, keys, allow_missing_keys, **kwargs
                 )
+                + f"because \n {e}"
             ) from e
 
     if fType == ASTROPY_HDF5:
@@ -211,6 +212,7 @@ def read_native(
                 read_native_error_message(
                     filepath, fType, fmt, keys, allow_missing_keys, **kwargs
                 )
+                + f"because \n {e}"
             ) from e
     if fType == NUMPY_HDF5:
         try:
@@ -220,6 +222,7 @@ def read_native(
                 read_native_error_message(
                     filepath, fType, fmt, keys, allow_missing_keys, **kwargs
                 )
+                + f"because \n {e}"
             ) from e
     if fType == NUMPY_FITS:
         try:
@@ -229,6 +232,7 @@ def read_native(
                 read_native_error_message(
                     filepath, fType, fmt, keys, allow_missing_keys, **kwargs
                 )
+                + f"because \n {e}"
             ) from e
     if fType == PANDAS_HDF5:
         try:
@@ -238,6 +242,7 @@ def read_native(
                 read_native_error_message(
                     filepath, fType, fmt, keys, allow_missing_keys, **kwargs
                 )
+                + f"because \n {e}"
             ) from e
     if fType == PANDAS_PARQUET:
         try:
@@ -247,6 +252,7 @@ def read_native(
                 read_native_error_message(
                     filepath, fType, fmt, keys, allow_missing_keys, **kwargs
                 )
+                + f"because \n {e}"
             ) from e
     if fType == PYARROW_HDF5:
         try:
@@ -256,6 +262,7 @@ def read_native(
                 read_native_error_message(
                     filepath, fType, fmt, keys, allow_missing_keys, **kwargs
                 )
+                + f"because \n {e}"
             ) from e
     if fType == PYARROW_PARQUET:
         try:
@@ -265,6 +272,7 @@ def read_native(
                 read_native_error_message(
                     filepath, fType, fmt, keys, allow_missing_keys, **kwargs
                 )
+                + f"because \n {e}"
             ) from e
     raise TypeError(
         f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
