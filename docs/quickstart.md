@@ -10,6 +10,13 @@ To install basic `tables_io`, you can run the following command:
 pip install tables_io
 ```
 
+This will enable the use of a subset of the available [file formats](#supported-file-formats) that use [pandas](https://pandas.pydata.org/pandas-docs/stable/index.html) and [h5py](https://docs.h5py.org/en/stable/quick.html#). To be able to use all the available formats, you must install two additional packages:
+
+```bash
+pip install astropy
+pip install pyarrow
+```
+
 (parallel-installation)=
 
 ### Parallel installation
@@ -58,16 +65,58 @@ If you're having difficulties installing, try using the `environment.yml` file t
 
 ### Installing from source
 
-If you prefer to install from source, use the following commands:
+If you prefer to install from source, use the following commands to clone the package:
 
 ```bash
 # Clone the repository
 git clone https://github.com/LSSTDESC/tables_io.git
 cd tables_io
+```
 
+Then you can use `setup.py` or `pip` to install the package:
+
+::::{tab-set}
+
+:::{tab-item} pip
+
+```bash
+# Install the package with minimal dependencies
+pip install .
+
+```
+
+:::
+
+:::{tab-item} setup.py
+
+```bash
 # Run the setup script
 python setup.py install
 ```
+
+:::
+
+::::
+
+To install the full functionality that allows the use of all file and table formats you can instead run:
+
+::::{tab-set}
+
+:::{tab-item} bash
+
+```bash
+pip install '.[full]'
+```
+
+:::
+
+:::{tab-item} zsh
+
+```zsh
+pip install '.[full]'
+```
+
+::::
 
 ## Main functionality
 
