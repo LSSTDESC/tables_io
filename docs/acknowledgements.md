@@ -1,1 +1,5 @@
 # Acknowledgements
+
+## Contributors
+
+- Eric Charles
