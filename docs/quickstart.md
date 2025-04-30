@@ -4,7 +4,7 @@
 
 ### Basic installation
 
-To install basic `tables_io`, you can run the following command:
+To install a minimal version of `tables_io`, you can run the following command:
 
 ```bash
 pip install tables_io
@@ -15,6 +15,12 @@ This will enable the use of a subset of the available [file formats](#supported-
 ```bash
 pip install astropy
 pip install pyarrow
+```
+
+or install using the following command instead:
+
+```bash
+pip install 'tables-io[full]'
 ```
 
 (parallel-installation)=
