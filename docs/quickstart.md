@@ -19,9 +19,25 @@ pip install pyarrow
 
 or install using the following command instead:
 
+::::{tab-set}
+
+:::{tab-item} bash
+
+```bash
+pip install tables-io[full]
+```
+
+:::
+
+:::{tab-item} zsh
+
 ```bash
 pip install 'tables-io[full]'
 ```
+
+:::
+
+::::
 
 (parallel-installation)=
 
