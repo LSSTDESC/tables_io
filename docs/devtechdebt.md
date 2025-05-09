@@ -8,6 +8,11 @@ good first contributions for new contributors to the project. You can also take 
 - [ ] {py:func}`iter_H5_to_dataframe <tables_io.io_utils.iterator.iter_H5_to_dataframe>` is not implemented, iterator cannot iterate over 'h5' files
 - [ ] {py:func}`pa_table_to_recarray <tables_io.conv.conv_table.pa_table_to_recarray>` is not implemented, but the functionality is being accomplished via converting to astropy Table first
 - [ ] Migrate `tests/io_utils/test_io_classic.py` to `pytest` fully, and remove `unittest` import.
+- [ ] Functions that could use tests or more in-depth tests:
+  - [ ] split_tasks_by_rank
+  - [ ] data_ranges_by_rank
+  - [ ] check_columns
+  - [ ] io_open
 
 ### Deprecation
 

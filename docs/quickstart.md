@@ -211,20 +211,20 @@ Here, the type of file to write to is specified by the file name suffix, 'hdf5'.
 
 `tables_io` currently supports the following formats to read files in from and write to, with the associated suffixes:
 
-| File format name | File suffix    | Produced by                                                                            |
-| ---------------- | -------------- | -------------------------------------------------------------------------------------- |
-| astropyFits      | 'fits'         | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             |
-| astropyHDF5      | 'hf5'          | [`astropy`](https://docs.astropy.org/en/stable/io/unified.html#hdf5)                   |
-| numpyHDF5        | 'hdf5'         | [`h5py`](https://docs.h5py.org/en/stable/quick.html#appendix-creating-a-file)          |
-| numpyFits        | 'fit'          | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             |
-| pyarrowHDF5      | 'hd5'          | [`pyarrow`](https://arrow.apache.org/docs/python/getstarted.html)                      |
-| pandasHDF5       | 'h5'           | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-hdf5)    |
-| pandaParquet     | 'parq' or 'pq' | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html#parquet) |
-| pyarrowParquet   | 'parquet'      | [`pyarrow`](https://arrow.apache.org/docs/python/parquet.html)                         |
+| File format name | File suffix    | Produced by                                                                            | Available by default                   |
+| ---------------- | -------------- | -------------------------------------------------------------------------------------- | -------------------------------------- |
+| astropyFits      | 'fits'         | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             | {octicon}`x;1.5em`                     |
+| astropyHDF5      | 'hf5'          | [`astropy`](https://docs.astropy.org/en/stable/io/unified.html#hdf5)                   | {octicon}`x;1.5em`                     |
+| numpyHDF5        | 'hdf5'         | [`h5py`](https://docs.h5py.org/en/stable/quick.html#appendix-creating-a-file)          | {octicon}`check;1.5em;sd-text-success` |
+| numpyFits        | 'fit'          | [`astropy.io.fits`](https://docs.astropy.org/en/stable/io/fits/index.html)             | {octicon}`x;1.5em`                     |
+| pyarrowHDF5      | 'hd5'          | [`pyarrow`](https://arrow.apache.org/docs/python/getstarted.html)                      | {octicon}`x;1.5em`                     |
+| pandasHDF5       | 'h5'           | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-hdf5)    | {octicon}`check;1.5em;sd-text-success` |
+| pandaParquet     | 'parq' or 'pq' | [`pandas`](https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html#parquet) | {octicon}`check;1.5em;sd-text-success` |
+| pyarrowParquet   | 'parquet'      | [`pyarrow`](https://arrow.apache.org/docs/python/parquet.html)                         | {octicon}`x;1.5em`                     |
 
-```{note}
-`tables_io` does not require all of the above packages to function. If you do not have one of these packages installed, you will not be able to create tables of that type (i.e. if you do not have `pandas` installed, you cannot convert objects to `pandasDataFrame` or read in `pandasParquet` files.)
-```
+:::{note}
+The file formats supported with the minimal installation are indicated in the 'Available by default' column. If you do not have the relevant package installed, you will not be able to create tables of that type (i.e. if you do not have `pyarrow` installed, you cannot convert objects to `pyarrowTable` or read in `pyarrowParquet` files.) See <project:#basic-installation> for instructions to install the packages to support all the possible file formats.
+:::
 
 (tabular-formats)=
 
@@ -232,13 +232,15 @@ Here, the type of file to write to is specified by the file name suffix, 'hdf5'.
 
 `tables_io` currently supports the following tabular formats in memory for `Table-like` or `TableDict-like` objects:
 
-| Tabular format name | Actual format type                                                                                          |
-| ------------------- | ----------------------------------------------------------------------------------------------------------- |
-| astropyTable        | [`astropy.table.Table`](https://docs.astropy.org/en/stable/table/index.html)                                |
-| numpyDict           | [`OrderedDict (str, np.array)`](https://docs.python.org/3/library/collections.html#collections.OrderedDict) |
-| numpyRecarray       | [`np.recarray`](https://numpy.org/doc/stable/reference/generated/numpy.recarray.html)                       |
-| pandasDataFrame     | [`pd.DataFrame`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html)          |
-| pyarrowTable        | [`pyarrow.Table`](https://arrow.apache.org/docs/python/generated/pyarrow.Table.html)                        |
+| Tabular format name | Actual format type                                                                                          | Available by default                   |
+| ------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| astropyTable        | [`astropy.table.Table`](https://docs.astropy.org/en/stable/table/index.html)                                | {octicon}`x;1.5em`                     |
+| numpyDict           | [`OrderedDict (str, np.array)`](https://docs.python.org/3/library/collections.html#collections.OrderedDict) | {octicon}`check;1.5em;sd-text-success` |
+| numpyRecarray       | [`np.recarray`](https://numpy.org/doc/stable/reference/generated/numpy.recarray.html)                       | {octicon}`check;1.5em;sd-text-success` |
+| pandasDataFrame     | [`pd.DataFrame`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html)          | {octicon}`check;1.5em;sd-text-success` |
+| pyarrowTable        | [`pyarrow.Table`](https://arrow.apache.org/docs/python/generated/pyarrow.Table.html)                        | {octicon}`x;1.5em`                     |
+
+As above, only some of these formats are available in the minimal installation, as indicated by the 'Available by default' column.
 
 The table below shows which tabular formats are available for `Table-like` or `TableDict-like` objects, and how they are associated with the available file types. File types in the 'File format for native read' column will be read in to the associated 'Tabular format in memory'. The default file that these tabular formats will be written to is given in the 'Native written file' column.
 

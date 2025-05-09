@@ -5,7 +5,7 @@ license = { file = "LICENSE" }
 readme = "README.md"
 description = "Input/output and conversion functions for tabular data"
 authors = [
-    { name = "LSST Dark Energy Science Collaboration (DESC)", email = "echarles@slac.stanford.edu" },
+    { name = "Erich Charles", email = "echarles@slac.stanford.edu" },
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

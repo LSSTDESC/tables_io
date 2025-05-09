@@ -6,7 +6,23 @@
 
 ### Read in a file to a specific format
 
-To read in a `Table-like` or `TableDict-like` object from a file to a specific tabular type, use the {py:func}`read <tables_io.io_utils.read.read>` function. You can supply the type via the `tType` argument, either as a string or as an integer. The allowed tabular types are listed in <project:./quickstart.md#supported-tabular-formats>.
+To read in a `Table-like` or `TableDict-like` object from a file to a specific tabular type, use the {py:func}`read <tables_io.io_utils.read.read>` function. For example, to read in a Parquet file:
+
+```{doctest}
+
+>>> import tables_io
+>>> tab = tables_io.read('filename.parquet')
+>>> tab
+pyarrow.Table
+x: double
+z: double
+----
+x: [[1,1.5,2]]
+z: [[0.2,0.7,1.2]]
+
+```
+
+You can also supply the type via the `tType` argument, either as a string or as an integer. The allowed tabular types are listed in <project:./quickstart.md#supported-tabular-formats>.
 
 For example, to read in tables from an HDF5 file as `astropyTable` objects:
 
