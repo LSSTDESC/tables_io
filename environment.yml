@@ -14,11 +14,12 @@ dependencies:
   - pylint
   - pytest
   - pytest-cov
+  - deprecated>=1.2.0
   - jupyter
   - pip
   - setuptools
   - coverage
   - flake8
   - click
-  - jax
+  - jax>=0.4
   - jaxlib

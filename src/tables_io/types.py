@@ -1,12 +1,13 @@
-"""Type defintions for tables_io"""
+"""Type definitions and related functions for tables_io"""
 
 import os
 from collections import OrderedDict
 from collections.abc import Iterable, Mapping
+from typing import Union, Optional
 
 import numpy as np
 
-from .arrayUtils import arrayLength
+from .utils.array_utils import array_length
 from .lazy_modules import pa
 
 # Tabular data formats
@@ -73,7 +74,7 @@ DEFAULT_TABLE_KEY = OrderedDict(
         ("fits", ""),
         ("hf5", None),
         ("hdf5", None),
-        ("hd5", "data"),        
+        ("hd5", "data"),
         ("fit", ""),
         ("h5", "data"),
         ("parquet", ""),
@@ -84,7 +85,9 @@ DEFAULT_TABLE_KEY = OrderedDict(
 
 FILE_FORMATS = OrderedDict([(val, key) for key, val in FILE_FORMAT_NAMES.items()])
 
-FILE_FORMAT_SUFFIX_MAP = OrderedDict([(val, key) for key, val in FILE_FORMAT_SUFFIXS.items()])
+FILE_FORMAT_SUFFIX_MAP = OrderedDict(
+    [(val, key) for key, val in FILE_FORMAT_SUFFIXS.items()]
+)
 
 # Default format to write various table types
 NATIVE_FORMAT = OrderedDict(
@@ -111,21 +114,28 @@ ALLOWED_FORMATS = OrderedDict(
 )
 
 
-def isDataFrame(obj):
+def is_dataframe(obj):
     for c in obj.__class__.__mro__:
         if c.__name__ == "DataFrame" and c.__module__ == "pandas.core.frame":
             return True
     return False
 
 
-def isApTable(obj):
+def is_ap_table(obj):
     for c in obj.__class__.__mro__:
         if c.__name__ == "Table" and c.__module__ == "astropy.table.table":
             return True
     return False
 
 
-def tableType(obj):
+def is_pa_table(obj):
+    for c in obj.__class__.__mro__:
+        if c.__name__ == "Table" and c.__module__ == "pyarrow.lib":
+            return True
+    return False
+
+
+def table_type(obj) -> int:
     """Identify the type of table we have
 
     Parameters
@@ -145,37 +155,36 @@ def tableType(obj):
     IndexError
         One of the columns in a Mapping is the wrong length
     """
-    if isDataFrame(obj):
+    if is_dataframe(obj):
         return PD_DATAFRAME
-    if isApTable(obj):
+    if is_ap_table(obj):
         return AP_TABLE
-    if isinstance(obj, pa.Table):
+    if is_pa_table(obj):
         return PA_TABLE
     if isinstance(obj, (np.recarray, np.ma.core.MaskedArray)):
         return NUMPY_RECARRAY
     if not isinstance(obj, Mapping):
         raise TypeError(
-            f"Object of type {type(obj)} is not one of the supported types"
-            f"{list(TABULAR_FORMAT_NAMES.keys())}"
+            f"Object of type {type(obj)} is not one of the supported types. \n Must be one of {list(TABULAR_FORMAT_NAMES.keys())}"
         )
 
     nRow = None
     for key, val in obj.items():
-        if istablelike(val):
+        if is_table_like(val):
             raise TypeError(f"Column {key} is a table of type {type(val)}")
-        if not isinstance(val, Iterable):  # pragma: no cover
+        if not isinstance(val, Iterable):
             raise TypeError(f"Column {key} of type {type(val)} is not iterable")
         if nRow is None:
-            nRow = arrayLength(val)
+            nRow = array_length(val)
         else:
-            if arrayLength(val) != nRow:
+            if array_length(val) != nRow:
                 raise IndexError(
-                    f"Column {key} length {arrayLength(val)} != {nRow}"
+                    f"Column {key} length {array_length(val)} != {nRow}. \n Column lengths are not equal, this is not a valid {TABULAR_FORMATS[NUMPY_DICT]} object"
                 )  # pylint: disable=bad-string-format-type
     return NUMPY_DICT
 
 
-def istablelike(obj):
+def is_table_like(obj) -> bool:
     """Test to see if an object is one of the supported table types
 
     Parameters
@@ -185,18 +194,19 @@ def istablelike(obj):
 
     Returns
     -------
-    tablelike : `bool`
-        True is the object is `Tablelike`, False otherwise
+    table-like : `bool`
+        True is the object is `Table-like`, False otherwise
     """
     try:
-        _ = tableType(obj)
+        _ = table_type(obj)
     except (TypeError, IndexError):
         return False
     return True
 
 
-def istabledictlike(obj):
-    """Test to see if an object is a `Mapping`, (`str`, `Tablelike`)
+def is_tabledict_like(obj) -> bool:
+    """Test to see if an object is a `Mapping`, (`str`, `Table-like`),
+    or `TableDict-like`.
 
     Parameters
     ----------
@@ -206,17 +216,17 @@ def istabledictlike(obj):
     Returns
     -------
     tabledict : `bool`
-        True is the object is a `Mapping`, (`str`, `Tablelike`), False otherwise
+        True is the object is a `Mapping`, (`str`, `Table-like`), False otherwise
     """
     if not isinstance(obj, Mapping):
         return False
     for val in obj.values():
-        if not istablelike(val):
+        if not is_table_like(val):
             return False
     return True
 
 
-def fileType(filepath, fmt=None):
+def file_type(filepath: str, fmt: Optional[str] = None) -> int:
     """Identify the type of file we have
 
     Parameters
@@ -243,5 +253,91 @@ def fileType(filepath, fmt=None):
         return FILE_FORMAT_SUFFIXS[fmt]
     except KeyError as msg:
         raise KeyError(
-            f"Unknown file format {fmt}, supported types are" f"{list(FILE_FORMAT_SUFFIXS.keys())}"
+            f"Unknown file format {fmt}, supported types are"
+            f"{list(FILE_FORMAT_SUFFIXS.keys())}"
         ) from msg
+
+
+def tType_to_int(tType: Union[str, int]) -> int:
+    """Takes table type as an `int` or `str`, and converts it to the corresponding
+      `int` if it's a `str`.
+
+    Parameters
+    ----------
+    tType : Union[str, int]
+        The tabular format
+
+    Returns
+    -------
+    int
+        The number corresponding to the tabular format
+
+    Raises
+    ------
+    TypeError
+        Raised if the given `str` is not one of the available tabular format options.
+    """
+
+    if isinstance(tType, str):
+        try:
+            int_tType = TABULAR_FORMAT_NAMES[tType]
+        except:
+            raise TypeError(
+                f"Unsupported tableType '{tType}', must be one of {TABULAR_FORMAT_NAMES}"
+            )
+    if isinstance(tType, int):
+        int_tType = tType
+
+    return int_tType
+
+
+def get_table_type(obj) -> str:
+    """Gets the table type of a Table-like or TableDict-like object, and returns the name of that type.
+    If the object is a TableDict-like object, it will check that all Table-like objects have the same type.
+    Will raise an error if the object is not of a supported type.
+
+    Parameters
+    ----------
+    obj : `Table-like` or `TableDict-like` object
+        The object to determine the type of.
+
+    Returns
+    -------
+    str
+        Name of the tabular type
+
+    Raises
+    ------
+    TypeError
+        Raises a TypeError if the table is not of a supported type
+    """
+
+    # check if object is TableDict-like
+    is_td = is_tabledict_like(obj)
+
+    if is_td:
+        # get the table type of the tables in the TableDict
+        tab_types = []
+        for keys in obj.keys():
+            tab_types.append(table_type(obj[keys]))
+
+        # if there is more than one table type raise an error
+        if len(np.unique(tab_types)) > 1:
+            raise TypeError(
+                f"Object contains Table-like objects of multiple types (obj: {obj})"
+            )
+        int_tType = tab_types[0]
+
+    else:
+
+        try:
+            # get the table type of the Table
+            int_tType = table_type(obj)
+        except Exception as e:
+            raise TypeError(
+                f"Object of type {type(obj)} is not one of the supported types. \n Must be one of {list(TABULAR_FORMAT_NAMES.keys())}"
+            ) from e
+
+    tType = TABULAR_FORMATS[int_tType]
+
+    return tType
