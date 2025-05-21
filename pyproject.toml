@@ -5,7 +5,7 @@ license = { file = "LICENSE" }
 readme = "README.md"
 description = "Input/output and conversion functions for tabular data"
 authors = [
-    { name = "Erich Charles", email = "echarles@slac.stanford.edu" },
+    { name = "Eric Charles", email = "echarles@slac.stanford.edu" },
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
