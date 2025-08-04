@@ -43,6 +43,7 @@ PYARROW_HDF5 = 6
 PYARROW_PARQUET = 7
 PANDAS_CSV = 8
 JSON = 9
+YAML_INDEX = 10
 
 
 FILE_FORMAT_NAMES = OrderedDict(
@@ -57,6 +58,7 @@ FILE_FORMAT_NAMES = OrderedDict(
         ("pyarrowParquet", PYARROW_PARQUET),
         ("pandasCsv", PANDAS_CSV),
         ("json", JSON),
+        ("yamlIndex", YAML_INDEX),
     ]
 )
 
@@ -74,6 +76,7 @@ FILE_FORMAT_SUFFIXS = OrderedDict(
         ("pq", PANDAS_PARQUET),
         ("csv", PANDAS_CSV),
         ("json", JSON),
+        ("idx", YAML_INDEX), 
     ]
 )
 
@@ -90,6 +93,7 @@ DEFAULT_TABLE_KEY = OrderedDict(
         ("pq", ""),
         ("csv", ""),
         ("json", ""),
+        ("idx", ""),
     ]
 )
 
