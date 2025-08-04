@@ -52,11 +52,14 @@ def convert(input, output):
 
     print(f"Converting {input_fname} to {output_fname}")
 
-    suffixes = types.FILE_FORMAT_SUFFIXS
-    suffix = suffixes[output_format]
+    # This is the enum of the output format type, based on the suffix
+    suffix = types.FILE_FORMAT_SUFFIXS[output_format]
+
+    # This is the enum of the corresponding table type
+    table_format = types.TABLE_FORMAT[suffix]
 
     t_in = tables_io.read(input_fname)
-    t_out = tables_io.convert(t_in, suffix)
+    t_out = tables_io.convert(t_in, table_format)
     _written = tables_io.write(t_out, output_fname)
 
     print("Done converting file")
