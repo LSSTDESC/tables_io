@@ -1009,6 +1009,47 @@ def read_pq_to_tables(
     return tables
 
 
+### II I. Index file read
+
+def read_index_file(filepath, keys=None):
+    """Open an index file and and return a concatanated object
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    keys : `list` or `None`
+        Which tables to read
+
+    Returns
+    -------
+    tab : `OrderedDict` (`str` : `table-like`)
+       The data
+    """
+    dirname = os.path.abspath(os.path.dirname(filepath))
+
+    with open(filepath) as fin:
+        file_index = yaml.safe_load(fin)
+
+    try:
+        inputs = file_index['inputs']
+    except KeyError:
+        raise KeyError(f"Index file {filepath} does contain 'inputs' yaml tag") from None
+    n_in = len(inputs)
+    start = 0
+    all_data = []
+    for input_ in inputs:
+        try:
+            path = input_['path']
+        except KeyError:
+            raise KeyError(f"Index file {filepath} input does contain 'path' yaml tag") from None
+        fullpath = os.path.join(dirname, path)
+        data = read(fullpath, keys)
+        all_data.append(data)
+    return concat(all_data, None)
+
+
 # III. Miscellaneous
 
 

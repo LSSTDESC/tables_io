@@ -707,3 +707,43 @@ def write_tables_to_pq(tables: Mapping, filepath: str, **kwargs):
         ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
     for k, v in tables.items():
         pq.write_table(v, f"{basepath}{k}{ext}", **kwargs)
+
+
+# II F. Writing index files
+
+def write_index_file(filepath: str, fileList: list[str]):
+    """Create and write and index file for set of files
+
+    Parameters
+    ----------
+    filepath : `str`
+        File name for the file to write.  Should end in '.idx'
+
+    fileList : `list`
+        The files to add to the index file
+    """
+    inputs=[]
+    n_total=0,
+    idx = 0
+
+    check_suffix = os.path.splitext(filepath)[-1]
+    if check_suffix != '.idx':
+        raise ValueError(f"Output filepath {filepath} doex not end in '.idx'")
+
+    main_path = (filepath + '/').replace('//', '/')
+    for filepath_ in fileList:
+        n = getInputDataLength(filepath_)
+        fdict = dict(
+            path=filepath_.replace(main_path, ''),
+            n=n,
+            start=idx
+        )
+        idx += n
+        inputs.append(fdict)
+
+    out_dict = dict(
+        inputs=inputs,
+        n_total=idx,
+    )
+    with open(filepath, 'w') as fout:
+        yaml.dump(out_dict, fout)

@@ -39,6 +39,7 @@ PANDAS_HDF5 = 4
 PANDAS_PARQUET = 5
 PYARROW_HDF5 = 6
 PYARROW_PARQUET = 7
+YAML_INDEX = 8
 
 
 FILE_FORMAT_NAMES = OrderedDict(
@@ -51,6 +52,7 @@ FILE_FORMAT_NAMES = OrderedDict(
         ("pandasHdf5", PANDAS_HDF5),
         ("pandaParquet", PANDAS_PARQUET),
         ("pyarrowParquet", PYARROW_PARQUET),
+        ("yamlIndex", YAML_INDEX),
     ]
 )
 
@@ -66,6 +68,7 @@ FILE_FORMAT_SUFFIXS = OrderedDict(
         ("parquet", PYARROW_PARQUET),
         ("parq", PANDAS_PARQUET),
         ("pq", PANDAS_PARQUET),
+        ("idx", YAML_INDEX), 
     ]
 )
 
@@ -80,6 +83,7 @@ DEFAULT_TABLE_KEY = OrderedDict(
         ("parquet", ""),
         ("parq", ""),
         ("pq", ""),
+        ("idx", ""),
     ]
 )
 
