@@ -113,6 +113,11 @@ ALLOWED_FORMATS = OrderedDict(
     ]
 )
 
+TABLE_FORMAT = {}
+for key, val_list in ALLOWED_FORMATS.items():
+    for val in val_list:
+        TABLE_FORMAT[val] = key
+
 
 def is_dataframe(obj):
     for c in obj.__class__.__mro__:

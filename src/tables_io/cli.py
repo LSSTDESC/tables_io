@@ -55,7 +55,7 @@ def convert(input, output):
     suffixes = types.FILE_FORMAT_SUFFIXS
     suffix = suffixes[output_format]
 
-    table_format = types.NATIVE_TABLE_TYPE[suffix]
+    table_format = types.TABLE_FORMAT[suffix]
 
     t_in = tables_io.read(input_fname)
     t_out = tables_io.convert(t_in, table_format)
