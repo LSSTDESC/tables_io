@@ -34,3 +34,12 @@ def parquet_data_file(test_dir) -> Path:
     """Path to test Parquet File"""
 
     return test_dir / "data/parquet_test.parquet"
+
+
+# Path for index file
+
+@pytest.fixture
+def index_file(test_dir) -> Path:
+    """Path to test index file"""
+
+    return test_dir / "data/index_file.idx"

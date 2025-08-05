@@ -5,10 +5,11 @@ from collections import OrderedDict
 from collections.abc import Iterator, Iterable
 from typing import Optional, Union, Mapping, List
 import warnings
+import yaml
 
 import numpy as np
 
-from .read import read_HDF5_group, read_HDF5_dataset_to_array
+from .read import read, read_HDF5_group, read_HDF5_dataset_to_array
 from ..utils.array_utils import get_group_input_data_length
 from ..conv.conv_tabledict import convert
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
@@ -559,3 +560,97 @@ def data_ranges_by_rank(
         start = i * chunk_rows
         end = min((i + 1) * chunk_rows, n_rows)
         yield start, end
+
+
+
+# II E. Index file functions
+
+def iter_index_file(source, columns: Optional[List[str]] = None, chunk_size: int = 100_000, **kwargs):
+    """Iterates through the data in an index file. The data is yielded (along with
+    the start and stop index) as a `Table-like` object that has the default format
+    for the given file type.
+
+    This function currently only works for the following file types: `numpyHDF5`, `pandasParquet`, `pyarrowParquet`, `pyarrowHDF5`
+
+    Any kwargs are passed to the specific iterator function for the file type.
+
+    Parameters
+    ----------
+    source : `str`
+        File to load
+    columns: `List[str]`, default `None`
+        The list of columns to use
+    chunk_size: int, by default 100,000
+        The size of data chunk to iterate over
+
+    Returns
+    -------
+    start: int
+        Data start index
+    stop: int
+        Data ending index
+    data : `Table-like`
+        The data in the native type for that file, from [start:stop]
+
+
+    Optional kwargs
+    -----------------
+    groupname : `str` or `None`
+        For HDF5 files, the group name where the data is
+    columns : list of `str` or `None`
+        For parquet files, the names of the columns to read.
+        `None` will read all the columns
+    rank: int, by default 0
+        The rank of this process under MPI
+    parallel_size: int, by default 1
+        The number of processes under MPI
+    """
+
+    rank = kwargs.get('rank', 0)
+    parallel_size = kwargs.get('parallel_size', 1)
+
+    dirname = os.path.abspath(os.path.dirname(source))
+
+    if rank >= parallel_size:
+        raise TypeError(
+            f"MPI rank {rank} larger than the total " f"number of processes {parallel_size}"
+        )  # pragma: no cover
+
+    with open(source) as fin:
+        file_index = yaml.safe_load(fin)
+
+    inputs = file_index['inputs']
+    n_in = len(inputs)
+    start = 0
+
+    it = split_tasks_by_rank(range(n_in), parallel_size, rank)
+    for i in it:
+        input_ = inputs[i]
+        start = input_['start']
+        path = input_['path']
+        n = input_['n']
+        end = start + n
+        fullpath = os.path.join(dirname, path)
+        data = read(fullpath)
+        yield start, end, data
+
+
+def get_input_data_length_index(filepath):
+    """Open a index file and return the size of a group
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    Returns
+    -------
+    nrow : `int`
+        The length of the data
+    """
+    with open(filepath) as fin:
+        file_index = yaml.safe_load(fin)
+    try:
+        return file_index['n_total']
+    except KeyError:  # pragma: no cover
+        raise KeyError(f"Index file {filepath} does contain 'n_total' yaml tag") from None
