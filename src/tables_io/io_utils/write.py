@@ -4,6 +4,8 @@ import os
 from collections import OrderedDict
 from typing import Mapping, Optional, Union, List
 
+import yaml
+
 import numpy as np
 
 from ..conv.conv_tabledict import convert
@@ -31,6 +33,8 @@ from ..types import (
     is_table_like,
     table_type,
 )
+from .iterator import get_input_data_length
+
 
 # I. Top-level interface functions
 
@@ -732,7 +736,7 @@ def write_index_file(filepath: str, fileList: list[str]):
 
     main_path = (filepath + '/').replace('//', '/')
     for filepath_ in fileList:
-        n = getInputDataLength(filepath_)
+        n = get_input_data_length(filepath_)
         fdict = dict(
             path=filepath_.replace(main_path, ''),
             n=n,

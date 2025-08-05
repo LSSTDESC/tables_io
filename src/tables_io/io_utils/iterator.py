@@ -5,10 +5,11 @@ from collections import OrderedDict
 from collections.abc import Iterator, Iterable
 from typing import Optional, Union, Mapping, List
 import warnings
+import yaml
 
 import numpy as np
 
-from .read import read_HDF5_group, read_HDF5_dataset_to_array
+from .read import read, read_HDF5_group, read_HDF5_dataset_to_array
 from ..utils.array_utils import get_group_input_data_length
 from ..conv.conv_tabledict import convert
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
@@ -651,5 +652,5 @@ def get_input_data_length_index(filepath):
         file_index = yaml.safe_load(fin)
     try:
         return file_index['n_total']
-    except KeyError:
+    except KeyError:  # pragma: no cover
         raise KeyError(f"Index file {filepath} does contain 'n_total' yaml tag") from None

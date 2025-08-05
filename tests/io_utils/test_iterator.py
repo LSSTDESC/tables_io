@@ -46,3 +46,19 @@ def test_iter_chunk_hdf5_data(h5_no_group_file):
     for itr in io_utils.iterator.iter_HDF5_to_dict(h5_no_group_file, chunk_size=3):
         for val in itr[2].values():
             assert np.size(val) <= 3
+
+
+@pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
+def test_index_iter(index_file):
+    """Test the read function for an index file"""
+    for itr in  io_utils.iterator.iter_index_file(index_file):
+        for val in itr[2].values():
+            assert len(val) == 10
+
+
+def test_index_data_length(index_file):
+    """Test the read function for an index file"""
+    n = io_utils.iterator.get_input_data_length_index(index_file)
+    assert n == 16
+            
+            

@@ -262,7 +262,7 @@ def file_type(filepath: str, fmt: Optional[str] = None) -> int:
         return FILE_FORMAT_SUFFIXS[fmt]
     except KeyError as msg:
         raise KeyError(
-            f"Unknown file format {fmt}, supported types are"
+            f"Unknown file format {filepath}: {fmt}, supported types are"
             f"{list(FILE_FORMAT_SUFFIXS.keys())}"
         ) from msg
 

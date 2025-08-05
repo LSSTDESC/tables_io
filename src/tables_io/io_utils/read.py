@@ -5,7 +5,9 @@ from collections import OrderedDict
 
 import numpy as np
 from typing import List, Mapping, Optional, Union
+import yaml
 
+from ..utils.concat_utils import concat_table, concat_tabledict
 from ..utils.array_utils import force_to_pandables
 from ..conv.conv_tabledict import convert
 from ..conv.conv_table import dataframe_to_dict, hdf5_group_to_dict
@@ -33,6 +35,7 @@ from ..types import (
     is_tabledict_like,
     is_table_like,
     table_type,
+    get_table_type,
 )
 
 
@@ -1034,20 +1037,28 @@ def read_index_file(filepath, keys=None):
 
     try:
         inputs = file_index['inputs']
-    except KeyError:
+    except KeyError:  # pragma: no cover
         raise KeyError(f"Index file {filepath} does contain 'inputs' yaml tag") from None
     n_in = len(inputs)
     start = 0
     all_data = []
+    t_type = ""
     for input_ in inputs:
         try:
             path = input_['path']
-        except KeyError:
+        except KeyError:  # pragma: no cover
             raise KeyError(f"Index file {filepath} input does contain 'path' yaml tag") from None
         fullpath = os.path.join(dirname, path)
         data = read(fullpath, keys)
+        for _k, v in data.items():
+            check_t_type = get_table_type(v)
+            if t_type:
+                if check_t_type != t_type:  # pragma: no cover
+                    raise ValueError(f"Failed to match table type {t_type} !- {check_t_type}")
+            else:
+                t_type = check_t_type
         all_data.append(data)
-    return concat(all_data, None)
+    return concat_tabledict(all_data, t_type)
 
 
 # III. Miscellaneous

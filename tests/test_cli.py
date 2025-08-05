@@ -30,6 +30,7 @@ def test_cli_concat(test_dir, tmp_path):
     runner = CliRunner()
     result = runner.invoke(
         concatanate, ["--output", str(output_file), str(input_file), str(input_file), str(input_file)]
+    )
 
         
 def test_cli_index(test_dir, tmp_path):

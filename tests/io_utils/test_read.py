@@ -67,3 +67,13 @@ def test_read_fits_edge_cases(test_dir):
     # Testing Edge Cases in read_fits_to_ap_tables
     _ = io_utils.read.read_fits_to_ap_tables(noname_fits)
     _ = io_utils.read.read_fits_to_ap_tables(repeated_names_fits)
+
+
+
+@pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
+def test_index_read(index_file):
+    """Test the read function for an index file"""
+    data = io_utils.read.read_index_file(index_file)
+    for _key, val in data.items():
+        for _kk, v2 in val.items():
+            assert len(v2) == 20

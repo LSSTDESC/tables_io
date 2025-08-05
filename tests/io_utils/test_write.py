@@ -147,3 +147,17 @@ def test_write_output_parallel_file_single(h5_test_outfile):
     io_utils.write.finalize_HDF5_write(outf, "md", zgrid=zgrid)
 
     os.unlink(h5_test_outfile)
+
+    
+@pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
+def test_write_index_file(test_dir, tmp_path):
+    """Test writing an output file"""
+        
+    input_file = test_dir / "data/pandas_test_hdf5.h5"
+    output_file = tmp_path / "test_index_good.idx"
+    output_file_bad = tmp_path / "test_index.bad"
+
+    io_utils.write.write_index_file(str(output_file), [str(input_file), str(input_file), str(input_file)])
+    
+    with pytest.raises(ValueError):
+        io_utils.write.write_index_file(str(output_file_bad), [str(input_file), str(input_file), str(input_file)])
