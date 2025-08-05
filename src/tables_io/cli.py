@@ -21,6 +21,21 @@ class PartialOption:
         return self._partial(*args, **kwargs)
 
 
+class PartialArgument:
+    """Wraps click.argument with partial arguments for convenient reuse"""
+
+    def __init__(self, *param_decls: Any, **kwargs: Any) -> None:
+        self._partial = partial(
+            click.argument, *param_decls, cls=click.Argument, **kwargs
+        )
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:  # pragma: no cover
+        return self._partial(*args, **kwargs)
+
+
+inputs = PartialArgument("inputs", nargs=-1)
+
+
 input = PartialOption(
     "--input",
     type=click.Path(),
@@ -63,5 +78,37 @@ def convert(input, output):
     _written = tables_io.write(t_out, output_fname)
 
     print("Done converting file")
+
+    return 0
+
+
+@cli.command(name='concatanate')
+@inputs()
+@output()
+def concatanate(inputs, output):
+    """Concatanate a list of tables"""
+
+    input_fnames = inputs
+    output_fname = output
+    output_format = output_fname.split(".")[-1]
+
+    print(f"Concatanating {input_fnames} to {output_fname}")
+
+    # This is the enum of the output format type, based on the suffix
+    suffix = types.FILE_FORMAT_SUFFIXS[output_format]
+
+    # This is the enum of the corresponding table type
+    t_format = types.TABLE_FORMAT[suffix]
+
+    table_list = []
+    for input_fname in input_fnames:
+        t_in = tables_io.read(input_fname)
+        table_list.append(t_in)
+
+    t_out = tables_io.concat_table(table_list, t_format)
+
+    _written = tables_io.write(t_out, output_fname)
+
+    print("Done Concatanating file")
 
     return 0
