@@ -34,3 +34,13 @@ def parquet_data_file(test_dir) -> Path:
     """Path to test Parquet File"""
 
     return test_dir / "data/parquet_test.parquet"
+
+
+# Paths for CSV Files
+
+
+@pytest.fixture
+def csv_data_file(test_dir) -> Path:
+    """Path to test CSV File"""
+
+    return test_dir / "data/csv_test.csv"

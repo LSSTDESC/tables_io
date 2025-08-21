@@ -1,5 +1,4 @@
-"""Tests for Reading Functions
-"""
+"""Tests for Reading Functions"""
 
 import os
 import pytest
@@ -8,14 +7,17 @@ import numpy as np
 
 from tables_io import io_utils
 from tests.helpers.utilities import check_deps
-from tables_io.lazy_modules import h5py, pq, fits
+from tables_io.lazy_modules import h5py, pq, pd
 
 
-@pytest.mark.skipif(not check_deps([h5py, pq]), reason="Missing HDF5 or parquet")
-def test_pandas_read(h5_data_file, parquet_data_file):
-    """Test the pandas reading from HDF5 and Parquet files"""
+@pytest.mark.skipif(
+    not check_deps([h5py, pq, pd]), reason="Missing HDF5, parquet or csv"
+)
+def test_pandas_read(h5_data_file, parquet_data_file, csv_data_file):
+    """Test the pandas reading from HDF5, Parquet or CSV files"""
     _ = io_utils.read.read_H5_to_dict(h5_data_file)
     _ = io_utils.read.read_pq_to_dict(parquet_data_file)
+    _ = io_utils.read.read_csv_to_dataframes(csv_data_file)
 
 
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
