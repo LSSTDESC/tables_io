@@ -8,7 +8,7 @@ import warnings
 
 import numpy as np
 
-from .read import read_HDF5_group, read_HDF5_dataset_to_array
+from .read import read_HDF5_group, read_HDF5_dataset_to_array, try_parse
 from ..utils.array_utils import get_group_input_data_length
 from ..conv.conv_tabledict import convert
 from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, ds
@@ -17,6 +17,7 @@ from ..types import (
     PA_TABLE,
     PANDAS_HDF5,
     PANDAS_PARQUET,
+    PANDAS_CSV,
     PYARROW_HDF5,
     PYARROW_PARQUET,
     PD_DATAFRAME,
@@ -161,6 +162,7 @@ def iterator_native(
         PANDAS_PARQUET: iter_pq_to_dataframe,
         PYARROW_PARQUET: iter_ds_to_table,
         PYARROW_HDF5: iter_ds_to_table,
+        PANDAS_CSV: iter_csv_to_dataframe,
     }
 
     try:
@@ -180,7 +182,7 @@ def iterator_native(
     else:
         if parallel_size != 1 or rank != 0:
             warnings.warn(
-                f"MPI arguments were provided for this function, but it will run in series as it cannot be run in parallel."
+                "MPI arguments were provided for this function, but it will run in series as it cannot be run in parallel."
             )  # pragma: no cover
 
     return theFunc(
@@ -217,6 +219,7 @@ def get_input_data_length(filepath: str, fmt: Optional[str] = None, **kwargs):
         PANDAS_HDF5: get_input_data_length_HDF5,
         PANDAS_PARQUET: get_input_data_length_pq,
         PYARROW_PARQUET: get_input_data_length_ds,
+        PANDAS_CSV: get_input_data_length_csv,
     }
 
     try:
@@ -404,6 +407,44 @@ def iter_pq_to_dataframe(
         start += num_rows
 
 
+def iter_csv_to_dataframe(
+    filepath: str,
+    chunk_size: int = 100_000,
+    **kwargs,
+):
+    """
+    Iterates through a CSV file, yielding one chunk of data at a time.
+
+    Parameters
+    ----------
+    filepath: `str`
+        path to input file
+    chunk_size: `int`, by default = 100,000
+        The maximum chunk size of the data
+    kwargs : additional arguments to pass to the pandas read_csv function
+
+    Yields
+    ------
+    data: `pandas.DataFrame`
+        DataFrame of all data from start:end
+    """
+    if not os.path.isfile(filepath):
+        raise FileNotFoundError(f"File {filepath} not found")  # pragma: no cover
+
+    reader = pd.read_csv(filepath, chunksize=chunk_size, **kwargs)
+    start = 0
+    end = 0
+
+    for data in reader:
+        num_rows = len(data)
+        end += num_rows
+        for col in data.columns:
+            if isinstance(data[col].iloc[0], str) or not data[col].iloc:
+                data[col] = data[col].apply(try_parse)
+        yield start, end, data
+        start += num_rows
+
+
 def get_input_data_length_pq(
     filepath: str, columns: Optional[List[str]] = None, **kwargs
 ) -> int:
@@ -433,6 +474,25 @@ def get_input_data_length_pq(
     tab = pq.read_table(filepath, columns=columns)
     nrow = len(tab[tab.column_names[0]])
     return nrow
+
+
+def get_input_data_length_csv(source: str, **kwargs) -> int:
+    """Open a CSV file and return the number of rows in it
+
+    Parameters
+    ----------
+    source: `str`
+        Path to input file
+
+    Returns
+    -------
+    nrows : `int`
+        The length of the data
+    """
+    if not os.path.isfile(source):
+        raise FileNotFoundError(f"File {source} not found")  # pragma: no cover
+
+    return len(pd.read_csv(source, **kwargs))
 
 
 # II C. Parquet dataset partial read functions

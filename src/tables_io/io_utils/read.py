@@ -1,6 +1,7 @@
 """IO Read Functions for tables_io"""
 
 import os
+import json
 from collections import OrderedDict
 
 import numpy as np
@@ -25,6 +26,7 @@ from ..types import (
     PA_TABLE,
     PANDAS_HDF5,
     PANDAS_PARQUET,
+    PANDAS_CSV,
     PYARROW_HDF5,
     PYARROW_PARQUET,
     PD_DATAFRAME,
@@ -274,6 +276,16 @@ def read_native(
                 )
                 + f" \n because of error: \n {e}"
             ) from e
+    if fType == PANDAS_CSV:
+        try:
+            return read_csv_to_dataframes(filepath, keys, allow_missing_keys, **kwargs)
+        except Exception as e:
+            raise RuntimeError(
+                read_native_error_message(
+                    filepath, fType, fmt, keys, allow_missing_keys, **kwargs
+                )
+                + f" \n because of error: \n {e}"
+            ) from e
     raise TypeError(
         f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
     )  # pragma: no cover
@@ -324,6 +336,10 @@ def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
     if fType in [PYARROW_PARQUET, PANDAS_PARQUET]:
         # basepath = os.path.splitext(filepath)[0]
         return pq.ParquetFile(filepath, **kwargs)
+    if fType in [PANDAS_CSV]:
+        if "iterator" not in kwargs:
+            kwargs["iterator"] = True
+        return pd.read_csv(filepath, **kwargs)
     raise TypeError(
         f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
     )  # pragma: no cover
@@ -375,6 +391,11 @@ def check_columns(
 
     elif fType in [PYARROW_PARQUET, PANDAS_PARQUET]:
         col_list = file.schema.names
+
+    elif fType in [PANDAS_CSV]:
+        data = file.read(nrows=1)
+        col_list = data.columns.tolist()
+
     else:
         raise TypeError(
             f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
@@ -1007,6 +1028,111 @@ def read_pq_to_tables(
                 continue
             raise msg
     return tables
+
+
+# II E Reading `pandas.DataFrame` from csv file
+
+
+def try_parse(val) -> Union[np.array, list, dict, str]:
+    """Tries to parse a string into a numpy array or a JSON object.
+    This function attempts to convert a string representation of a numpy array or a JSON object
+
+    Parameters
+    ----------
+    val : `str`
+        The string to parse
+
+    Returns
+    -------
+    val : `numpy.array` or `list` or `dict` or `str`
+        If the string is a valid numpy array or JSON object, it returns the parsed object.
+        If parsing fails, it returns the original string.
+    """
+
+    try:
+        if isinstance(val, str) and val.startswith("[") and val.endswith("]"):
+            return np.array([np.float64(x) for x in val.strip("[]").split()])
+    except Exception:
+        pass
+
+    try:
+        if isinstance(val, str) and (val.startswith("[") or val.startswith("{")):
+            return json.loads(val)
+    except Exception:
+        pass
+
+    return val
+
+
+def read_csv_to_dataframes(
+    filepath: str,
+    keys: Optional[List[str]] = None,
+    allow_missing_keys: bool = False,
+    columns: Union[List[str], Mapping, None] = None,
+    **kwargs,
+) -> Mapping:
+    """
+    Reads `pandas.DataFrame` objects from a csv file into an `OrderedDict`.
+
+    Parameters
+    ----------
+    filepath: `str`
+        Path to input file
+
+    keys : `list`
+        Keys for the input objects.  Used to complete filepaths
+
+    allow_missing_keys: `bool`
+        If False will raise FileNotFoundError if a key is missing. By default False.
+
+    columns : `dict` of `list (str)`, `list` (`str`), or `None`
+        Names of the columns to read.
+            - if a dictionary, keys are the `keys`, and values are a list of string column names.
+                for each keyed table, only the columns in the value list will be loaded.
+                if the key is not found, all columns will be loaded.
+            - if a list, only the columns in the list will be loaded.
+            - `None` will read all the columns
+
+    **kwargs : additional arguments to pass to the native file reader
+
+    Returns
+    -------
+    tables : `OrderedDict` of `pandas.DataFrame`
+        Keys will be taken from keys
+    """
+
+    if keys is None:  # pragma: no cover
+        keys = [""]
+    dataframes = OrderedDict()
+    basepath, ext = os.path.splitext(filepath)
+    if not ext:  # pragma: no cover
+        ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_CSV]
+
+    for key in keys:
+        try:
+            column_list = None
+            if pd.api.types.is_dict_like(columns):  # pragma: no cover
+                column_list = columns[key]
+            elif pd.api.types.is_list_like(columns):  # pragma: no cover
+                column_list = columns
+            print("column_list", column_list)
+
+            if column_list is not None and "usecols" not in kwargs:
+                kwargs["usecols"] = column_list
+
+            df = pd.read_csv(f"{basepath}{key}{ext}", **kwargs)
+
+            if isinstance(df, pd.DataFrame):
+                for col in df.columns:
+                    if isinstance(df[col].iloc[0], str) or not df[col].iloc:
+                        df[col] = df[col].apply(try_parse)
+
+            dataframes[key] = df
+            return dataframes
+        except FileNotFoundError as msg:  # pragma: no cover
+            if allow_missing_keys:
+                continue
+            raise msg
 
 
 # III. Miscellaneous

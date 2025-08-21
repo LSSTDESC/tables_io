@@ -39,6 +39,7 @@ PANDAS_HDF5 = 4
 PANDAS_PARQUET = 5
 PYARROW_HDF5 = 6
 PYARROW_PARQUET = 7
+PANDAS_CSV = 8
 
 
 FILE_FORMAT_NAMES = OrderedDict(
@@ -51,6 +52,7 @@ FILE_FORMAT_NAMES = OrderedDict(
         ("pandasHdf5", PANDAS_HDF5),
         ("pandaParquet", PANDAS_PARQUET),
         ("pyarrowParquet", PYARROW_PARQUET),
+        ("pandasCsv", PANDAS_CSV),
     ]
 )
 
@@ -66,6 +68,7 @@ FILE_FORMAT_SUFFIXS = OrderedDict(
         ("parquet", PYARROW_PARQUET),
         ("parq", PANDAS_PARQUET),
         ("pq", PANDAS_PARQUET),
+        ("csv", PANDAS_CSV),
     ]
 )
 
@@ -80,6 +83,7 @@ DEFAULT_TABLE_KEY = OrderedDict(
         ("parquet", ""),
         ("parq", ""),
         ("pq", ""),
+        ("csv", ""),
     ]
 )
 
@@ -108,7 +112,7 @@ ALLOWED_FORMATS = OrderedDict(
         (AP_TABLE, [ASTROPY_FITS, ASTROPY_HDF5]),
         (NUMPY_DICT, [NUMPY_HDF5]),
         (NUMPY_RECARRAY, [ASTROPY_FITS]),
-        (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5]),
+        (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5, PANDAS_CSV]),
         (PA_TABLE, [PYARROW_PARQUET, PANDAS_PARQUET, PANDAS_HDF5]),
     ]
 )
