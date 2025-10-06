@@ -1,6 +1,7 @@
 """Io write functions for tables_io"""
 
 import os
+import json
 from collections import OrderedDict
 from typing import Mapping, Optional, Union, List
 
@@ -23,6 +24,7 @@ from ..types import (
     PA_TABLE,
     PANDAS_HDF5,
     PANDAS_PARQUET,
+    PANDAS_CSV,
     PYARROW_HDF5,
     PYARROW_PARQUET,
     PD_DATAFRAME,
@@ -126,6 +128,10 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
             forcedPaTables = convert(odict, PA_TABLE)
             write_tables_to_HDF5(forcedPaTables, filepath)
             return filepath
+        if fType == PANDAS_CSV:
+            forcedOdict = convert(odict, PD_DATAFRAME)
+            write_dataframes_to_csv(forcedOdict, filepath)
+            return filepath
     except Exception as e:
         raise RuntimeError(
             f"Failed to write table to '{filepath}' as {FILE_FORMATS[fType]} because of error: \n {e}"
@@ -209,6 +215,9 @@ def write_native(odict, filepath: str) -> Optional[str]:
         return filepath
     if fType == PYARROW_PARQUET:
         write_tables_to_pq(odict, filepath)
+        return filepath
+    if fType == PANDAS_CSV:
+        write_dataframes_to_csv(odict, filepath)
         return filepath
     raise TypeError(
         f"Unsupported Native file type {fType}. Must be one of ['astropyHdf5','numpyHdf5','numpyFits','pandaParquet','pyarrowParquet']"
@@ -649,6 +658,31 @@ def write_dataframes_to_pq(dataFrames: Mapping, filepath: str, **kwargs):
         ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
     for k, v in dataFrames.items():
         _ = v.to_parquet(f"{basepath}{k}{ext}", **kwargs)
+
+
+def write_dataframes_to_csv(dataFrames: Mapping, filepath: str, **kwargs):
+    """
+    Writes a dictionary of `pandas.DataFrame` to csv files
+
+    Parameters
+    ----------
+    tables : `dict` of `pandas.DataFrame`
+        Keys will be passed to 'path' parameter
+
+    filepath: `str`
+        Path to output file
+
+    """
+
+    if "index" not in kwargs:  # don't write out the index by default
+        kwargs["index"] = False
+
+    basepath, ext = os.path.splitext(filepath)
+    if not ext:  # pragma: no cover
+        ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_CSV]
+
+    for k, v in dataFrames.items():
+        _ = v.to_csv(f"{basepath}{k}{ext}", **kwargs)
 
 
 # II F. Writing pyarrow table(s)

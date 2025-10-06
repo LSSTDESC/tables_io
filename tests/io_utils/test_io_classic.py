@@ -303,6 +303,14 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_open("test_out_single.parquet")
         self._do_check_columns("test_out_single.parquet")
 
+    def testCsvLoopback(self):
+        """Test writing / reading to csv files"""
+        self._do_loopback_with_keys(types.AP_TABLE, "test_out", "csv", ["data", "md"])
+        self._do_loopback_single(types.AP_TABLE, "test_out_single", "csv", [""])
+        self._do_iterator("test_out_single.csv", types.AP_TABLE, True, chunk_size=50)
+        self._do_open("test_out_single.csv", in_context=False)
+        self._do_check_columns("test_out_single.csv")
+
     def testBad(self):  # pylint: disable=no-self-use
         """Test that bad calls to write are dealt with"""
         try:
