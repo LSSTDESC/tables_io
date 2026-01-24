@@ -125,7 +125,7 @@ for key, val_list in ALLOWED_FORMATS.items():
 
 def is_dataframe(obj):
     for c in obj.__class__.__mro__:
-        if c.__name__ == "DataFrame" and c.__module__ == "pandas.core.frame":
+        if c.__name__ == "DataFrame" and c.__module__ in ["pandas.core.frame", "pandas"]:
             return True
     return False
 
