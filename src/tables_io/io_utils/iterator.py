@@ -121,7 +121,6 @@ def iterator_native(
     for the given file type.
 
     This function currently only works for the following file types: `numpyHDF5`, `pandasParquet`, `pyarrowParquet`, `pyarrowHDF5`
-
     Any kwargs are passed to the specific iterator function for the file type.
 
     Parameters
@@ -176,7 +175,7 @@ def iterator_native(
     kwargs["chunk_size"] = chunk_size
 
     # only add MPI arguments if using MPI-capable function
-    if theFunc == iter_H5_to_dataframe or theFunc == iter_HDF5_to_dict:
+    if theFunc == iter_H5_to_dataframe or theFunc == iter_HDF5_to_dict or theFunc==iter_ds_to_table:
         kwargs["parallel_size"] = parallel_size
         kwargs["rank"] = rank
     else:
@@ -397,7 +396,7 @@ def iter_pq_to_dataframe(
     start = 0
     end = 0
 
-    batches = parquet_file.to_batches(max_chunksize=chunk_size)
+    batches = parquet_file.to_batches(max_chunksize=chunk_sizee)
 
     for table_chunk in batches:
         data = pa.Table.from_batches([table_chunk]).to_pandas()
@@ -525,14 +524,21 @@ def iter_ds_to_table(
     """
     start = 0
     end = 0
-    dataset = ds.dataset(source, **kwargs)
+    dataset = ds.dataset(source)
+    batch_index = 0
 
     for batch in dataset.to_batches(columns=columns, batch_size=chunk_size):
+        if (batch_index % kwargs['parallel_size']) != kwargs['rank']:
+            batch_index += 1
+            start += chunk_size
+            end += chunk_size
+            continue
         data = pa.Table.from_pydict(batch.to_pydict())
         num_rows = len(data)
         end += num_rows
         yield start, end, data
         start += num_rows
+        batch_index += 1
 
 
 def get_input_data_length_ds(source, **kwargs) -> int:
