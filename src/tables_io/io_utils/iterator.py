@@ -396,7 +396,7 @@ def iter_pq_to_dataframe(
     start = 0
     end = 0
 
-    batches = parquet_file.to_batches(max_chunksize=chunk_sizee)
+    batches = parquet_file.to_batches(max_chunksize=chunk_size)
 
     for table_chunk in batches:
         data = pa.Table.from_batches([table_chunk]).to_pandas()
