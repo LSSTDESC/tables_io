@@ -313,7 +313,7 @@ def hdf5_group_to_dict(hg):
 
 def json_to_dict(json_data):
     """
-    Convert a json string to an `astropy.table.Table`
+    Convert a json string to an `OrderedDict` of numpy arrays
 
     Parameters
     ----------
