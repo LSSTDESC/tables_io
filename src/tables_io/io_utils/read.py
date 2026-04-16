@@ -744,6 +744,7 @@ def read_HDF5_to_dicts(
             )
         else:
             l_out.append((key, read_HDF5_group_to_dict(val)))
+
     return OrderedDict(l_out)
 
 
