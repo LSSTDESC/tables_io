@@ -8,7 +8,7 @@ import os
 import pytest
 
 import unittest
-from tables_io import types, convert, io_open, read, write, iterator, check_columns
+from tables_io import types, convert, io_open, read, slice_utils, write, iterator, check_columns
 from tests.helpers.utilities import (
     compare_table_dicts,
     compare_tables,
@@ -46,6 +46,15 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._files.append(filepath)
         odict_r = read(filepath, tType=tType, fmt=fmt, **kwargs)
         tables_r = convert(odict_r, types.AP_TABLE)
+
+        breakpoint()
+        odict_r_02 = read(filepath, tType=tType, fmt=fmt, slice_dict={'data':slice(0,2)}, **kwargs)
+
+        tables_r_02 = convert(odict_r_02, types.AP_TABLE)
+        check_r_02_data = convert(slice_utils.slice_dict(self._tables['data'], slice(0,2)), types.AP_TABLE)
+
+        assert compare_tables(self._tables['md'], tables_r_02['md'])     
+        assert compare_tables(check_r_02_data, tables_r_02['data'])
 
         # Testing to raise errors on read (i.e., trying with invalid key)
 

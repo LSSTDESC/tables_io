@@ -47,6 +47,7 @@ def read(
     fmt: Optional[str] = None,
     keys: Optional[List[str]] = None,
     allow_missing_keys: bool = False,
+    slice_dict: dict[str, slice | int] | None = None,
     **kwargs,
 ):
     """Reads in a given file to either a `Table-like` format if there is one table within the file,
@@ -89,6 +90,9 @@ def read(
         The keys should be the unique identifiers for each dataset or file.
     allow_missing_keys : `bool`, by default False
         If False will raise FileNotFoundError if a key is missing from the given file.
+    slice_dict: `dict[str, slice | int]` or `None`
+        If provided, specfies which slices to read from which tables
+
     kwargs :
         Additional arguments to pass to the native file reader
 
@@ -130,10 +134,8 @@ def read(
 
         Notice that the resulting `OrderedDict` has `astropyTable` objects as the values.
 
-
     """
-
-    odict = read_native(filepath, fmt, keys, allow_missing_keys, **kwargs)
+    odict = read_native(filepath, fmt, keys, allow_missing_keys, slice_dict, **kwargs)
 
     if len(odict) == 1:
         # For special keys, use the table alone without an enclosing dictionary.
@@ -151,6 +153,7 @@ def read_native(
     fmt: Optional[str] = None,
     keys: Optional[List[str]] = None,
     allow_missing_keys: bool = False,
+    slice_dict: dict[str, slice | int] | None = None,    
     **kwargs,
 ):
     """Reads in a file to its corresponding default tabular format.
@@ -173,6 +176,8 @@ def read_native(
         The keys should be the unique identifiers for each dataset or file.
     allow_missing_keys : `bool`, by default False.
         If False will raise FileNotFoundError if a key is missing from the given file.
+    slice_dict: `dict[str, slice | int]` or `None`
+        If provided, specfies which slices to read from which tables
     kwargs :
         Additional arguments to pass to the native file reader
 
@@ -197,7 +202,7 @@ def read_native(
     fType = file_type(filepath, fmt)
     if fType == ASTROPY_FITS:
         try:
-            return read_fits_to_ap_tables(filepath, keys=keys)
+            return read_fits_to_ap_tables(filepath, keys=keys, slice_dict=slice_dict)
         except Exception as e:
             raise RuntimeError(
                 read_native_error_message(
@@ -208,7 +213,7 @@ def read_native(
 
     if fType == ASTROPY_HDF5:
         try:
-            return read_HDF5_to_ap_tables(filepath, keys=keys)
+            return read_HDF5_to_ap_tables(filepath, keys=keys, slice_dict=slice_dict)
         except Exception as e:
             raise RuntimeError(
                 read_native_error_message(
@@ -218,7 +223,7 @@ def read_native(
             ) from e
     if fType == NUMPY_HDF5:
         try:
-            return read_HDF5_to_dicts(filepath, keys=keys)
+            return read_HDF5_to_dicts(filepath, keys=keys, slice_dict=slice_dict)
         except Exception as e:
             raise RuntimeError(
                 read_native_error_message(
@@ -228,7 +233,7 @@ def read_native(
             ) from e
     if fType == NUMPY_FITS:
         try:
-            return read_fits_to_recarrays(filepath, keys=keys)
+            return read_fits_to_recarrays(filepath, keys=keys, slice_dict=slice_dict)
         except Exception as e:
             raise RuntimeError(
                 read_native_error_message(
@@ -238,7 +243,7 @@ def read_native(
             ) from e
     if fType == PANDAS_HDF5:
         try:
-            return read_H5_to_dataframes(filepath, keys=keys)
+            return read_H5_to_dataframes(filepath, keys=keys, slice_dict=slice_dict)
         except Exception as e:
             raise RuntimeError(
                 read_native_error_message(
@@ -248,7 +253,7 @@ def read_native(
             ) from e
     if fType == PANDAS_PARQUET:
         try:
-            return read_pq_to_dataframes(filepath, keys, allow_missing_keys, **kwargs)
+            return read_pq_to_dataframes(filepath, keys, allow_missing_keys, slice_dict=slice_dict, **kwargs)
         except Exception as e:
             raise RuntimeError(
                 read_native_error_message(
@@ -258,7 +263,7 @@ def read_native(
             ) from e
     if fType == PYARROW_HDF5:
         try:
-            return read_HDF5_to_tables(filepath, keys)
+            return read_HDF5_to_tables(filepath, keys, slice_dict=slice_dict)
         except Exception as e:
             raise RuntimeError(
                 read_native_error_message(
@@ -268,7 +273,7 @@ def read_native(
             ) from e
     if fType == PYARROW_PARQUET:
         try:
-            return read_pq_to_tables(filepath, keys, allow_missing_keys, **kwargs)
+            return read_pq_to_tables(filepath, keys, allow_missing_keys, slice_dict=slice_dict, **kwargs)
         except Exception as e:
             raise RuntimeError(
                 read_native_error_message(
@@ -278,7 +283,7 @@ def read_native(
             ) from e
     if fType == PANDAS_CSV:
         try:
-            return read_csv_to_dataframes(filepath, keys, allow_missing_keys, **kwargs)
+            return read_csv_to_dataframes(filepath, keys, allow_missing_keys, slice_dict=slice_dict, **kwargs)
         except Exception as e:
             raise RuntimeError(
                 read_native_error_message(
@@ -414,7 +419,11 @@ def check_columns(
 # II A. Reading `astropy.table.Table` from FITS files
 
 
-def read_fits_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
+def read_fits_to_ap_tables(
+    filepath: str,
+    keys: Optional[List[str]] = None,
+    slice_dict: dict[str, slice | int] | None = None,    
+) -> Mapping:
     """
     Reads `astropy.table.Table` objects into an `OrderedDict` TableDict-like object from a FITS file.
     If a list of keys is given, will read only those tables.
@@ -426,6 +435,9 @@ def read_fits_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> M
 
     keys : `list` or `None`
         A list of which tables to read, in lower case.
+
+    slice_dict: `dict[str, slice | int]` or `None`
+        If provided, specfies which slices to read from which tables
 
     Returns
     -------
@@ -439,6 +451,11 @@ def read_fits_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> M
             if hdu.name.lower() not in keys:
                 continue
 
+        if slice_dict is not None:
+            the_slice = slice_dict.get(hdu.name.lower())
+        else:
+            the_slice = None
+            
         # In base case, handle cases where no names are provided or
         # names are repeated. If no names are provided and more than one table
         # is in the FITS file, use string of extension number as its name
@@ -452,14 +469,25 @@ def read_fits_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> M
         if tab_name in tables.keys():
             tab_name = f"{tab_name}_{str(ext_num)}"
 
-        tables[tab_name] = apTable.Table.read(filepath, hdu=ext_num)
+        if the_slice is not None:
+            if the_slice.step:
+                raise ValueError(f"Can not use step when reading astropy tables {the_slice}")
+            tables[tab_name] = apTable.Table.read(
+                filepath, hdu=ext_num, data_start=the_slice.start, data_stop=the_slice.stop,
+            )
+        else:
+            tables[tab_name] = apTable.Table.read(filepath, hdu=ext_num)
     return tables
 
 
 # II B Reading `np.recarray` from FITS files
 
 
-def read_fits_to_recarrays(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
+def read_fits_to_recarrays(
+    filepath: str,
+    keys: Optional[List[str]] = None,
+    slice_dict: dict[str, slice | int] | None = None,
+) -> Mapping:
     """
     Reads `np.recarray` objects into an `OrderedDict` TableDict-like object from a FITS file.
     If a list of keys is given, will read only those tables.
@@ -472,6 +500,9 @@ def read_fits_to_recarrays(filepath: str, keys: Optional[List[str]] = None) -> M
     keys : `list` or `None`
         A list of which HDU names to read, in lower case.
 
+    slice_dict: `dict[str, slice | int]` or `None`
+        If provided, specfies which slices to read from which tables
+
     Returns
     -------
     tables : `OrderedDict` of `np.recarray`
@@ -483,6 +514,11 @@ def read_fits_to_recarrays(filepath: str, keys: Optional[List[str]] = None) -> M
         if keys is not None and hdu.name.lower() not in keys:
             continue
 
+        if slice_dict is not None:
+            the_slice = slice_dict.get(hdu.name.lower())
+        else:
+            the_slice = None
+        
         # In base case, handle cases where no names are provided or
         # names are repeated. If no names are provided and more than one table
         # is in the FITS file, use string of extension number as its name
@@ -496,7 +532,10 @@ def read_fits_to_recarrays(filepath: str, keys: Optional[List[str]] = None) -> M
         if tab_name in tables.keys():
             tab_name = f"{tab_name}_{str(ext_num)}"
 
-        tables[tab_name] = hdu.data
+        if the_slice:
+            tables[tab_name] = hdu.data[the_slice]
+        else:
+            tables[tab_name] = hdu.data
 
     return tables
 
@@ -504,7 +543,11 @@ def read_fits_to_recarrays(filepath: str, keys: Optional[List[str]] = None) -> M
 # II C Reading `astropy.table.Table` from HDF5 file
 
 
-def read_HDF5_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
+def read_HDF5_to_ap_tables(
+    filepath: str,
+    keys: Optional[List[str]] = None,
+    slice_dict: dict[str, slice | int] | None = None,    
+) -> Mapping:
     """
     Reads `astropy.table.Table` objects into an `OrderedDict` TableDict-like object from an hdf5 file.
 
@@ -516,6 +559,9 @@ def read_HDF5_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> M
     keys : `list` or `None`
         A list of which datasets to read in.
 
+    slice_dict: `dict[str, slice | int]` or `None`
+        If provided, specfies which slices to read from which tables
+
     Returns
     -------
     tables : `OrderedDict` of `astropy.table.Table`
@@ -526,14 +572,32 @@ def read_HDF5_to_ap_tables(filepath: str, keys: Optional[List[str]] = None) -> M
     for k in fin.keys():
         if keys is not None and k not in keys:
             continue
-        tables[k] = apTable.Table.read(filepath, path=k, format="hdf5")
+
+        if slice_dict is not None:
+            the_slice = slice_dict.get(k)
+        else:
+            the_slice = None
+
+        if the_slice is not None:
+            if the_slice.step:
+                raise ValueError(f"Can not use step when reading astropy tables {the_slice}")
+            tables[k] = apTable.Table.read(
+                filepath, path=k, format="hdf5", data_start=the_slice.start, data_stop=the_slice.stop
+            )
+        else:
+            tables[k] = apTable.Table.read(filepath, path=k, format="hdf5")
+            
     return tables
 
 
 ## II D. Reading `OrderedDict` (`str`, `numpy.array`) and `np.array` from HDF5 file
 
 
-def read_HDF5_group(filepath: str, groupname: Optional[str] = None):
+def read_HDF5_group(
+    filepath: str,
+    groupname: Optional[str] = None,
+    read_slice: slice | int | None = None,            
+):
     """Read and return the requested group and file object from an hdf5 file. If no group is provided, returns the `h5py.File` object twice.
 
     Parameters
@@ -542,6 +606,8 @@ def read_HDF5_group(filepath: str, groupname: Optional[str] = None):
         File in question
     groupname : `str` or `None`
         The name or path to the desired group.
+    read_slice : `slice` or `int` or `None`
+        Slice of data to read
 
     Returns
     -------
@@ -553,6 +619,9 @@ def read_HDF5_group(filepath: str, groupname: Optional[str] = None):
     infp = h5py.File(filepath, "r")
     if groupname is None or not groupname:  # pragma: no cover
         return infp, infp
+
+    if read_slide is not None:        
+        return infp[groupname][read_slice], infp
     return infp[groupname], infp
 
 
@@ -617,7 +686,11 @@ def read_HDF5_group_names(
     return list(subgroups)
 
 
-def read_HDF5_to_dicts(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
+def read_HDF5_to_dicts(
+    filepath: str,
+    keys: Optional[List[str]] = None,
+    slice_dict: dict[str, slice | int] | None = None,    
+) -> Mapping:
     """
     Reads `numpy.array` objects into an `OrderedDict` from an hdf5 file. If a list of keys is given,
     will only read those specific datasets.
@@ -630,6 +703,9 @@ def read_HDF5_to_dicts(filepath: str, keys: Optional[List[str]] = None) -> Mappi
     keys : `list` or `None`
         A list of which tables to read from the file.
 
+    slice_dict: `dict[str, slice | int]` or `None`
+        If provided, specfies which slices to read from which tables
+
     Returns
     -------
     dicts : `OrderedDict`, (`str`, `OrderedDict`, (`str`, `numpy.array`) )
@@ -640,6 +716,12 @@ def read_HDF5_to_dicts(filepath: str, keys: Optional[List[str]] = None) -> Mappi
     for key, val in fin.items():
         if keys is not None and key not in keys:
             continue
+
+        if slice_dict is not None:
+            the_slice = slice_dict.get(key)
+        else:
+            the_slice = None
+        
         l_out.append((key, read_HDF5_group_to_dict(val)))
     return OrderedDict(l_out)
 
@@ -673,7 +755,11 @@ def read_HDF5_dataset_to_array(
 # II D. Reading `pandas.DataFrame` from HDF5
 
 
-def read_H5_to_dataframe(filepath: str, key: Optional[str] = None):
+def read_H5_to_dataframe(
+    filepath: str,
+    key: Optional[str] = None,
+    read_slice: slice | int | None = None,
+):
     """
     Reads `pandas.DataFrame` objects from an 'h5' file (a pandas `hdf5` file).
 
@@ -683,6 +769,8 @@ def read_H5_to_dataframe(filepath: str, key: Optional[str] = None):
         Path to input file
     key : `str` or `None`
         The key in the hdf5 file
+    read_slice : `slice` or `int` or `None`
+        Slice of data to read
 
     Returns
     -------
@@ -692,7 +780,11 @@ def read_H5_to_dataframe(filepath: str, key: Optional[str] = None):
     return pd.read_hdf(filepath, key)
 
 
-def read_H5_to_dataframes(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
+def read_H5_to_dataframes(
+    filepath: str,
+    keys: Optional[List[str]] = None,
+    slice_dict: dict[str, slice | int] | None = None,    
+) -> Mapping:
     """Open an `h5` (pandas `hdf5`) file and and return an `OrderedDict` of `pandas.DataFrame` objects
 
     Parameters
@@ -702,6 +794,9 @@ def read_H5_to_dataframes(filepath: str, keys: Optional[List[str]] = None) -> Ma
 
     keys : `list` or `None`
         A list of which tables to read.
+
+    slice_dict: `dict[str, slice | int]` or `None`
+        If provided, specfies which slices to read from which tables
 
     Returns
     -------
@@ -725,7 +820,12 @@ def read_H5_to_dataframes(filepath: str, keys: Optional[List[str]] = None) -> Ma
 # II E Reading `pandas.DataFrame` from parquet file
 
 
-def read_pq_to_dataframe(filepath: str, columns: Optional[List[str]] = None, **kwargs):
+def read_pq_to_dataframe(
+    filepath: str,
+    columns: Optional[List[str]] = None,
+    read_slice: slice | int | None = None,
+    **kwargs
+):
     """
     Reads a `pandas.DataFrame` object from a parquet file.
 
@@ -737,6 +837,9 @@ def read_pq_to_dataframe(filepath: str, columns: Optional[List[str]] = None, **k
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
 
+    read_slice : `slice` or `int` or `None`
+        Slice of data to read
+
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
@@ -744,14 +847,20 @@ def read_pq_to_dataframe(filepath: str, columns: Optional[List[str]] = None, **k
     df : `pandas.DataFrame`
         The data frame
     """
-    return pd.read_parquet(filepath, engine="pyarrow", columns=columns, **kwargs)
-
+    if read_slice is not None:
+        if the_slice.step:
+            raise ValueError(f"Can not use step when reading pandas from parquet {the_slice}")        
+        filters = [('id', '>=', read_slice.start), ('id', '<=', read_slice.stop)]        
+        return pd.read_parquet(filepath, engine="pyarrow", columns=columns, filters=filters, **kwargs)
+    return pd.read_parquet(filepath, engine="pyarrow", columns=columns, **kwargs)   
+    
 
 def read_pq_to_dataframes(
     filepath: str,
     keys: Optional[List[str]] = None,
     allow_missing_keys: bool = False,
     columns: Union[List[str], Mapping, None] = None,
+    slice_dict: dict[str, slice | int] | None = None,
     **kwargs,
 ) -> Mapping:
     """
@@ -776,6 +885,9 @@ def read_pq_to_dataframes(
             - if a list, only the columns in the list will be loaded.
             - `None` will read all the columns
 
+    slice_dict: `dict[str, slice | int]` or `None`
+        If provided, specfies which slices to read from which tables
+
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
@@ -790,6 +902,12 @@ def read_pq_to_dataframes(
     if not ext:  # pragma: no cover
         ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
     for key in keys:
+
+        if slice_dict is not None:
+            the_slice = slice_dict.get(key)
+        else:
+            the_slice = None
+               
         try:
             column_list = None
             if pd.api.types.is_dict_like(columns):
@@ -799,7 +917,7 @@ def read_pq_to_dataframes(
             print("column_list", column_list)
 
             dataframes[key] = read_pq_to_dataframe(
-                f"{basepath}{key}{ext}", columns=column_list, **kwargs
+                f"{basepath}{key}{ext}", columns=column_list, read_slice=the_slice, **kwargs
             )
         except FileNotFoundError as msg:  # pragma: no cover
             if allow_missing_keys:
@@ -812,7 +930,10 @@ def read_pq_to_dataframes(
 
 
 def read_pq_to_dict(
-    filepath: str, columns: Optional[List[str]] = None, **kwargs
+    filepath: str,
+    columns: Optional[List[str]] = None,
+    read_slice: slice | int | None = None,                
+    **kwargs
 ) -> Mapping:
     """Open a parquet file and return an `OrderedDict` of `numpy.array` objects
 
@@ -824,6 +945,9 @@ def read_pq_to_dict(
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
 
+    read_slice : `slice` or `int` or `None`
+        Slice of data to read
+
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
@@ -831,7 +955,14 @@ def read_pq_to_dict(
     tab : `OrderedDict` (`str` : `numpy.array`)
        The data
     """
-    tab = pq.read_table(filepath, columns=columns, **kwargs)
+    if read_slice is not None:
+        if read_slice.step:
+            raise ValueError(f"Can not use step when reading astropy tables {read_slice}")
+        filters = [('id', '>=', read_slice.start), ('id', '<=', read_slice.stop)]        
+        tab = pq.read_table(filepath, columns=columns, filters=filters, **kwargs)
+    else:
+        tab = pq.read_table(filepath, columns=columns, **kwargs)
+
     return OrderedDict(
         [
             (c_name, col.to_numpy())
@@ -840,7 +971,11 @@ def read_pq_to_dict(
     )
 
 
-def read_H5_to_dict(filepath: str, groupname: Optional[str] = None) -> Mapping:
+def read_H5_to_dict(
+    filepath: str,
+    groupname: Optional[str] = None,
+    read_slice: slice | int | None = None,            
+) -> Mapping:
     """Open an `h5` file and and return an `OrderedDict` of `numpy.array` objects.
 
     Parameters
@@ -850,6 +985,9 @@ def read_H5_to_dict(filepath: str, groupname: Optional[str] = None) -> Mapping:
 
     groupname : `str` or `None`
         The name of the group with the data
+
+    read_slice : `slice` or `int` or `None`
+        Slice of data to read
 
     Returns
     -------
@@ -861,11 +999,15 @@ def read_H5_to_dict(filepath: str, groupname: Optional[str] = None) -> Mapping:
     We are using the file suffix 'h5' to specify 'hdf5' files written from DataFrames using `pandas`
     They have a different structure than 'hdf5' files written with `h5py` or `astropy.table`
     """
-    df = read_H5_to_dataframe(filepath, groupname)
+    df = read_H5_to_dataframe(filepath, groupname, read_slice)
     return dataframe_to_dict(df)
 
 
-def read_HDF5_to_dict(filepath: str, groupname: Optional[str] = None) -> Mapping:
+def read_HDF5_to_dict(
+    filepath: str,
+    groupname: Optional[str] = None,
+    read_slice: slice | int | None = None,
+) -> Mapping:
     """Read in h5py hdf5 data, return a dictionary of all of the keys
 
     Parameters
@@ -875,6 +1017,9 @@ def read_HDF5_to_dict(filepath: str, groupname: Optional[str] = None) -> Mapping
 
     groupname : `str` or `None`
         The groupname for the data
+
+    read_slice : `slice` or `int` or `None`
+        Slice of data to read
 
     Returns
     -------
@@ -886,7 +1031,7 @@ def read_HDF5_to_dict(filepath: str, groupname: Optional[str] = None) -> Mapping
     We are using the file suffix 'hdf5' to specify 'hdf5' files written with `h5py` or `astropy.table`
     They have a different structure than 'h5' files written `panda`
     """
-    hg, infp = read_HDF5_group(filepath, groupname)
+    hg, infp = read_HDF5_group(filepath, groupname, read_slice)
     data = hdf5_group_to_dict(hg)
     infp.close()
     return data
@@ -895,7 +1040,11 @@ def read_HDF5_to_dict(filepath: str, groupname: Optional[str] = None) -> Mapping
 # II G. Reading `pyarrow.Table` from HDF5 file
 
 
-def read_HDF5_to_table(filepath: str, key: Optional[str] = None):
+def read_HDF5_to_table(
+    filepath: str,
+    key: Optional[str] = None,
+    read_slice: slice | int | None = None,                
+):
     """
     Reads `pyarrow.Table` objects from an hdf5 file.
 
@@ -905,20 +1054,26 @@ def read_HDF5_to_table(filepath: str, key: Optional[str] = None):
         Path to input file
     key : `str` or `None`
         The key in the hdf5 file
+    read_slice : `slice` or `int` or `None`
+        Slice of data to read
 
     Returns
     -------
     table : `pyarrow.Table`
         The table
     """
-    pydict = read_HDF5_to_dicts(filepath, [key])[key]
+    pydict = read_HDF5_to_dicts(filepath, [key], slice_dict={key:read_slice})[key]
     t_dict = {}
     for key, val in pydict.items():
         t_dict[key] = force_to_pandables(val)
     return pa.Table.from_pydict(t_dict)
 
 
-def read_HDF5_to_tables(filepath: str, keys: Optional[List[str]] = None) -> Mapping:
+def read_HDF5_to_tables(
+    filepath: str,
+    keys: Optional[List[str]] = None,
+    slice_dict: dict[str, slice | int] | None = None,    
+) -> Mapping:
     """Open an `HDF5` file and and return an `OrderedDict` of `pyarrow.Table`
 
     Parameters
@@ -928,6 +1083,9 @@ def read_HDF5_to_tables(filepath: str, keys: Optional[List[str]] = None) -> Mapp
 
     keys : `list` or `None`
         Which tables to read
+
+    slice_dict: `dict[str, slice | int]` or `None`
+        If provided, specfies which slices to read from which tables
 
     Returns
     -------
@@ -940,14 +1098,23 @@ def read_HDF5_to_tables(filepath: str, keys: Optional[List[str]] = None) -> Mapp
     for key in fin.keys():
         if keys is not None and key not in keys:  # pragma: no cover
             continue
-        l_out.append((key, read_HDF5_to_table(filepath, key=key)))
+        if slice_dict is not None:
+            the_slice = slice_dict.get(key)
+        else:
+            the_slice = None
+        l_out.append((key, read_HDF5_to_table(filepath, key=key, read_slice=the_slice)))
     return OrderedDict(l_out)
 
 
 # II H. Reading `pyarrow.Table` from parquet file
 
 
-def read_pq_to_table(filepath: str, columns: Optional[List[str]] = None, **kwargs):
+def read_pq_to_table(
+    filepath: str,
+    columns: Optional[List[str]] = None,
+    read_slice: slice | int | None = None,                
+    **kwargs
+):
     """
     Reads a `pyarrow.Table` object from an parquet file.
 
@@ -959,6 +1126,9 @@ def read_pq_to_table(filepath: str, columns: Optional[List[str]] = None, **kwarg
     columns : `list` (`str`) or `None`
         Names of the columns to read, `None` will read all the columns
 
+    read_slice : `slice` or `int` or `None`
+        Slice of data to read
+
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
@@ -966,6 +1136,12 @@ def read_pq_to_table(filepath: str, columns: Optional[List[str]] = None, **kwarg
     table : `pyarrow.Table`
         The table
     """
+    if read_slice is not None:
+        if read_slice.step:
+            raise ValueError(f"Can not use step when reading pyarrow.Table {read_slice}")
+        filters = [('id', '>=', read_slice.start), ('id', '<=', read_slice.stop)]        
+        return pq.read_table(filepath, columns=columns, filters=filters, **kwargs)
+
     return pq.read_table(filepath, columns=columns, **kwargs)
 
 
@@ -974,6 +1150,7 @@ def read_pq_to_tables(
     keys: Optional[List[str]] = None,
     allow_missing_keys: bool = False,
     columns: Union[List[str], Mapping, None] = None,
+    slice_dict: dict[str, slice | int] | None = None,        
     **kwargs,
 ) -> Mapping:
     """
@@ -998,6 +1175,9 @@ def read_pq_to_tables(
             - if a list, only the columns in the list will be loaded.
             - `None` will read all the columns
 
+    slice_dict: `dict[str, slice | int]` or `None`
+        If provided, specfies which slices to read from which tables
+
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
@@ -1012,6 +1192,12 @@ def read_pq_to_tables(
     if not ext:  # pragma: no cover
         ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
     for key in keys:
+
+        if slice_dict is not None:
+            the_slice = slice_dict.get(key)
+        else:
+            the_slice = None
+
         try:
             column_list = None
             if pd.api.types.is_dict_like(columns):  # pragma: no cover
@@ -1021,7 +1207,7 @@ def read_pq_to_tables(
             print("column_list", column_list)
 
             tables[key] = read_pq_to_table(
-                f"{basepath}{key}{ext}", columns=column_list, **kwargs
+                f"{basepath}{key}{ext}", columns=column_list, read_slice=the_slice, **kwargs
             )
         except FileNotFoundError as msg:  # pragma: no cover
             if allow_missing_keys:
@@ -1069,6 +1255,7 @@ def read_csv_to_dataframes(
     keys: Optional[List[str]] = None,
     allow_missing_keys: bool = False,
     columns: Union[List[str], Mapping, None] = None,
+    slice_dict: dict[str, slice | int] | None = None,    
     **kwargs,
 ) -> Mapping:
     """
@@ -1093,6 +1280,9 @@ def read_csv_to_dataframes(
             - if a list, only the columns in the list will be loaded.
             - `None` will read all the columns
 
+    slice_dict: `dict[str, slice | int]` or `None`
+        If provided, specfies which slices to read from which tables
+
     **kwargs : additional arguments to pass to the native file reader
 
     Returns
@@ -1109,6 +1299,12 @@ def read_csv_to_dataframes(
         ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_CSV]
 
     for key in keys:
+
+        if slice_dict is not None:
+            the_slice = slice_dict.get(key)
+        else:
+            the_slice = None        
+
         try:
             column_list = None
             if pd.api.types.is_dict_like(columns):  # pragma: no cover
@@ -1127,7 +1323,11 @@ def read_csv_to_dataframes(
                     if isinstance(df[col].iloc[0], str) or not df[col].iloc:
                         df[col] = df[col].apply(try_parse)
 
-            dataframes[key] = df
+            if the_slice:
+                dataframes[key] = df[the_slice]
+            else:
+                dataframes[key] = df
+                
             return dataframes
         except FileNotFoundError as msg:  # pragma: no cover
             if allow_missing_keys:
