@@ -51,6 +51,7 @@ def convert(obj, tType: Union[str, int]):
     "numpyRecarray"     2
     "pandasDataFrame"   3
     "pyarrowTable"      4
+    "jsonString"        5
     ==================  ===============
 
     Parameters

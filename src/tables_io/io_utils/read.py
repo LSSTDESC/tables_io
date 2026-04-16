@@ -80,6 +80,7 @@ def read(
     "numpyRecarray"     2
     "pandasDataFrame"   3
     "pyarrowTable"      4
+    "jsonString"        5
     ==================  ===============
 
 
