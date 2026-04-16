@@ -230,7 +230,7 @@ def write_native(odict, filepath: str) -> Optional[str]:
         write_json(odict, filepath)
         return filepath    
     raise TypeError(
-        f"Unsupported Native file type {fType}. Must be one of ['astropyHdf5','numpyHdf5','numpyFits','pandaParquet','pyarrowParquet']"
+        f"Unsupported Native file type {fType}. Must be one of ['astropyHdf5','numpyHdf5','numpyFits','pandaParquet','pyarrowParquet','json']"
     )  # pragma: no cover
 
 
