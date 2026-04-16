@@ -8,7 +8,7 @@ from typing import Union, Optional
 import numpy as np
 
 from .utils.array_utils import array_length
-from .lazy_modules import pa
+from .lazy_modules import pa, json
 
 # Tabular data formats
 AP_TABLE = 0
@@ -16,6 +16,7 @@ NUMPY_DICT = 1
 NUMPY_RECARRAY = 2
 PD_DATAFRAME = 3
 PA_TABLE = 4
+JSON_STRING = 5
 
 TABULAR_FORMAT_NAMES = OrderedDict(
     [
@@ -24,6 +25,7 @@ TABULAR_FORMAT_NAMES = OrderedDict(
         ("numpyRecarray", NUMPY_RECARRAY),
         ("pandasDataFrame", PD_DATAFRAME),
         ("pyarrowTable", PA_TABLE),
+        ("jsonString", JSON_STRING),
     ]
 )
 
@@ -40,6 +42,7 @@ PANDAS_PARQUET = 5
 PYARROW_HDF5 = 6
 PYARROW_PARQUET = 7
 PANDAS_CSV = 8
+JSON = 9
 
 
 FILE_FORMAT_NAMES = OrderedDict(
@@ -53,6 +56,7 @@ FILE_FORMAT_NAMES = OrderedDict(
         ("pandaParquet", PANDAS_PARQUET),
         ("pyarrowParquet", PYARROW_PARQUET),
         ("pandasCsv", PANDAS_CSV),
+        ("json", JSON),
     ]
 )
 
@@ -69,6 +73,7 @@ FILE_FORMAT_SUFFIXS = OrderedDict(
         ("parq", PANDAS_PARQUET),
         ("pq", PANDAS_PARQUET),
         ("csv", PANDAS_CSV),
+        ("json", JSON),
     ]
 )
 
@@ -84,6 +89,7 @@ DEFAULT_TABLE_KEY = OrderedDict(
         ("parq", ""),
         ("pq", ""),
         ("csv", ""),
+        ("json", ""),
     ]
 )
 
@@ -101,6 +107,7 @@ NATIVE_FORMAT = OrderedDict(
         (NUMPY_RECARRAY, NUMPY_FITS),
         (PD_DATAFRAME, PANDAS_PARQUET),
         (PA_TABLE, PYARROW_PARQUET),
+        (JSON_STRING, JSON),
     ]
 )
 
@@ -114,6 +121,7 @@ ALLOWED_FORMATS = OrderedDict(
         (NUMPY_RECARRAY, [ASTROPY_FITS]),
         (PD_DATAFRAME, [PANDAS_PARQUET, PANDAS_HDF5, PANDAS_CSV]),
         (PA_TABLE, [PYARROW_PARQUET, PANDAS_PARQUET, PANDAS_HDF5]),
+        (JSON_STRING, [JSON]),
     ]
 )
 
@@ -144,6 +152,16 @@ def is_pa_table(obj):
     return False
 
 
+def is_json_table(obj):
+    if not isinstance(obj, str):
+        return False
+    try:
+        json.loads(obj)
+    except (ValueError, json.JSONDecodeError):
+        return False
+    return True
+
+
 def table_type(obj) -> int:
     """Identify the type of table we have
 
@@ -172,6 +190,8 @@ def table_type(obj) -> int:
         return PA_TABLE
     if isinstance(obj, (np.recarray, np.ma.core.MaskedArray)):
         return NUMPY_RECARRAY
+    if is_json_table(obj):
+        return JSON_STRING
     if not isinstance(obj, Mapping):
         raise TypeError(
             f"Object of type {type(obj)} is not one of the supported types. \n Must be one of {list(TABULAR_FORMAT_NAMES.keys())}"

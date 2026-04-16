@@ -21,6 +21,7 @@ import numpy as np
         types.NUMPY_RECARRAY,
         types.PA_TABLE,
         types.PD_DATAFRAME,
+        types.JSON_STRING,
     ],
 )
 @pytest.mark.parametrize(
@@ -31,6 +32,7 @@ import numpy as np
         types.NUMPY_RECARRAY,
         types.PA_TABLE,
         types.PD_DATAFRAME,
+        types.JSON_STRING,        
     ],
 )
 def test_convert_table(data_table, tType1, tType2):
@@ -49,7 +51,7 @@ def test_convert_table(data_table, tType1, tType2):
     # Testing against unsupported table type
 
     with pytest.raises(TypeError):
-        _ = convert_table(t1, 5)
+        _ = convert_table(t1, 33)
 
 
 def test_bad_conversion(data_table):

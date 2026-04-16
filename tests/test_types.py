@@ -38,6 +38,7 @@ def test_type_finders():
     d2 = DataFrameSub()
     t1 = Table()
     t2 = TableSub()
+    j1 = ""
 
     assert types.is_dataframe(d1)
     assert types.is_dataframe(d2)
@@ -45,14 +46,25 @@ def test_type_finders():
     assert not types.is_dataframe(t2)
     assert not types.is_dataframe({})
     assert not types.is_dataframe(77)
+    assert not types.is_dataframe(j1)
 
     assert not types.is_ap_table(d1)
-    assert not types.is_ap_table(d2)
+    assert not types.is_ap_table(d2)    
     assert types.is_ap_table(t1)
     assert types.is_ap_table(t2)
     assert not types.is_ap_table({})
     assert not types.is_ap_table(77)
+    assert not types.is_ap_table(j1)
 
+    assert not types.is_json_table(d1)
+    assert not types.is_json_table(d2)
+    assert not types.is_json_table(t1)
+    assert not types.is_json_table(t2)
+    assert not types.is_json_table({})
+    assert not types.is_json_table(77)
+    assert types.is_json_table(j1)
+
+    
 
 def test_get_table_type(data_tables):
     """Testing the Getting the Table Type Functionality"""

@@ -319,6 +319,13 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         self._do_open("test_out_single.csv", in_context=False)
         self._do_check_columns("test_out_single.csv")
 
+    def testJSONLoopback(self):
+        """Test reading / writing to json files"""
+        self._do_loopback(types.PD_DATAFRAME, "test_out", "json")
+        self._do_loopback(types.PA_TABLE, "test_out_pa", "json")
+        self._do_loopback_single(types.PD_DATAFRAME, "test_out_single", "json")
+
+        
     def testBad(self):  # pylint: disable=no-self-use
         """Test that bad calls to write are dealt with"""
         try:

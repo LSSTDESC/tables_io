@@ -27,6 +27,7 @@ def test_deps(mod):
         types.NUMPY_RECARRAY,
         types.PA_TABLE,
         types.PD_DATAFRAME,
+        types.JSON_STRING,        
     ],
 )
 @pytest.mark.parametrize(
@@ -37,6 +38,7 @@ def test_deps(mod):
         types.NUMPY_RECARRAY,
         types.PA_TABLE,
         types.PD_DATAFRAME,
+        types.JSON_STRING,        
     ],
 )
 def test_convert_table_dicts(data_tables, tType1, tType2):

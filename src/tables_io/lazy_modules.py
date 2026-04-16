@@ -68,3 +68,5 @@ ds = lazyImport("pyarrow.dataset")
 """The PyArrow Dataset Module"""
 jnp = lazyImport("jax.numpy")
 """The JAX Numpy Module"""
+json = lazyImport("json")
+"""The JSON Module"""

@@ -16,6 +16,10 @@ from ..types import (
     ASTROPY_HDF5,
     FILE_FORMAT_SUFFIX_MAP,
     FILE_FORMATS,
+    JSON,
+    JSON_STRING,
+    NATIVE_FORMAT,
+    NATIVE_TABLE_TYPE,
     NUMPY_FITS,
     NUMPY_HDF5,
     PANDAS_HDF5,
@@ -299,6 +303,16 @@ def read_native(
                 )
                 + f" \n because of error: \n {e}"
             ) from e
+    if fType == JSON:
+        try:
+            return read_json(filepath)
+        except Exception as e:
+            raise RuntimeError(
+                read_native_error_message(
+                    filepath, fType, fmt, keys, allow_missing_keys, **kwargs
+                )
+                + f" \n because of error: \n {e}"
+            ) from e        
     raise TypeError(
         f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
     )  # pragma: no cover
@@ -353,6 +367,8 @@ def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
         if "iterator" not in kwargs:
             kwargs["iterator"] = True
         return pd.read_csv(filepath, **kwargs)
+    if fType in [JSON]:
+        raise NotImplementedError("Can not use io_open on json files")
     raise TypeError(
         f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
     )  # pragma: no cover
@@ -1371,7 +1387,24 @@ def read_csv_to_dataframes(
                 continue
             raise msg
 
+        
+# II E Reading json files
+def read_json(
+    filepath: str,
+    **kwargs,
+):
+    with open(filepath) as fin:    
+        data = json.loads(fin)
 
+    l_out = []
+    for key, val in data.items():
+        if keys is not None and key not in keys:
+            continue
+        a_table = {kk: np.array(vv) for kk, vv in val.items()}
+        l_out.append((key, a_table))        
+    return OrderedDict(l_out)
+
+        
 # III. Miscellaneous
 
 

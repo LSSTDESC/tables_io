@@ -17,6 +17,8 @@ from ..types import (
     FILE_FORMAT_SUFFIX_MAP,
     FILE_FORMAT_SUFFIXS,
     FILE_FORMATS,
+    JSON,
+    JSON_STRING,
     NATIVE_FORMAT,
     NATIVE_TABLE_TYPE,
     NUMPY_FITS,
@@ -93,7 +95,7 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
     else:
         raise TypeError(f"Can not write object of type {type(obj)}")
 
-    if fType in [ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_PARQUET, PYARROW_PARQUET]:
+    if fType in [ASTROPY_HDF5, NUMPY_HDF5, NUMPY_FITS, PANDAS_PARQUET, PYARROW_PARQUET, JSON_STRING]:
         try:
             nativeTType = NATIVE_TABLE_TYPE[fType]
         except KeyError as msg:  # pragma: no cover
@@ -132,6 +134,11 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
             forcedOdict = convert(odict, PD_DATAFRAME)
             write_dataframes_to_csv(forcedOdict, filepath)
             return filepath
+        if fType == JSON:
+            forcedJSON = convert(odict, JSON_STRING)
+            write_json(forcedJSON, filepath)
+            return filepath
+        
     except Exception as e:
         raise RuntimeError(
             f"Failed to write table to '{filepath}' as {FILE_FORMATS[fType]} because of error: \n {e}"
@@ -219,6 +226,9 @@ def write_native(odict, filepath: str) -> Optional[str]:
     if fType == PANDAS_CSV:
         write_dataframes_to_csv(odict, filepath)
         return filepath
+    if fType == JSON:
+        write_json(odict, filepath)
+        return filepath    
     raise TypeError(
         f"Unsupported Native file type {fType}. Must be one of ['astropyHdf5','numpyHdf5','numpyFits','pandaParquet','pyarrowParquet']"
     )  # pragma: no cover
@@ -741,3 +751,27 @@ def write_tables_to_pq(tables: Mapping, filepath: str, **kwargs):
         ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
     for k, v in tables.items():
         pq.write_table(v, f"{basepath}{k}{ext}", **kwargs)
+
+
+# II. G   writing json
+
+def write_json(json_string: str, filepath: str, **kwargs):
+    """
+    Writes a json string to a json file. If no extension is
+    given in the base path, it will be written as a `.json` file.
+
+    Parameters
+    ----------
+    json_string : str
+        Json to be written
+
+    filepath: `str`
+        Path to output file
+
+    """
+    basepath, ext = os.path.splitext(filepath)
+    if not ext:  # pragma: no cover
+        ext = "." + FILE_FORMAT_SUFFIX_MAP[JSON]
+
+    with open(filepath, "w", encoding="utf-8") as fout:
+        fout.write(json_string)
