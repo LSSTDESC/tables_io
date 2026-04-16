@@ -2,13 +2,15 @@
 
 from collections import OrderedDict
 from typing import Union, Mapping, Optional
+from io import StringIO
 
 import numpy as np
 
 from ..utils.array_utils import force_to_pandables
-from ..lazy_modules import apTable, fits, pd, pa
+from ..lazy_modules import apTable, fits, json, pd, pa
 from ..types import (
     AP_TABLE,
+    JSON_STRING,
     NUMPY_DICT,
     NUMPY_RECARRAY,
     PD_DATAFRAME,
@@ -39,6 +41,7 @@ def convert_table(obj, tType: Union[str, int]):
     "numpyRecarray"     2
     "pandasDataFrame"   3
     "pyarrowTable"      4
+    "jsonString"        5
     ==================  ===============
 
     Parameters
@@ -57,6 +60,8 @@ def convert_table(obj, tType: Union[str, int]):
     # Convert tType to an int if necessary
     int_tType = tType_to_int(tType)
 
+    assert obj is not None
+    
     if int_tType == AP_TABLE:
         try:
             return convert_to_ap_table(obj)
@@ -88,6 +93,13 @@ def convert_table(obj, tType: Union[str, int]):
     if int_tType == PD_DATAFRAME:
         try:
             return convert_to_dataframe(obj)
+        except Exception as e:
+            raise RuntimeError(
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n \n Object to convert: {obj}"
+            ) from e
+    if int_tType == JSON_STRING:
+        try:
+            return convert_to_json(obj)
         except Exception as e:
             raise RuntimeError(
                 f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n \n Object to convert: {obj}"
@@ -145,6 +157,24 @@ def data_frame_to_ap_table(df):
     return tab
 
 
+def json_to_ap_table(json_data):
+    """
+    Convert a json string to an `astropy.table.Table`
+
+    Parameters
+    ----------
+    json_data :  `str`
+        The json
+
+    Returns
+    -------
+    tab : `astropy.table.Table`
+        The table
+    """
+    data = json.loads(json_data)
+    return apTable.Table(data)
+
+
 def convert_to_ap_table(obj):
     """
     Convert an object to an `astropy.table.Table`
@@ -171,6 +201,8 @@ def convert_to_ap_table(obj):
     if tType == PD_DATAFRAME:
         # try this: apTable.from_pandas(obj)
         return data_frame_to_ap_table(obj)
+    if tType == JSON_STRING:
+        return json_to_ap_table(obj)
     raise TypeError(
         f"Table is an unsupported Table Type {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )
@@ -279,6 +311,25 @@ def hdf5_group_to_dict(hg):
     return data
 
 
+def json_to_dict(json_data):
+    """
+    Convert a json string to an `OrderedDict` of numpy arrays
+
+    Parameters
+    ----------
+    json_data :  `str`
+        The json
+
+    Returns
+    -------
+    data : `OrderedDict`,  (`str` : `numpy.array`)
+        The tabledata
+    """
+    data = json.loads(json_data)
+    table = {kk: np.array(vv) for kk, vv in data.items()}
+    return table
+
+
 def convert_to_dict(obj):
     """
     Convert an object to an `OrderedDict`, (`str`, `numpy.array`)
@@ -304,6 +355,8 @@ def convert_to_dict(obj):
         return recarray_to_dict(obj)
     if tType == PD_DATAFRAME:
         return dataframe_to_dict(obj)
+    if tType == JSON_STRING:
+        return json_to_dict(obj)
     raise TypeError(
         f"Could not convert table because it is an unsupported TableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )
@@ -371,6 +424,8 @@ def convert_to_recarray(obj):
         return ap_table_to_recarray(data_frame_to_ap_table(obj))
     if tType == PA_TABLE:
         return ap_table_to_recarray(pa_table_to_ap_table(obj))
+    if tType == JSON_STRING:
+        return ap_table_to_recarray(json_to_ap_table(obj))
     raise TypeError(
         f"Could not convert table because it is an unsupported TableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )
@@ -473,6 +528,9 @@ def convert_to_dataframe(obj):
         return pa_table_to_dataframe(obj)
     if tType == PD_DATAFRAME:
         return obj
+    if tType == JSON_STRING:
+        o_dict = json_to_dict(obj)
+        return dict_to_dataframe(o_dict)
     raise TypeError(
         f"Could not convert table because it is an unsupported tableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )
@@ -580,6 +638,70 @@ def convert_to_pa_table(obj):
         return dataframe_to_pa_table(obj)
     if tType == PA_TABLE:
         return obj
+    if tType == JSON_STRING:
+        return dict_to_pa_table(json_to_dict(obj))
+    
     raise TypeError(
         f"Could not convert table because it is an unsupported tableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )
+
+
+### I G. Converting to `json`
+
+def dict_to_json(the_dict):
+    """
+    Convert a numpy dict to a json string
+
+    Parameters
+    ----------
+    the_dict : `dict[str, np.ndarray]`
+       The dict being converted
+
+    Returns
+    -------
+    json_string :  `str`
+        The json string
+    """
+    json_str = json.dumps(
+        the_dict,
+        default=lambda x: x.tolist() if isinstance(x, np.ndarray) else None
+    )
+    return json_str        
+
+
+def convert_to_json(obj):
+    """
+    Convert an object to a json string
+
+    Parameters
+    ----------
+    obj : `object`
+       The object being converted
+
+    Returns
+    -------
+    json_string :  `str`
+        The json string
+    """
+    tType = table_type(obj)
+    if tType == AP_TABLE:
+        odict = ap_table_to_dict(obj)        
+        return dict_to_json(odict)
+    if tType == NUMPY_DICT:
+        return dict_to_json(obj)
+    if tType == NUMPY_RECARRAY:
+        odict = recarray_to_dict(obj)
+        return dict_to_json(odict)
+    if tType == PD_DATAFRAME:
+        odict = dataframe_to_dict(obj)        
+        return dict_to_json(odict)
+    if tType == PA_TABLE:
+        odict = pa_table_to_dict(obj)                
+        return dict_to_json(odict)
+    if tType == JSON_STRING:
+        return obj
+    
+    raise TypeError(
+        f"Could not convert table because it is an unsupported tableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
+    )
+

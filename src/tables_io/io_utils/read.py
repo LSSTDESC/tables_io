@@ -16,6 +16,10 @@ from ..types import (
     ASTROPY_HDF5,
     FILE_FORMAT_SUFFIX_MAP,
     FILE_FORMATS,
+    JSON,
+    JSON_STRING,
+    NATIVE_FORMAT,
+    NATIVE_TABLE_TYPE,
     NUMPY_FITS,
     NUMPY_HDF5,
     PANDAS_HDF5,
@@ -76,6 +80,7 @@ def read(
     "numpyRecarray"     2
     "pandasDataFrame"   3
     "pyarrowTable"      4
+    "jsonString"        5
     ==================  ===============
 
 
@@ -299,6 +304,16 @@ def read_native(
                 )
                 + f" \n because of error: \n {e}"
             ) from e
+    if fType == JSON:
+        try:
+            return read_json(filepath, keys, allow_missing_keys, slice_dict=slice_dict, **kwargs)
+        except Exception as e:
+            raise RuntimeError(
+                read_native_error_message(
+                    filepath, fType, fmt, keys, allow_missing_keys, **kwargs
+                )
+                + f" \n because of error: \n {e}"
+            ) from e        
     raise TypeError(
         f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
     )  # pragma: no cover
@@ -353,6 +368,8 @@ def io_open(filepath: str, fmt: Optional[str] = None, **kwargs):
         if "iterator" not in kwargs:
             kwargs["iterator"] = True
         return pd.read_csv(filepath, **kwargs)
+    if fType in [JSON]:
+        raise NotImplementedError("Can not use io_open on json files")
     raise TypeError(
         f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
     )  # pragma: no cover
@@ -744,6 +761,8 @@ def read_HDF5_to_dicts(
             )
         else:
             l_out.append((key, read_HDF5_group_to_dict(val)))
+
+
     return OrderedDict(l_out)
 
 
@@ -1369,7 +1388,41 @@ def read_csv_to_dataframes(
                 continue
             raise msg
 
+        
+# II E Reading json files
+def read_json(
+    filepath: str,
+    keys: Optional[List[str]] = None,
+    allow_missing_keys: bool = False,
+    columns: Union[List[str], Mapping, None] = None,
+    slice_dict: dict[str, slice | int] | None = None,
+    **kwargs,
+):
+    with open(filepath, 'r', encoding='utf-8') as fin:    
+        data = json.load(fin)
 
+    l_out = []
+    for key, val in data.items():
+
+        if keys is not None and key not in keys:  # pragma: no cover
+            continue
+
+        if slice_dict is not None:
+            the_slice = slice_dict.get(key)
+        else:
+            the_slice = None
+
+        the_slice = _force_to_slice(the_slice)
+            
+        sub_dict = json.loads(val)
+        if the_slice is not None:
+            a_table = {kk: np.array(vv)[the_slice] for kk, vv in sub_dict.items()}
+        else:
+            a_table = {kk: np.array(vv) for kk, vv in sub_dict.items()}
+        l_out.append((key, a_table))        
+    return OrderedDict(l_out)
+
+        
 # III. Miscellaneous
 
 

@@ -10,6 +10,7 @@ from .conv_table import (
     convert_to_ap_table,
     convert_to_dataframe,
     convert_to_dict,
+    convert_to_json,
     convert_to_pa_table,
     convert_to_recarray,
 )
@@ -17,6 +18,7 @@ from ..utils.array_utils import force_to_pandables
 from ..lazy_modules import apTable, fits, pd, pa
 from ..types import (
     AP_TABLE,
+    JSON_STRING,
     NUMPY_DICT,
     NUMPY_RECARRAY,
     PD_DATAFRAME,
@@ -49,6 +51,7 @@ def convert(obj, tType: Union[str, int]):
     "numpyRecarray"     2
     "pandasDataFrame"   3
     "pyarrowTable"      4
+    "jsonString"        5
     ==================  ===============
 
     Parameters
@@ -91,6 +94,7 @@ def convert(obj, tType: Union[str, int]):
         NUMPY_RECARRAY: convert_to_recarrays,
         PA_TABLE: convert_to_pa_tables,
         PD_DATAFRAME: convert_to_dataframes,
+        JSON_STRING: convert_to_json_strings,
     }
 
     # Convert tType to int if necessary
@@ -188,3 +192,20 @@ def convert_to_dataframes(odict: Mapping) -> Mapping:
         The dataframes
     """
     return OrderedDict([(k, convert_to_dataframe(v)) for k, v in odict.items()])
+
+
+def convert_to_json_strings(odict: Mapping) -> Mapping:
+    """
+    Convert several `objects` to json `str`
+
+    Parameters
+    ----------
+    odict :  `Mapping`, (`str`, `Table-like`)
+        The input objects
+
+    Returns
+    -------
+    df :  `OrderedDict` of `str`
+        The json strings
+    """
+    return OrderedDict([(k, convert_to_json(v)) for k, v in odict.items()])
