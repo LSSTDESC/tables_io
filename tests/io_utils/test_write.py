@@ -43,6 +43,9 @@ def test_write_output_file(h5_test_outfile, tmp_path):
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_parallel_file(h5_test_outfile):
     """Testing Parallel Writing"""
+    if not h5py.get_config().mpi:
+        pytest.skip("hdf5py module not prepared for parallel writing")
+    
     from mpi4py import MPI
 
     """ Testing parallel write """
@@ -70,6 +73,7 @@ def test_write_output_parallel_file(h5_test_outfile):
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_file_single(h5_test_outfile):
     """Test writing an output file"""
+
     npdf = 40
     nbins = 21
     pz_pdf = np.random.uniform(size=(npdf, nbins))
@@ -108,6 +112,9 @@ def test_write_output_file_single(h5_test_outfile):
 @pytest.mark.skipif(not check_deps([h5py]), reason="Missing HDF5")
 def test_write_output_parallel_file_single(h5_test_outfile):
     """Testing parallel writing"""
+    if not h5py.get_config().mpi:
+        pytest.skip("hdf5py module not prepared for parallel writing")
+        
     from mpi4py import MPI
 
     comm = MPI.COMM_WORLD
