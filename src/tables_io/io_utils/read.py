@@ -26,6 +26,20 @@ from ..types import (
     file_type,
 )
 
+
+def _force_to_slice(
+    val: slice | int | None,
+    check_step_for: str="",
+) -> slice | None:
+    if val is None:
+        return None
+    if isinstance(val, int):
+        return slice(val, val+1)
+    if not check_step_for and val.step is not None:
+        raise ValueError(f"Function {check_step_for} does not allow step {val}")
+    return val
+    
+
 # I. Top-level interface functions
 
 
@@ -611,6 +625,8 @@ def read_HDF5_group(
     if groupname is None or not groupname:  # pragma: no cover
         return infp, infp
 
+    read_slice = _force_to_slice(read_slice)
+    
     if read_slice is not None:
         return infp[groupname][read_slice], infp
     return infp[groupname], infp
@@ -782,10 +798,8 @@ def read_H5_to_dataframe(
     df : `pandas.DataFrame`
         The dataframe
     """
-
+    read_slice = _force_to_slice(read_slice, "read_H5_to_dataframe")
     if read_slice is not None:
-        if read_slice.step:
-            raise ValueError(f"Can not use step with pdf.read_hdf{read_slice}")
         return pd.read_hdf(filepath, key, start=read_slice.start, stop=read_slice.stop)
     return pd.read_hdf(filepath, key)
 
@@ -863,11 +877,8 @@ def read_pq_to_dataframe(
     df : `pandas.DataFrame`
         The data frame
     """
+    read_slice = _force_to_slice(read_slice, "read_pq_to_dataframe")
     if read_slice is not None:
-        if read_slice.step:
-            raise ValueError(
-                f"Can not use step when reading pandas from parquet {read_slice}"
-            )
         filters = [("id", ">=", read_slice.start), ("id", "<=", read_slice.stop)]
         return pd.read_parquet(
             filepath, engine="pyarrow", columns=columns, filters=filters, **kwargs
@@ -978,11 +989,8 @@ def read_pq_to_dict(
     tab : `OrderedDict` (`str` : `numpy.array`)
        The data
     """
+    read_slice = _force_to_slice(read_slice, "read_pq_to_dict")
     if read_slice is not None:
-        if read_slice.step:
-            raise ValueError(
-                f"Can not use step when reading astropy tables {read_slice}"
-            )
         filters = [("id", ">=", read_slice.start), ("id", "<=", read_slice.stop)]
         tab = pq.read_table(filepath, columns=columns, filters=filters, **kwargs)
     else:
@@ -1161,11 +1169,8 @@ def read_pq_to_table(
     table : `pyarrow.Table`
         The table
     """
+    read_slice = _force_to_slice(read_slice, "read_pq_to_table")
     if read_slice is not None:
-        if read_slice.step:
-            raise ValueError(
-                f"Can not use step when reading pyarrow.Table {read_slice}"
-            )
         filters = [("id", ">=", read_slice.start), ("id", "<=", read_slice.stop)]
         return pq.read_table(filepath, columns=columns, filters=filters, **kwargs)
 
