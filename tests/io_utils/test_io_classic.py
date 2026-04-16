@@ -47,7 +47,6 @@ class IoTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attrib
         odict_r = read(filepath, tType=tType, fmt=fmt, **kwargs)
         tables_r = convert(odict_r, types.AP_TABLE)
 
-        breakpoint()
         odict_r_02 = read(filepath, tType=tType, fmt=fmt, slice_dict={'data':slice(0,2)}, **kwargs)
 
         tables_r_02 = convert(odict_r_02, types.AP_TABLE)
