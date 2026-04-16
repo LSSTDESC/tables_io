@@ -1,4 +1,5 @@
 import pytest
+import json
 from tables_io import convert, convert_table
 from tables_io.lazy_modules import apTable, lazyImport, pd
 from tests.helpers.utilities import check_deps
@@ -38,7 +39,10 @@ def test_type_finders():
     d2 = DataFrameSub()
     t1 = Table()
     t2 = TableSub()
-    j1 = ""
+    j1 = json.dumps(
+        dict(a=[1, 2, 3], b=[3, 4, 5]),
+        default=lambda x: x.tolist() if isinstance(x, np.ndarray) else None
+    )
 
     assert types.is_dataframe(d1)
     assert types.is_dataframe(d2)

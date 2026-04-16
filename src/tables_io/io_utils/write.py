@@ -755,15 +755,15 @@ def write_tables_to_pq(tables: Mapping, filepath: str, **kwargs):
 
 # II. G   writing json
 
-def write_json(json_string: str, filepath: str, **kwargs):
+def write_json(tables: Mapping, filepath: str, **kwargs):
     """
     Writes a json string to a json file. If no extension is
     given in the base path, it will be written as a `.json` file.
 
     Parameters
     ----------
-    json_string : str
-        Json to be written
+    tables : `dict` of `str`
+        Dict with the json strings of each table
 
     filepath: `str`
         Path to output file
@@ -773,5 +773,7 @@ def write_json(json_string: str, filepath: str, **kwargs):
     if not ext:  # pragma: no cover
         ext = "." + FILE_FORMAT_SUFFIX_MAP[JSON]
 
-    with open(filepath, "w", encoding="utf-8") as fout:
-        fout.write(json_string)
+    json_str = json.dumps({k:v for k,v in tables.items()})
+
+    with open(filepath, "w", encoding="utf-8") as fout:        
+        fout.write(json_str)
