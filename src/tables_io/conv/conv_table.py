@@ -650,7 +650,7 @@ def convert_to_pa_table(obj):
 
 def dict_to_json(the_dict):
     """
-    Convert a numpy dict to a json sting
+    Convert a numpy dict to a json string
 
     Parameters
     ----------
