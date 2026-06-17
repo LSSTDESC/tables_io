@@ -41,8 +41,10 @@ def _force_to_slice(
     if isinstance(val, int):
         return slice(val, val + 1)
     if isinstance(val, dict):
-        val = val[key]
-        return _force_to_slice(val, check_step_for)
+        if key in val:
+            val = val[key]
+            return _force_to_slice(val, check_step_for)
+        return None
     if not check_step_for and val.step is not None:
         raise ValueError(f"Function {check_step_for} does not allow step {val}")
     return val
@@ -1389,7 +1391,7 @@ def read_json(
         if keys is not None and key not in keys:  # pragma: no cover
             continue
 
-        the_slice = _force_to_slice(the_slice)
+        the_slice = _force_to_slice(slice_dict, "", key)
 
         sub_dict = json.loads(val)
         if the_slice is not None:
