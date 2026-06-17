@@ -33,16 +33,22 @@ from ..types import (
 
 def _force_to_slice(
     val: slice | int | None,
-    check_step_for: str="",
+    check_step_for: str = "",
+    key: str | None = None,
 ) -> slice | None:
     if val is None:
         return None
     if isinstance(val, int):
-        return slice(val, val+1)
+        return slice(val, val + 1)
+    if isinstance(val, dict):
+        if key in val:
+            val = val[key]
+            return _force_to_slice(val, check_step_for)
+        return None
     if not check_step_for and val.step is not None:
         raise ValueError(f"Function {check_step_for} does not allow step {val}")
     return val
-    
+
 
 # I. Top-level interface functions
 
@@ -53,7 +59,7 @@ def read(
     fmt: Optional[str] = None,
     keys: Optional[List[str]] = None,
     allow_missing_keys: bool = False,
-    slice_dict: dict[str, slice | int] | None = None,
+    slice_dict: dict[str, slice | int] | slice | int | None = None,
     **kwargs,
 ):
     """Reads in a given file to either a `Table-like` format if there is one table within the file,
@@ -97,7 +103,7 @@ def read(
         The keys should be the unique identifiers for each dataset or file.
     allow_missing_keys : `bool`, by default False
         If False will raise FileNotFoundError if a key is missing from the given file.
-    slice_dict: `dict[str, slice | int]` or `None`
+    slice_dict: `dict[str, slice | int]` or `slice` or `int` or `None`
         If provided, specfies which slices to read from which tables
 
     kwargs :
@@ -160,7 +166,7 @@ def read_native(
     fmt: Optional[str] = None,
     keys: Optional[List[str]] = None,
     allow_missing_keys: bool = False,
-    slice_dict: dict[str, slice | int] | None = None,
+    slice_dict: dict[str, slice | int] | slice | int | None = None,
     **kwargs,
 ):
     """Reads in a file to its corresponding default tabular format.
@@ -183,7 +189,7 @@ def read_native(
         The keys should be the unique identifiers for each dataset or file.
     allow_missing_keys : `bool`, by default False.
         If False will raise FileNotFoundError if a key is missing from the given file.
-    slice_dict: `dict[str, slice | int]` or `None`
+    slice_dict: `dict[str, slice | int]` or `slice` or `int` or `None`
         If provided, specfies which slices to read from which tables
     kwargs :
         Additional arguments to pass to the native file reader
@@ -306,14 +312,16 @@ def read_native(
             ) from e
     if fType == JSON:
         try:
-            return read_json(filepath, keys, allow_missing_keys, slice_dict=slice_dict, **kwargs)
+            return read_json(
+                filepath, keys, allow_missing_keys, slice_dict=slice_dict, **kwargs
+            )
         except Exception as e:
             raise RuntimeError(
                 read_native_error_message(
                     filepath, fType, fmt, keys, allow_missing_keys, **kwargs
                 )
                 + f" \n because of error: \n {e}"
-            ) from e        
+            ) from e
     raise TypeError(
         f"Unsupported FileType {fType}. Supported types are: {list(FILE_FORMATS.values())}"
     )  # pragma: no cover
@@ -447,7 +455,7 @@ def check_columns(
 def read_fits_to_ap_tables(
     filepath: str,
     keys: Optional[List[str]] = None,
-    slice_dict: dict[str, slice | int] | None = None,
+    slice_dict: dict[str, slice | int] | slice | int | None = None,
 ) -> Mapping:
     """
     Reads `astropy.table.Table` objects into an `OrderedDict` TableDict-like object from a FITS file.
@@ -461,7 +469,7 @@ def read_fits_to_ap_tables(
     keys : `list` or `None`
         A list of which tables to read, in lower case.
 
-    slice_dict: `dict[str, slice | int]` or `None`
+    slice_dict: `dict[str, slice | int]` or `slice` or `int` or `None`
         If provided, specfies which slices to read from which tables
 
     Returns
@@ -476,10 +484,9 @@ def read_fits_to_ap_tables(
             if hdu.name.lower() not in keys:
                 continue
 
-        if slice_dict is not None:
-            the_slice = slice_dict.get(hdu.name.lower())
-        else:
-            the_slice = None
+        the_slice = _force_to_slice(
+            slice_dict, "read_fits_to_ap_tables", hdu.name.lower()
+        )
 
         # In base case, handle cases where no names are provided or
         # names are repeated. If no names are provided and more than one table
@@ -508,7 +515,7 @@ def read_fits_to_ap_tables(
 def read_fits_to_recarrays(
     filepath: str,
     keys: Optional[List[str]] = None,
-    slice_dict: dict[str, slice | int] | None = None,
+    slice_dict: dict[str, slice | int] | slice | int | None = None,
 ) -> Mapping:
     """
     Reads `np.recarray` objects into an `OrderedDict` TableDict-like object from a FITS file.
@@ -522,7 +529,7 @@ def read_fits_to_recarrays(
     keys : `list` or `None`
         A list of which HDU names to read, in lower case.
 
-    slice_dict: `dict[str, slice | int]` or `None`
+    slice_dict: `dict[str, slice | int]` or `slice` or `int` or `None`
         If provided, specfies which slices to read from which tables
 
     Returns
@@ -536,10 +543,9 @@ def read_fits_to_recarrays(
         if keys is not None and hdu.name.lower() not in keys:
             continue
 
-        if slice_dict is not None:
-            the_slice = slice_dict.get(hdu.name.lower())
-        else:
-            the_slice = None
+        the_slice = _force_to_slice(
+            slice_dict, "read_fits_to_recarrays", hdu.name.lower()
+        )
 
         # In base case, handle cases where no names are provided or
         # names are repeated. If no names are provided and more than one table
@@ -568,7 +574,7 @@ def read_fits_to_recarrays(
 def read_HDF5_to_ap_tables(
     filepath: str,
     keys: Optional[List[str]] = None,
-    slice_dict: dict[str, slice | int] | None = None,
+    slice_dict: dict[str, slice | int] | slice | int | None = None,
 ) -> Mapping:
     """
     Reads `astropy.table.Table` objects into an `OrderedDict` TableDict-like object from an hdf5 file.
@@ -581,7 +587,7 @@ def read_HDF5_to_ap_tables(
     keys : `list` or `None`
         A list of which datasets to read in.
 
-    slice_dict: `dict[str, slice | int]` or `None`
+    slice_dict: `dict[str, slice | int]` or `slice` or `int` or `None`
         If provided, specfies which slices to read from which tables
 
     Returns
@@ -595,10 +601,7 @@ def read_HDF5_to_ap_tables(
         if keys is not None and k not in keys:
             continue
 
-        if slice_dict is not None:
-            the_slice = slice_dict.get(k)
-        else:
-            the_slice = None
+        the_slice = _force_to_slice(slice_dict, "read_HDF5_to_ap_tables", k)
 
         if the_slice is not None:
             if the_slice.step:
@@ -643,7 +646,7 @@ def read_HDF5_group(
         return infp, infp
 
     read_slice = _force_to_slice(read_slice)
-    
+
     if read_slice is not None:
         return infp[groupname][read_slice], infp
     return infp[groupname], infp
@@ -713,7 +716,7 @@ def read_HDF5_group_names(
 def read_HDF5_to_dicts(
     filepath: str,
     keys: Optional[List[str]] = None,
-    slice_dict: dict[str, slice | int] | None = None,
+    slice_dict: slice | dict[str, slice | int] | slice | int | None = None,
 ) -> Mapping:
     """
     Reads `numpy.array` objects into an `OrderedDict` from an hdf5 file. If a list of keys is given,
@@ -727,7 +730,7 @@ def read_HDF5_to_dicts(
     keys : `list` or `None`
         A list of which tables to read from the file.
 
-    slice_dict: `dict[str, slice | int]` or `None`
+    slice_dict: `dict[str, slice | int]` or `slice` or `int` or `None`
         If provided, specfies which slices to read from which tables
 
     Returns
@@ -741,16 +744,9 @@ def read_HDF5_to_dicts(
         if keys is not None and key not in keys:
             continue
 
-        if slice_dict is not None:
-            the_slice = slice_dict.get(key)
-        else:
-            the_slice = None
+        the_slice = _force_to_slice(slice_dict, "read_HDF5_group_to_dict", key)
 
         if the_slice is not None:
-            if the_slice.step:
-                raise ValueError(
-                    f"Can not use step with read_HDF5_group_to_dict {the_slice}"
-                )
             l_out.append(
                 (
                     key,
@@ -761,7 +757,6 @@ def read_HDF5_to_dicts(
             )
         else:
             l_out.append((key, read_HDF5_group_to_dict(val)))
-
 
     return OrderedDict(l_out)
 
@@ -826,7 +821,7 @@ def read_H5_to_dataframe(
 def read_H5_to_dataframes(
     filepath: str,
     keys: Optional[List[str]] = None,
-    slice_dict: dict[str, slice | int] | None = None,
+    slice_dict: dict[str, slice | int] | slice | int | None = None,
 ) -> Mapping:
     """Open an `h5` (pandas `hdf5`) file and and return an `OrderedDict` of `pandas.DataFrame` objects
 
@@ -838,7 +833,7 @@ def read_H5_to_dataframes(
     keys : `list` or `None`
         A list of which tables to read.
 
-    slice_dict: `dict[str, slice | int]` or `None`
+    slice_dict: `dict[str, slice | int]` or `slice` or `int` or `None`
         If provided, specfies which slices to read from which tables
 
     Returns
@@ -910,7 +905,7 @@ def read_pq_to_dataframes(
     keys: Optional[List[str]] = None,
     allow_missing_keys: bool = False,
     columns: Union[List[str], Mapping, None] = None,
-    slice_dict: dict[str, slice | int] | None = None,
+    slice_dict: dict[str, slice | int] | slice | int | None = None,
     **kwargs,
 ) -> Mapping:
     """
@@ -935,7 +930,7 @@ def read_pq_to_dataframes(
             - if a list, only the columns in the list will be loaded.
             - `None` will read all the columns
 
-    slice_dict: `dict[str, slice | int]` or `None`
+    slice_dict: `dict[str, slice | int]` or `slice` or `int` or `None`
         If provided, specfies which slices to read from which tables
 
     **kwargs : additional arguments to pass to the native file reader
@@ -953,10 +948,7 @@ def read_pq_to_dataframes(
         ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
     for key in keys:
 
-        if slice_dict is not None:
-            the_slice = slice_dict.get(key)
-        else:
-            the_slice = None
+        the_slice = _force_to_slice(slice_dict, "", key)
 
         try:
             column_list = None
@@ -1124,7 +1116,7 @@ def read_HDF5_to_table(
 def read_HDF5_to_tables(
     filepath: str,
     keys: Optional[List[str]] = None,
-    slice_dict: dict[str, slice | int] | None = None,
+    slice_dict: dict[str, slice | int] | slice | int | None = None,
 ) -> Mapping:
     """Open an `HDF5` file and and return an `OrderedDict` of `pyarrow.Table`
 
@@ -1136,7 +1128,7 @@ def read_HDF5_to_tables(
     keys : `list` or `None`
         Which tables to read
 
-    slice_dict: `dict[str, slice | int]` or `None`
+    slice_dict: `dict[str, slice | int]` or `slice` or `int` or `None`
         If provided, specfies which slices to read from which tables
 
     Returns
@@ -1150,10 +1142,8 @@ def read_HDF5_to_tables(
     for key in fin.keys():
         if keys is not None and key not in keys:  # pragma: no cover
             continue
-        if slice_dict is not None:
-            the_slice = slice_dict.get(key)
-        else:
-            the_slice = None
+
+        the_slice = _force_to_slice(slice_dict, "", key)
         l_out.append((key, read_HDF5_to_table(filepath, key=key, read_slice=the_slice)))
     return OrderedDict(l_out)
 
@@ -1201,7 +1191,7 @@ def read_pq_to_tables(
     keys: Optional[List[str]] = None,
     allow_missing_keys: bool = False,
     columns: Union[List[str], Mapping, None] = None,
-    slice_dict: dict[str, slice | int] | None = None,
+    slice_dict: dict[str, slice | int] | slice | int | None = None,
     **kwargs,
 ) -> Mapping:
     """
@@ -1226,7 +1216,7 @@ def read_pq_to_tables(
             - if a list, only the columns in the list will be loaded.
             - `None` will read all the columns
 
-    slice_dict: `dict[str, slice | int]` or `None`
+    slice_dict: `dict[str, slice | int]` or `slice` or `int` or `None`
         If provided, specfies which slices to read from which tables
 
     **kwargs : additional arguments to pass to the native file reader
@@ -1244,10 +1234,7 @@ def read_pq_to_tables(
         ext = "." + FILE_FORMAT_SUFFIX_MAP[PANDAS_PARQUET]
     for key in keys:
 
-        if slice_dict is not None:
-            the_slice = slice_dict.get(key)
-        else:
-            the_slice = None
+        the_slice = _force_to_slice(slice_dict, "", key)
 
         try:
             column_list = None
@@ -1334,7 +1321,7 @@ def read_csv_to_dataframes(
             - if a list, only the columns in the list will be loaded.
             - `None` will read all the columns
 
-    slice_dict: `dict[str, slice | int]` or `None`
+    slice_dict: `dict[str, slice | int]` or `slice` or `int` or `None`
         If provided, specfies which slices to read from which tables
 
     **kwargs : additional arguments to pass to the native file reader
@@ -1354,10 +1341,7 @@ def read_csv_to_dataframes(
 
     for key in keys:
 
-        if slice_dict is not None:
-            the_slice = slice_dict.get(key)
-        else:
-            the_slice = None
+        the_slice = _force_to_slice(slice_dict, "", key)
 
         try:
             column_list = None
@@ -1388,17 +1372,17 @@ def read_csv_to_dataframes(
                 continue
             raise msg
 
-        
+
 # II E Reading json files
 def read_json(
     filepath: str,
     keys: Optional[List[str]] = None,
     allow_missing_keys: bool = False,
     columns: Union[List[str], Mapping, None] = None,
-    slice_dict: dict[str, slice | int] | None = None,
+    slice_dict: dict[str, slice | int] | slice | int | None = None,
     **kwargs,
 ):
-    with open(filepath, 'r', encoding='utf-8') as fin:    
+    with open(filepath, "r", encoding="utf-8") as fin:
         data = json.load(fin)
 
     l_out = []
@@ -1407,22 +1391,17 @@ def read_json(
         if keys is not None and key not in keys:  # pragma: no cover
             continue
 
-        if slice_dict is not None:
-            the_slice = slice_dict.get(key)
-        else:
-            the_slice = None
+        the_slice = _force_to_slice(slice_dict, "", key)
 
-        the_slice = _force_to_slice(the_slice)
-            
         sub_dict = json.loads(val)
         if the_slice is not None:
             a_table = {kk: np.array(vv)[the_slice] for kk, vv in sub_dict.items()}
         else:
             a_table = {kk: np.array(vv) for kk, vv in sub_dict.items()}
-        l_out.append((key, a_table))        
+        l_out.append((key, a_table))
     return OrderedDict(l_out)
 
-        
+
 # III. Miscellaneous
 
 
