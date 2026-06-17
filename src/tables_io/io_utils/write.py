@@ -102,7 +102,7 @@ def write(obj, filepath: str, fmt: Optional[str] = None) -> Optional[str]:
             raise KeyError(f"Native file type not known for {fmt}") from msg
 
         forcedOdict = convert(odict, nativeTType)
-        if os.path.splitext(filepath)[1]:
+        if os.path.splitext(filepath)[1][1:] == fmt:
             fullpath = filepath
         else:
             fullpath = f"{filepath}.{fmt}"
