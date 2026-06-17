@@ -42,8 +42,7 @@ def _force_to_slice(
         return slice(val, val + 1)
     if isinstance(val, dict):
         val = val[key]
-        if isinstance(val, int):
-            return slice(val, val + 1)
+        return _force_to_slice(val, check_step_for)
     if not check_step_for and val.step is not None:
         raise ValueError(f"Function {check_step_for} does not allow step {val}")
     return val
