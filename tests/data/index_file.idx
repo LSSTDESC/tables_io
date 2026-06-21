@@ -1,0 +1,8 @@
+inputs:
+- n: 8
+  path: pandas_test_hdf5.h5
+  start: 0
+- n: 8
+  path: pandas_test_hdf5.h5
+  start: 8
+n_total: 16

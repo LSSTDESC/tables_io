@@ -81,7 +81,6 @@ def convert(input, output):
 
     return 0
 
-
 @cli.command(name='concatanate')
 @inputs()
 @output()
@@ -111,4 +110,11 @@ def concatanate(inputs, output):
 
     print("Done Concatanating file")
 
+
+@cli.command()
+@inputs()
+@output(help="output filename; suffix should be 'idx'")
+def make_index(inputs, output):  # pragma: no cover
+    """Make an index file from a list of input files"""
+    tables_io.write_index_file(output, inputs)
     return 0

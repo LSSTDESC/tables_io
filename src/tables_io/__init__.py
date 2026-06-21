@@ -36,7 +36,7 @@ writeNative = io_utils.write.write_native
 """This function is being deprecated, please see :py:func:`write_native` instead"""
 write_native = io_utils.write.write_native
 write = io_utils.write.write
-
+write_index_file = io_utils.write.write_index_file
 
 #
 # Read Functions
