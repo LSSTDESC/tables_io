@@ -17,6 +17,7 @@ NUMPY_RECARRAY = 2
 PD_DATAFRAME = 3
 PA_TABLE = 4
 JSON_STRING = 5
+NUMPY_ARRAY = 6
 
 TABULAR_FORMAT_NAMES = OrderedDict(
     [
@@ -26,6 +27,7 @@ TABULAR_FORMAT_NAMES = OrderedDict(
         ("pandasDataFrame", PD_DATAFRAME),
         ("pyarrowTable", PA_TABLE),
         ("jsonString", JSON_STRING),
+        ("numpyArray", NUMPY_ARRAY),
     ]
 )
 
@@ -43,6 +45,7 @@ PYARROW_HDF5 = 6
 PYARROW_PARQUET = 7
 PANDAS_CSV = 8
 JSON = 9
+NUMPY_FITZ = 10
 
 
 FILE_FORMAT_NAMES = OrderedDict(
@@ -67,6 +70,7 @@ FILE_FORMAT_SUFFIXS = OrderedDict(
         ("hf5", ASTROPY_HDF5),
         ("hdf5", NUMPY_HDF5),
         ("fit", NUMPY_FITS),
+        ("fitz", NUMPY_FITZ),
         ("h5", PANDAS_HDF5),
         ("hd5", PYARROW_HDF5),
         ("parquet", PYARROW_PARQUET),
@@ -84,6 +88,7 @@ DEFAULT_TABLE_KEY = OrderedDict(
         ("hdf5", None),
         ("hd5", "data"),
         ("fit", ""),
+        ("fitz", ""),
         ("h5", "data"),
         ("parquet", ""),
         ("parq", ""),
@@ -105,6 +110,7 @@ NATIVE_FORMAT = OrderedDict(
         (AP_TABLE, ASTROPY_HDF5),
         (NUMPY_DICT, NUMPY_HDF5),
         (NUMPY_RECARRAY, NUMPY_FITS),
+        (NUMPY_ARRAY, NUMPY_FITZ),
         (PD_DATAFRAME, PANDAS_PARQUET),
         (PA_TABLE, PYARROW_PARQUET),
         (JSON_STRING, JSON),
@@ -188,8 +194,10 @@ def table_type(obj) -> int:
         return AP_TABLE
     if is_pa_table(obj):
         return PA_TABLE
-    if isinstance(obj, (np.recarray, np.ma.core.MaskedArray)):
+    if isinstance(obj, (np.recarray, np.ma.core.MaskedArray, )):
         return NUMPY_RECARRAY
+    if isinstance(obj, np.ndarray) and len(obj.dtype.names) > 1:
+        return NUMPY_ARRAY
     if is_json_table(obj):
         return JSON_STRING
     if not isinstance(obj, Mapping):

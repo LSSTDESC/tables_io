@@ -26,6 +26,7 @@ from ..types import (
     TABULAR_FORMAT_NAMES,
     TABULAR_FORMATS,
     is_table_like,
+    is_tabledict_like,
     table_type,
     tType_to_int,
 )
@@ -85,8 +86,9 @@ def convert(obj, tType: Union[str, int]):
     y: [[3,4]]
 
     """
-    if is_table_like(obj):
-        return convert_table(obj, tType)
+    if not is_tabledict_like(obj):
+        if is_table_like(obj):
+            return convert_table(obj, tType)
 
     funcMap = {
         AP_TABLE: convert_to_ap_tables,

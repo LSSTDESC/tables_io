@@ -70,3 +70,5 @@ jnp = lazyImport("jax.numpy")
 """The JAX Numpy Module"""
 json = lazyImport("json")
 """The JSON Module"""
+rustfits = lazyImport("rustfits")
+"""The rustfits module"""

@@ -13,6 +13,7 @@ from ..types import (
     JSON_STRING,
     NUMPY_DICT,
     NUMPY_RECARRAY,
+    NUMPY_ARRAY,
     PD_DATAFRAME,
     PA_TABLE,
     TABULAR_FORMAT_NAMES,
@@ -42,6 +43,7 @@ def convert_table(obj, tType: Union[str, int]):
     "pandasDataFrame"   3
     "pyarrowTable"      4
     "jsonString"        5
+    "numpyAarray"       6
     ==================  ===============
 
     Parameters
@@ -61,7 +63,7 @@ def convert_table(obj, tType: Union[str, int]):
     int_tType = tType_to_int(tType)
 
     assert obj is not None
-    
+
     if int_tType == AP_TABLE:
         try:
             return convert_to_ap_table(obj)
@@ -100,6 +102,16 @@ def convert_table(obj, tType: Union[str, int]):
     if int_tType == JSON_STRING:
         try:
             return convert_to_json(obj)
+        except Exception as e:
+            raise RuntimeError(
+                f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n \n Object to convert: {obj}"
+            ) from e
+    raise TypeError(
+        f"Cannot convert to unsupported tableType {int_tType} ({int_tType})"
+    )
+    if int_tType == NUMPY_ARRAY:
+        try:
+            return convert_to_recarray(obj)
         except Exception as e:
             raise RuntimeError(
                 f"Could not convert object to {TABULAR_FORMATS[int_tType]} because of error: \n {e}. \n \n Object to convert: {obj}"
@@ -197,6 +209,8 @@ def convert_to_ap_table(obj):
     if tType == PA_TABLE:
         return pa_table_to_ap_table(obj)
     if tType == NUMPY_RECARRAY:
+        return apTable.Table(obj)
+    if tType == NUMPY_ARRAY:
         return apTable.Table(obj)
     if tType == PD_DATAFRAME:
         # try this: apTable.from_pandas(obj)
@@ -353,6 +367,8 @@ def convert_to_dict(obj):
         return obj
     if tType == NUMPY_RECARRAY:
         return recarray_to_dict(obj)
+    if tType == NUMPY_ARRAY:
+        return recarray_to_dict(obj)
     if tType == PD_DATAFRAME:
         return dataframe_to_dict(obj)
     if tType == JSON_STRING:
@@ -419,6 +435,8 @@ def convert_to_recarray(obj):
     if tType == NUMPY_DICT:
         return ap_table_to_recarray(apTable.Table(obj))
     if tType == NUMPY_RECARRAY:
+        return obj
+    if tType == NUMPY_ARRAY:
         return obj
     if tType == PD_DATAFRAME:
         return ap_table_to_recarray(data_frame_to_ap_table(obj))
@@ -640,7 +658,7 @@ def convert_to_pa_table(obj):
         return obj
     if tType == JSON_STRING:
         return dict_to_pa_table(json_to_dict(obj))
-    
+
     raise TypeError(
         f"Could not convert table because it is an unsupported tableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )
@@ -666,7 +684,7 @@ def dict_to_json(the_dict):
         the_dict,
         default=lambda x: x.tolist() if isinstance(x, np.ndarray) else None
     )
-    return json_str        
+    return json_str
 
 
 def convert_to_json(obj):
@@ -685,7 +703,7 @@ def convert_to_json(obj):
     """
     tType = table_type(obj)
     if tType == AP_TABLE:
-        odict = ap_table_to_dict(obj)        
+        odict = ap_table_to_dict(obj)
         return dict_to_json(odict)
     if tType == NUMPY_DICT:
         return dict_to_json(obj)
@@ -693,15 +711,14 @@ def convert_to_json(obj):
         odict = recarray_to_dict(obj)
         return dict_to_json(odict)
     if tType == PD_DATAFRAME:
-        odict = dataframe_to_dict(obj)        
+        odict = dataframe_to_dict(obj)
         return dict_to_json(odict)
     if tType == PA_TABLE:
-        odict = pa_table_to_dict(obj)                
+        odict = pa_table_to_dict(obj)
         return dict_to_json(odict)
     if tType == JSON_STRING:
         return obj
-    
+
     raise TypeError(
         f"Could not convert table because it is an unsupported tableType {tType}. Must be one of {TABULAR_FORMAT_NAMES.keys()}"
     )
-
