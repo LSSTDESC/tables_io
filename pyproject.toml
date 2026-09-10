@@ -20,12 +20,13 @@ dependencies = ["numpy>=1.21.0", "click", "deprecated>=1.2.0", "tables>=3.0", "h
 
 # On a mac, install optional dependencies with `pip install '.[dev]'` (include the single quotes)
 [project.optional-dependencies]
-full = ["astropy", "pyarrow"] # enables all of the tables_io file format options
+full = ["astropy", "pyarrow", "rustfits"] # enables all of the tables_io file format options
 dev = [
     "astropy",
     "h5py>=2.9",
     "pandas>=2.0",
     "pyarrow",
+    "rustfits",
     "mpi4py",
     "coverage",
     "pylint",

@@ -10,7 +10,7 @@ from typing import List, Mapping, Optional, Union
 from ..utils.array_utils import force_to_pandables
 from ..conv.conv_tabledict import convert
 from ..conv.conv_table import dataframe_to_dict, hdf5_group_to_dict
-from ..lazy_modules import apTable, fits, h5py, pa, pd, pq
+from ..lazy_modules import apTable, fits, h5py, pa, pd, pq, rustfits
 from ..types import (
     ASTROPY_FITS,
     ASTROPY_HDF5,
@@ -560,10 +560,13 @@ def read_fits_to_recarrays(
         if tab_name in tables.keys():
             tab_name = f"{tab_name}_{str(ext_num)}"
 
+        # read the table using rustfits
         if the_slice:
-            tables[tab_name] = hdu.data[the_slice]
+            # tables[tab_name] = hdu.data[the_slice]
+            tables[tab_name] = rustfits.read(filepath, tab_name)[the_slice]
         else:
-            tables[tab_name] = hdu.data
+            #tables[tab_name] = hdu.data
+            tables[tab_name] = rustfits.read(filepath, tab_name)[the_slice]
 
     return tables
 
