@@ -9,6 +9,7 @@ dependencies:
   - pandas
   - pyarrow
   - pytables
+  - rustfits
   - mpi4py
   - hdf5=*=*mpi_openmpi*
   - pylint
