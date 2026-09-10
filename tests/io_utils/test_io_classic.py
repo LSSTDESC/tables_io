@@ -15,7 +15,7 @@ from tests.helpers.utilities import (
     make_test_data,
     check_deps,
 )
-from tables_io.lazy_modules import apTable, jnp, h5py, pd, pq
+from tables_io.lazy_modules import apTable, jnp, h5py, pd, pq, rustfits
 
 
 @pytest.mark.skipif(

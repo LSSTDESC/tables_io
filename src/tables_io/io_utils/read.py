@@ -563,10 +563,10 @@ def read_fits_to_recarrays(
         # read the table using rustfits
         if the_slice:
             # tables[tab_name] = hdu.data[the_slice]
-            tables[tab_name] = rustfits.read(filepath, tab_name)[the_slice]
+            tables[tab_name] = rustfits.read(filepath, ext_num)[the_slice]
         else:
             #tables[tab_name] = hdu.data
-            tables[tab_name] = rustfits.read(filepath, tab_name)[the_slice]
+            tables[tab_name] = rustfits.read(filepath, ext_num)[the_slice]
 
     return tables
 
